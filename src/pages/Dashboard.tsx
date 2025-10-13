@@ -162,16 +162,18 @@ const Dashboard = () => {
                   : 'Desbloqueie seu potencial máximo'}
               </CardDescription>
             </CardHeader>
-            <CardContent className="relative z-10 flex flex-col justify-between h-full">
+            <CardContent className="relative z-10 flex flex-col">
               {activeChallenge ? (
-                <div className="space-y-4">
-                  <div className="p-3 rounded-xl bg-background/50 border border-primary/20">
-                    <h3 className="font-bold text-xl mb-2 text-primary font-display">
-                      {activeChallenge.name}
-                    </h3>
-                    <p className="text-sm text-muted-foreground font-body">
-                      Iniciado em {new Date(activeChallenge.start_date).toLocaleDateString('pt-BR')}
-                    </p>
+                <>
+                  <div className="flex-1 mb-4">
+                    <div className="p-3 rounded-xl bg-background/50 border border-primary/20">
+                      <h3 className="font-bold text-xl mb-2 text-primary font-display">
+                        {activeChallenge.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground font-body">
+                        Iniciado em {new Date(activeChallenge.start_date).toLocaleDateString('pt-BR')}
+                      </p>
+                    </div>
                   </div>
                   <Button 
                     className="w-full bg-primary hover:bg-primary-glow text-primary-foreground font-bold text-lg py-6 font-display shadow-glow" 
@@ -179,20 +181,22 @@ const Dashboard = () => {
                   >
                     Ver Progresso
                   </Button>
-                </div>
+                </>
               ) : (
-                <div className="space-y-4">
-                  <p className="text-accent/80 font-body text-base leading-relaxed">
-                    Você não tem nenhum desafio ativo no momento. Escolha um desafio
-                    da biblioteca ou crie um personalizado.
-                  </p>
+                <>
+                  <div className="flex-1 mb-4">
+                    <p className="text-accent/80 font-body text-base leading-relaxed">
+                      Você não tem nenhum desafio ativo no momento. Escolha um desafio
+                      da biblioteca ou crie um personalizado.
+                    </p>
+                  </div>
                   <Button 
                     className="w-full bg-primary hover:bg-primary-glow text-primary-foreground font-bold text-lg py-6 font-display shadow-glow" 
                     onClick={() => navigate('/challenges')}
                   >
                     Iniciar Desafio
                   </Button>
-                </div>
+                </>
               )}
             </CardContent>
           </Card>
@@ -224,43 +228,47 @@ const Dashboard = () => {
                   : 'Defina e acompanhe seus sonhos'}
               </CardDescription>
             </CardHeader>
-            <CardContent className="relative z-10 flex flex-col justify-between h-full">
+            <CardContent className="relative z-10 flex flex-col">
               {goals.length > 0 ? (
-                <div className="space-y-4">
-                  <ul className="space-y-3">
-                    {goals.map((goal) => (
-                      <li
-                        key={goal.id}
-                        className="flex items-center justify-between p-3 rounded-xl bg-background/50 border border-accent/20 hover:border-accent/40 transition-all hover:shadow-glow"
-                      >
-                        <span className="font-bold text-primary font-body">{goal.title}</span>
-                        {goal.deadline && (
-                          <span className="text-xs text-accent/70 font-body">
-                            {new Date(goal.deadline).toLocaleDateString('pt-BR')}
-                          </span>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
+                <>
+                  <div className="flex-1 mb-4">
+                    <ul className="space-y-3">
+                      {goals.map((goal) => (
+                        <li
+                          key={goal.id}
+                          className="flex items-center justify-between p-3 rounded-xl bg-background/50 border border-accent/20 hover:border-accent/40 transition-all hover:shadow-glow"
+                        >
+                          <span className="font-bold text-primary font-body">{goal.title}</span>
+                          {goal.deadline && (
+                            <span className="text-xs text-accent/70 font-body">
+                              {new Date(goal.deadline).toLocaleDateString('pt-BR')}
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                   <Button 
-                    className="w-full bg-primary hover:bg-primary-glow text-primary-foreground font-bold text-lg py-6 font-display shadow-glow mt-4"
+                    className="w-full bg-primary hover:bg-primary-glow text-primary-foreground font-bold text-lg py-6 font-display shadow-glow"
                     onClick={() => navigate('/goals')}
                   >
                     Ver Todos
                   </Button>
-                </div>
+                </>
               ) : (
-                <div className="space-y-4">
-                  <p className="text-accent/80 font-body text-base leading-relaxed">
-                    Defina objetivos significativos e transformadores para sua vida.
-                  </p>
+                <>
+                  <div className="flex-1 mb-4">
+                    <p className="text-accent/80 font-body text-base leading-relaxed">
+                      Defina objetivos significativos e transformadores para sua vida.
+                    </p>
+                  </div>
                   <Button 
                     className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-bold text-lg py-6 font-display shadow-glow"
                     onClick={() => navigate('/goals')}
                   >
                     Criar Objetivo
                   </Button>
-                </div>
+                </>
               )}
             </CardContent>
           </Card>
