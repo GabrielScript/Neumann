@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { Sprout } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -94,10 +94,10 @@ const Auth = () => {
         <CardHeader className="text-center space-y-2">
           <div className="flex justify-center mb-4">
             <div className="p-3 bg-primary/10 rounded-2xl">
-              <Sprout className="w-12 h-12 text-primary" />
+              <Trophy className="w-12 h-12 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-3xl font-bold">Challenger Life</CardTitle>
+          <CardTitle className="text-3xl font-bold font-display">Challenger Champions</CardTitle>
           <CardDescription className="text-base">
             Desbloqueie seu potencial máximo através de desafios e crescimento consistente.
           </CardDescription>
