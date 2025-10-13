@@ -5,6 +5,7 @@ import { LogOut, Moon, Sun, TrendingUp, Flame, Trophy } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getTrophyStage } from '@/lib/xp';
 
 interface UserStats {
   level: number;
@@ -33,7 +34,8 @@ export const TopBar = () => {
     if (data) setStats(data);
   };
 
-  const getTrophyStageName = (stage: string) => {
+  const getTrophyStageName = (level: number) => {
+    const stage = getTrophyStage(level);
     const stageNames: { [key: string]: string } = {
       municipal: 'Municipal',
       estadual: 'Estadual',
@@ -76,7 +78,7 @@ export const TopBar = () => {
                 <Trophy className="w-5 h-5 text-primary" />
                 <div>
                   <p className="text-xs text-success/70 font-body">Troféu</p>
-                  <p className="font-bold text-sm text-primary font-body">{getTrophyStageName(stats.tree_stage)}</p>
+                  <p className="font-bold text-sm text-primary font-body">{getTrophyStageName(stats.level)}</p>
                 </div>
               </div>
             </div>
