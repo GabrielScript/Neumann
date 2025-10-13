@@ -233,9 +233,9 @@ const Dashboard = () => {
                       {goals.map((goal) => (
                         <li
                           key={goal.id}
-                          className="flex items-center justify-between p-3 rounded-xl bg-background/50 border border-accent/20 hover:border-accent/40 transition-all hover:shadow-glow"
+                          className="p-3 rounded-xl bg-background/50 border border-primary/20 hover:border-primary/40 transition-all hover:shadow-glow"
                         >
-                          <span className="font-bold text-primary font-body">{goal.title}</span>
+                          <span className="font-bold text-lg text-primary font-display">{goal.title}</span>
                         </li>
                       ))}
                     </ul>
