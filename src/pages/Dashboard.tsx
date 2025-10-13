@@ -140,6 +140,7 @@ const Dashboard = () => {
             before:rounded-lg before:pointer-events-none
             group
             animate-slide-in-bottom
+            h-full
           ">
             <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity duration-500" />
             
@@ -161,10 +162,10 @@ const Dashboard = () => {
                   : 'Desbloqueie seu potencial máximo'}
               </CardDescription>
             </CardHeader>
-            <CardContent className="relative z-10">
+            <CardContent className="relative z-10 flex flex-col justify-between h-full">
               {activeChallenge ? (
                 <div className="space-y-4">
-                  <div className="p-4 rounded-xl bg-background/50 border border-primary/20">
+                  <div className="p-3 rounded-xl bg-background/50 border border-primary/20">
                     <h3 className="font-bold text-xl mb-2 text-primary font-display">
                       {activeChallenge.name}
                     </h3>
@@ -208,6 +209,7 @@ const Dashboard = () => {
             before:rounded-lg before:pointer-events-none
             group
             animate-slide-in-bottom
+            h-full
           ">
             <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity duration-500" />
             
@@ -222,7 +224,7 @@ const Dashboard = () => {
                   : 'Defina e acompanhe seus sonhos'}
               </CardDescription>
             </CardHeader>
-            <CardContent className="relative z-10">
+            <CardContent className="relative z-10 flex flex-col justify-between h-full">
               {goals.length > 0 ? (
                 <div className="space-y-4">
                   <ul className="space-y-3">
