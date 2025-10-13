@@ -10,12 +10,12 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { Target, Trophy, Award, Users, Settings } from 'lucide-react';
+import { Target, Trophy, Award, Users, Settings, Sparkles } from 'lucide-react';
 
 const navItems = [
   { title: 'Dashboard', url: '/dashboard', icon: Trophy },
   { title: 'Desafios', url: '/challenges', icon: Target },
-  { title: 'Objetivos de Vida', url: '/goals', icon: Trophy },
+  { title: 'Objetivos de Vida', url: '/goals', icon: Sparkles },
   { title: 'Meu Troféu', url: '/trophy', icon: Award },
   { title: 'Comunidade', url: '/community', icon: Users },
   { title: 'Configurações', url: '/settings', icon: Settings },
