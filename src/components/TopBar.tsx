@@ -75,7 +75,7 @@ export const TopBar = () => {
               <div className="flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-primary" />
                 <div>
-                  <p className="text-xs text-primary/70 font-body">Troféu</p>
+                  <p className="text-xs text-success/70 font-body">Troféu</p>
                   <p className="font-bold text-sm text-primary font-body">{getTrophyStageName(stats.tree_stage)}</p>
                 </div>
               </div>
