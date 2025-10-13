@@ -55,7 +55,7 @@ export const TopBar = () => {
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-primary" />
                 <div>
-                  <p className="text-xs text-primary/70 font-body">Nível</p>
+                  <p className="text-xs text-success/70 font-body">Nível</p>
                   <p className="font-bold text-lg text-primary font-display">{stats.level}</p>
                 </div>
               </div>
