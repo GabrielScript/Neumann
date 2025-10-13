@@ -213,7 +213,7 @@ const Dashboard = () => {
             
             <CardHeader className="relative z-10 pb-4">
               <div className="flex items-center gap-3">
-                <Sparkles className="w-8 h-8 text-accent group-hover:scale-110 transition-transform" />
+                <Sparkles className="w-8 h-8 text-yellow-400 group-hover:scale-110 transition-transform" />
                 <CardTitle className="text-2xl font-bold text-primary font-display">Objetivos de Vida</CardTitle>
               </div>
               <CardDescription className="text-base text-accent/80 font-body">
