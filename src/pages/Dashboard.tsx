@@ -170,9 +170,6 @@ const Dashboard = () => {
                       <h3 className="font-bold text-base mb-1 text-primary font-display">
                         {activeChallenge.name}
                       </h3>
-                      <p className="text-sm text-muted-foreground font-body">
-                        Iniciado em {new Date(activeChallenge.start_date).toLocaleDateString('pt-BR')}
-                      </p>
                     </div>
                   </div>
                   <Button 
@@ -239,11 +236,6 @@ const Dashboard = () => {
                           className="flex items-center justify-between p-3 rounded-xl bg-background/50 border border-accent/20 hover:border-accent/40 transition-all hover:shadow-glow"
                         >
                           <span className="font-bold text-primary font-body">{goal.title}</span>
-                          {goal.deadline && (
-                            <span className="text-xs text-accent/70 font-body">
-                              {new Date(goal.deadline).toLocaleDateString('pt-BR')}
-                            </span>
-                          )}
                         </li>
                       ))}
                     </ul>
