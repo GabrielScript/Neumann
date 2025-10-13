@@ -63,7 +63,7 @@ export const TopBar = () => {
 
             <div className="border-2 border-accent/50 bg-background/80 backdrop-blur-md px-4 py-2 rounded-lg shadow-glow">
               <div className="flex items-center gap-2">
-                <Flame className="w-5 h-5 text-accent" />
+                <Flame className="w-5 h-5 text-destructive" />
                 <div>
                   <p className="text-xs text-accent/70 font-body">Sequência</p>
                   <p className="font-bold text-lg text-primary font-display">{stats.current_streak}d</p>
