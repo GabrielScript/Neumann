@@ -47,7 +47,7 @@ export const AppSidebar = () => {
         </div>
         
         <SidebarGroup>
-          <SidebarGroupLabel className={isCollapsed ? 'sr-only' : ''}>Menu</SidebarGroupLabel>
+          <SidebarGroupLabel className={isCollapsed ? 'sr-only' : 'text-base'}>Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-2 mx-2">
               {navItems.map((item) => {
@@ -66,9 +66,9 @@ export const AppSidebar = () => {
                             : 'hover:bg-accent/10 hover:text-accent'
                         }`}
                       >
-                        <item.icon className="h-6 w-6" />
+                        <item.icon className="h-7 w-7" />
                         {!isCollapsed && (
-                          <span className="text-base font-medium font-body">
+                          <span className="text-lg font-medium font-body">
                             {item.title}
                           </span>
                         )}
