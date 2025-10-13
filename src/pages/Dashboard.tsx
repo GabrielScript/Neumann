@@ -4,9 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Target, Trophy, TrendingUp, Flame } from 'lucide-react';
+import { Target, Trophy, TrendingUp, Flame, Sparkles, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -32,6 +31,10 @@ interface Goal {
   deadline: string | null;
 }
 
+interface Profile {
+  full_name: string;
+}
+
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -39,6 +42,7 @@ const Dashboard = () => {
   const [activeChallenge, setActiveChallenge] = useState<Challenge | null>(null);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState<string>('Champion');
 
   useEffect(() => {
     if (user) {
@@ -48,6 +52,17 @@ const Dashboard = () => {
 
   const loadDashboardData = async () => {
     try {
+      // Load user profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user?.id)
+        .single();
+
+      if (profileData?.full_name) {
+        setUserName(profileData.full_name.split(' ')[0]);
+      }
+
       // Load user stats
       const { data: statsData, error: statsError } = await supabase
         .from('user_stats')
@@ -85,119 +100,80 @@ const Dashboard = () => {
     }
   };
 
-  const getXPForNextLevel = (level: number) => {
-    return level * 100; // Simple formula: 100 XP per level
-  };
-
-  const getTreeStageName = (stage: string) => {
-    const stageNames: { [key: string]: string } = {
-      seed: 'Semente',
-      sprout: 'Broto',
-      young: 'Árvore Jovem',
-      flourish: 'Árvore Frondosa',
-      splendid: 'Árvore Esplêndida',
-    };
-    return stageNames[stage] || stage;
-  };
-
   if (loading) {
     return (
       <Layout>
         <div className="flex items-center justify-center h-full">
-          <div className="animate-pulse text-muted-foreground">Carregando...</div>
+          <div className="animate-pulse text-primary font-display text-xl">Carregando...</div>
         </div>
       </Layout>
     );
   }
 
-  const xpForNext = getXPForNextLevel(stats?.level || 1);
-  const xpProgress = ((stats?.xp || 0) / xpForNext) * 100;
-
   return (
     <Layout>
-      <div className="space-y-6 max-w-7xl mx-auto">
-        {/* Header with Stats */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="space-y-8 max-w-7xl mx-auto px-6 py-8">
+        {/* Saudação Personalizada */}
+        <div className="flex items-center gap-3 animate-slide-in-bottom">
+          <span className="text-5xl animate-wave">👋</span>
           <div>
-            <h1 className="text-4xl font-bold animate-fade-in">
-              Bem-vindo de volta! 🌱
+            <h1 className="text-4xl font-black text-primary font-display">
+              Olá, {userName}!
             </h1>
-            <p className="text-muted-foreground mt-2">
-              Continue sua jornada de transformação
+            <p className="text-accent mt-1 font-body text-lg">
+              Pronto para conquistar seus desafios hoje?
             </p>
-          </div>
-
-          <div className="flex flex-wrap gap-4">
-            <div className="flex items-center gap-2 bg-card px-4 py-2 rounded-lg shadow-card">
-              <TrendingUp className="w-5 h-5 text-primary" />
-              <div>
-                <p className="text-xs text-muted-foreground">Nível</p>
-                <p className="font-bold text-lg">{stats?.level}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 bg-card px-4 py-2 rounded-lg shadow-card">
-              <Flame className="w-5 h-5 text-accent" />
-              <div>
-                <p className="text-xs text-muted-foreground">Sequência</p>
-                <p className="font-bold text-lg">{stats?.current_streak} dias</p>
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* XP Progress Bar */}
-        <Card className="shadow-card animate-scale-in">
-          <CardHeader>
-            <CardTitle className="text-lg">Progresso de XP</CardTitle>
-            <CardDescription>
-              {stats?.xp} / {xpForNext} XP para o próximo nível
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Progress value={xpProgress} className="h-3" />
-            <div className="mt-2 flex justify-between text-sm text-muted-foreground">
-              <span>{getTreeStageName(stats?.tree_stage || 'seed')}</span>
-              <span>Nível {(stats?.level || 1) + 1}</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Main Content Grid */}
+        {/* Main Content Grid - FOCO EM DESAFIOS E OBJETIVOS */}
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Active Challenge Card */}
-          <Card className="shadow-card hover:shadow-primary transition-all duration-300 animate-slide-up">
-            <CardHeader>
+          {/* Active Challenge Card - REDESENHADO */}
+          <Card className="
+            relative overflow-hidden
+            border-2 border-primary/30
+            bg-gradient-card
+            shadow-card hover:shadow-primary
+            transition-all duration-500
+            before:absolute before:inset-0 
+            before:border before:border-accent/20
+            before:rounded-lg before:pointer-events-none
+            group
+            animate-slide-in-bottom
+          ">
+            <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity duration-500" />
+            
+            <CardHeader className="relative z-10 pb-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Target className="w-6 h-6 text-primary" />
-                  <CardTitle>Desafio Ativo</CardTitle>
+                <div className="flex items-center gap-3">
+                  <Target className="w-8 h-8 text-primary group-hover:scale-110 transition-transform" />
+                  <CardTitle className="text-2xl font-bold text-primary font-display">Desafio Ativo</CardTitle>
                 </div>
                 {activeChallenge && (
-                  <Badge variant="secondary">
+                  <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30 font-body">
                     {activeChallenge.duration_days} dias
                   </Badge>
                 )}
               </div>
-              <CardDescription>
+              <CardDescription className="text-base text-accent/80 font-body">
                 {activeChallenge
                   ? 'Continue seu desafio atual'
-                  : 'Desbloqueie seu potencial'}
+                  : 'Desbloqueie seu potencial máximo'}
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="relative z-10">
               {activeChallenge ? (
                 <div className="space-y-4">
-                  <div>
-                    <h3 className="font-semibold text-lg mb-2">
+                  <div className="p-4 rounded-xl bg-background/50 border border-primary/20">
+                    <h3 className="font-bold text-xl mb-2 text-primary font-display">
                       {activeChallenge.name}
                     </h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground font-body">
                       Iniciado em {new Date(activeChallenge.start_date).toLocaleDateString('pt-BR')}
                     </p>
                   </div>
                   <Button 
-                    className="w-full" 
+                    className="w-full bg-primary hover:bg-primary-glow text-primary-foreground font-bold text-lg py-6 font-display shadow-glow" 
                     onClick={() => navigate('/challenges')}
                   >
                     Ver Progresso
@@ -205,12 +181,12 @@ const Dashboard = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <p className="text-muted-foreground">
+                  <p className="text-accent/80 font-body text-base leading-relaxed">
                     Você não tem nenhum desafio ativo no momento. Escolha um desafio
                     da biblioteca ou crie um personalizado.
                   </p>
                   <Button 
-                    className="w-full" 
+                    className="w-full bg-primary hover:bg-primary-glow text-primary-foreground font-bold text-lg py-6 font-display shadow-glow" 
                     onClick={() => navigate('/challenges')}
                   >
                     Iniciar Desafio
@@ -220,31 +196,44 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Life Goals Card */}
-          <Card className="shadow-card hover:shadow-primary transition-all duration-300 animate-slide-up">
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Trophy className="w-6 h-6 text-accent" />
-                <CardTitle>Objetivos de Vida</CardTitle>
+          {/* Life Goals Card - REDESENHADO */}
+          <Card className="
+            relative overflow-hidden
+            border-2 border-primary/30
+            bg-gradient-card
+            shadow-card hover:shadow-primary
+            transition-all duration-500
+            before:absolute before:inset-0 
+            before:border before:border-accent/20
+            before:rounded-lg before:pointer-events-none
+            group
+            animate-slide-in-bottom
+          ">
+            <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity duration-500" />
+            
+            <CardHeader className="relative z-10 pb-4">
+              <div className="flex items-center gap-3">
+                <Trophy className="w-8 h-8 text-accent group-hover:scale-110 transition-transform" />
+                <CardTitle className="text-2xl font-bold text-primary font-display">Objetivos de Vida</CardTitle>
               </div>
-              <CardDescription>
+              <CardDescription className="text-base text-accent/80 font-body">
                 {goals.length > 0
                   ? 'Seus sonhos em andamento'
                   : 'Defina e acompanhe seus sonhos'}
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="relative z-10">
               {goals.length > 0 ? (
                 <div className="space-y-4">
-                  <ul className="space-y-2">
+                  <ul className="space-y-3">
                     {goals.map((goal) => (
                       <li
                         key={goal.id}
-                        className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors"
+                        className="flex items-center justify-between p-3 rounded-xl bg-background/50 border border-accent/20 hover:border-accent/40 transition-all hover:shadow-glow"
                       >
-                        <span className="font-medium">{goal.title}</span>
+                        <span className="font-bold text-primary font-body">{goal.title}</span>
                         {goal.deadline && (
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-xs text-accent/70 font-body">
                             {new Date(goal.deadline).toLocaleDateString('pt-BR')}
                           </span>
                         )}
@@ -253,7 +242,7 @@ const Dashboard = () => {
                   </ul>
                   <Button 
                     variant="outline" 
-                    className="w-full"
+                    className="w-full border-2 border-accent/30 text-accent hover:bg-accent/10 font-bold text-lg py-6 font-display"
                     onClick={() => navigate('/goals')}
                   >
                     Ver Todos
@@ -261,11 +250,11 @@ const Dashboard = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <p className="text-muted-foreground">
+                  <p className="text-accent/80 font-body text-base leading-relaxed">
                     Defina objetivos significativos e transformadores para sua vida.
                   </p>
                   <Button 
-                    className="w-full"
+                    className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-bold text-lg py-6 font-display shadow-glow"
                     onClick={() => navigate('/goals')}
                   >
                     Criar Objetivo
@@ -276,28 +265,118 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Quick Stats */}
-        <Card className="shadow-card animate-fade-in">
+        {/* Estatísticas Detalhadas - REDESENHADO */}
+        <Card className="border-2 border-primary/30 bg-gradient-card shadow-card animate-fade-in">
           <CardHeader>
-            <CardTitle>Estatísticas</CardTitle>
+            <CardTitle className="text-2xl text-primary flex items-center gap-2 font-display font-black">
+              <Zap className="w-6 h-6" />
+              Seu Arsenal de Conquistas
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center p-4 rounded-lg bg-muted/30">
-                <p className="text-2xl font-bold text-primary">{stats?.level}</p>
-                <p className="text-sm text-muted-foreground">Nível Atual</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {/* Nível Atual */}
+              <div className="
+                relative
+                p-6 rounded-xl
+                border-2 border-accent/30
+                bg-background/50
+                backdrop-blur-sm
+                hover:border-primary/50
+                hover:shadow-glow
+                transition-all duration-300
+                group
+              ">
+                <div className="absolute top-2 right-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <TrendingUp className="w-16 h-16 text-primary" />
+                </div>
+                
+                <div className="relative z-10">
+                  <p className="text-4xl font-black text-primary mb-2 font-display">
+                    {stats?.level}
+                  </p>
+                  <p className="text-sm text-accent/80 uppercase tracking-wider font-body font-bold">
+                    Nível Atual
+                  </p>
+                </div>
               </div>
-              <div className="text-center p-4 rounded-lg bg-muted/30">
-                <p className="text-2xl font-bold text-accent">{stats?.current_streak}</p>
-                <p className="text-sm text-muted-foreground">Dias Seguidos</p>
+
+              {/* Sequência */}
+              <div className="
+                relative
+                p-6 rounded-xl
+                border-2 border-accent/30
+                bg-background/50
+                backdrop-blur-sm
+                hover:border-primary/50
+                hover:shadow-glow
+                transition-all duration-300
+                group
+              ">
+                <div className="absolute top-2 right-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <Flame className="w-16 h-16 text-accent" />
+                </div>
+                
+                <div className="relative z-10">
+                  <p className="text-4xl font-black text-accent mb-2 font-display">
+                    {stats?.current_streak}
+                  </p>
+                  <p className="text-sm text-accent/80 uppercase tracking-wider font-body font-bold">
+                    Dias Seguidos
+                  </p>
+                </div>
               </div>
-              <div className="text-center p-4 rounded-lg bg-muted/30">
-                <p className="text-2xl font-bold text-success">{stats?.best_streak}</p>
-                <p className="text-sm text-muted-foreground">Melhor Sequência</p>
+
+              {/* Melhor Sequência */}
+              <div className="
+                relative
+                p-6 rounded-xl
+                border-2 border-accent/30
+                bg-background/50
+                backdrop-blur-sm
+                hover:border-primary/50
+                hover:shadow-glow
+                transition-all duration-300
+                group
+              ">
+                <div className="absolute top-2 right-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <Trophy className="w-16 h-16 text-success" />
+                </div>
+                
+                <div className="relative z-10">
+                  <p className="text-4xl font-black text-success mb-2 font-display">
+                    {stats?.best_streak}
+                  </p>
+                  <p className="text-sm text-accent/80 uppercase tracking-wider font-body font-bold">
+                    Melhor Sequência
+                  </p>
+                </div>
               </div>
-              <div className="text-center p-4 rounded-lg bg-muted/30">
-                <p className="text-2xl font-bold">{stats?.xp}</p>
-                <p className="text-sm text-muted-foreground">XP Total</p>
+
+              {/* XP Total */}
+              <div className="
+                relative
+                p-6 rounded-xl
+                border-2 border-accent/30
+                bg-background/50
+                backdrop-blur-sm
+                hover:border-primary/50
+                hover:shadow-glow
+                transition-all duration-300
+                group
+              ">
+                <div className="absolute top-2 right-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <Sparkles className="w-16 h-16 text-primary" />
+                </div>
+                
+                <div className="relative z-10">
+                  <p className="text-4xl font-black text-primary mb-2 font-display">
+                    {stats?.xp}
+                  </p>
+                  <p className="text-sm text-accent/80 uppercase tracking-wider font-body font-bold">
+                    XP Total
+                  </p>
+                </div>
               </div>
             </div>
           </CardContent>

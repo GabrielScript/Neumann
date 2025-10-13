@@ -10,10 +10,10 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { Target, Trophy, TreeDeciduous, Users, Settings, Sprout } from 'lucide-react';
+import { Target, Trophy, TreeDeciduous, Users, Settings } from 'lucide-react';
 
 const navItems = [
-  { title: 'Dashboard', url: '/dashboard', icon: Sprout },
+  { title: 'Dashboard', url: '/dashboard', icon: Trophy },
   { title: 'Desafios', url: '/challenges', icon: Target },
   { title: 'Objetivos de Vida', url: '/goals', icon: Trophy },
   { title: 'Minha Árvore', url: '/tree', icon: TreeDeciduous },
@@ -27,37 +27,51 @@ export const AppSidebar = () => {
   const isCollapsed = state === 'collapsed';
 
   return (
-    <Sidebar className={`${isCollapsed ? 'w-14' : 'w-64'} transition-all duration-300`} collapsible="icon">
-      <SidebarContent>
-        <div className="p-4">
-          <div className="flex items-center gap-2 mb-8">
+    <Sidebar 
+      className={`${isCollapsed ? 'w-20' : 'w-72'} transition-all duration-300 border-r-2 border-primary/20`} 
+      collapsible="icon"
+    >
+      <SidebarContent className="p-4">
+        <div className="mb-8 px-2">
+          <div className="flex items-center gap-3">
             {!isCollapsed && (
               <>
-                <Sprout className="w-8 h-8 text-primary" />
-                <span className="font-bold text-lg">Challenger Life</span>
+                <Trophy className="w-10 h-10 text-primary" />
+                <span className="font-display font-black text-xl text-primary">
+                  Challenger Champions
+                </span>
               </>
             )}
-            {isCollapsed && <Sprout className="w-8 h-8 text-primary" />}
+            {isCollapsed && <Trophy className="w-10 h-10 text-primary" />}
           </div>
         </div>
         
         <SidebarGroup>
           <SidebarGroupLabel className={isCollapsed ? 'sr-only' : ''}>Menu</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-2 mx-2">
               {navItems.map((item) => {
                 const isActive = location.pathname === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
+                    <SidebarMenuButton 
+                      asChild
+                      className="h-auto py-3 px-4 rounded-xl"
+                    >
                       <NavLink
                         to={item.url}
-                        className={`${
-                          isActive ? 'bg-primary/10 text-primary font-medium' : 'hover:bg-muted/50'
+                        className={`flex items-center gap-3 ${
+                          isActive 
+                            ? 'bg-primary/20 text-primary font-bold border-l-4 border-primary' 
+                            : 'hover:bg-accent/10 hover:text-accent'
                         }`}
                       >
-                        <item.icon className="h-5 w-5" />
-                        {!isCollapsed && <span>{item.title}</span>}
+                        <item.icon className="h-6 w-6" />
+                        {!isCollapsed && (
+                          <span className="text-base font-medium font-body">
+                            {item.title}
+                          </span>
+                        )}
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
