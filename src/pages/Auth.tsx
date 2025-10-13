@@ -43,13 +43,6 @@ const Auth = () => {
       toast.error(error.message);
     } else {
       toast.success('Conta criada! Redirecionando...');
-      // Create initial user stats
-      const { data: { user: newUser } } = await supabase.auth.getUser();
-      if (newUser) {
-        await supabase.from('user_stats').insert({
-          user_id: newUser.id,
-        });
-      }
       navigate('/dashboard');
     }
     setLoading(false);
