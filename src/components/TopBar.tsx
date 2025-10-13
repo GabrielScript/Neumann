@@ -66,7 +66,7 @@ export const TopBar = () => {
                 <Flame className="w-5 h-5 text-accent" />
                 <div>
                   <p className="text-xs text-accent/70 font-body">Sequência</p>
-                  <p className="font-bold text-lg text-accent font-display">{stats.current_streak}d</p>
+                  <p className="font-bold text-lg text-primary font-display">{stats.current_streak}d</p>
                 </div>
               </div>
             </div>
