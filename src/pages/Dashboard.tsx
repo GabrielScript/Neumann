@@ -161,10 +161,10 @@ const Dashboard = () => {
                   : 'Desbloqueie seu potencial máximo'}
               </CardDescription>
             </CardHeader>
-            <CardContent className="relative z-10">
+            <CardContent className="relative z-10 flex flex-col h-full">
               {activeChallenge ? (
-                <div className="space-y-4">
-                  <div className="p-4 rounded-xl bg-background/50 border border-primary/20">
+                <div className="space-y-4 flex-1 flex flex-col">
+                  <div className="p-4 rounded-xl bg-background/50 border border-primary/20 flex-1">
                     <h3 className="font-bold text-xl mb-2 text-primary font-display">
                       {activeChallenge.name}
                     </h3>
@@ -173,20 +173,20 @@ const Dashboard = () => {
                     </p>
                   </div>
                   <Button 
-                    className="w-full bg-primary hover:bg-primary-glow text-primary-foreground font-bold text-lg py-6 font-display shadow-glow" 
+                    className="w-full bg-primary hover:bg-primary-glow text-primary-foreground font-bold text-lg py-6 font-display shadow-glow mt-auto" 
                     onClick={() => navigate('/challenges')}
                   >
                     Ver Progresso
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  <p className="text-accent/80 font-body text-base leading-relaxed">
+                <div className="space-y-4 flex-1 flex flex-col">
+                  <p className="text-accent/80 font-body text-base leading-relaxed flex-1">
                     Você não tem nenhum desafio ativo no momento. Escolha um desafio
                     da biblioteca ou crie um personalizado.
                   </p>
                   <Button 
-                    className="w-full bg-primary hover:bg-primary-glow text-primary-foreground font-bold text-lg py-6 font-display shadow-glow" 
+                    className="w-full bg-primary hover:bg-primary-glow text-primary-foreground font-bold text-lg py-6 font-display shadow-glow mt-auto" 
                     onClick={() => navigate('/challenges')}
                   >
                     Iniciar Desafio
@@ -222,10 +222,10 @@ const Dashboard = () => {
                   : 'Defina e acompanhe seus sonhos'}
               </CardDescription>
             </CardHeader>
-            <CardContent className="relative z-10">
+            <CardContent className="relative z-10 flex flex-col h-full">
               {goals.length > 0 ? (
-                <div className="space-y-4">
-                  <ul className="space-y-3">
+                <div className="space-y-4 flex-1 flex flex-col">
+                  <ul className="space-y-3 flex-1">
                     {goals.map((goal) => (
                       <li
                         key={goal.id}
@@ -242,19 +242,19 @@ const Dashboard = () => {
                   </ul>
                   <Button 
                     variant="outline" 
-                    className="w-full border-2 border-accent/30 text-accent hover:bg-accent/10 font-bold text-lg py-6 font-display"
+                    className="w-full border-2 border-accent/30 text-accent hover:bg-accent/10 font-bold text-lg py-6 font-display mt-auto"
                     onClick={() => navigate('/goals')}
                   >
                     Ver Todos
                   </Button>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  <p className="text-accent/80 font-body text-base leading-relaxed">
+                <div className="space-y-4 flex-1 flex flex-col">
+                  <p className="text-accent/80 font-body text-base leading-relaxed flex-1">
                     Defina objetivos significativos e transformadores para sua vida.
                   </p>
                   <Button 
-                    className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-bold text-lg py-6 font-display shadow-glow"
+                    className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-bold text-lg py-6 font-display shadow-glow mt-auto"
                     onClick={() => navigate('/goals')}
                   >
                     Criar Objetivo
