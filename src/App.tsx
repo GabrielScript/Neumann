@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Challenges from "./pages/Challenges";
 import Goals from "./pages/Goals";
+import Trophy from "./pages/Trophy";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/challenges" element={<Challenges />} />
               <Route path="/goals" element={<Goals />} />
+              <Route path="/trophy" element={<Trophy />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

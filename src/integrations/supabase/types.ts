@@ -211,6 +211,36 @@ export type Database = {
           },
         ]
       }
+      daily_medals: {
+        Row: {
+          challenges_completed: number
+          created_at: string
+          date: string
+          id: string
+          medal_type: string
+          total_challenges: number
+          user_id: string
+        }
+        Insert: {
+          challenges_completed?: number
+          created_at?: string
+          date?: string
+          id?: string
+          medal_type: string
+          total_challenges?: number
+          user_id: string
+        }
+        Update: {
+          challenges_completed?: number
+          created_at?: string
+          date?: string
+          id?: string
+          medal_type?: string
+          total_challenges?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       life_goals: {
         Row: {
           action_plan: string | null
@@ -287,9 +317,13 @@ export type Database = {
           best_streak: number
           created_at: string
           current_streak: number
+          daily_medals_bronze: number | null
+          daily_medals_gold: number | null
+          daily_medals_silver: number | null
           id: string
           last_activity_date: string | null
           level: number
+          life_goal_trophies: number | null
           tree_stage: string
           updated_at: string
           user_id: string
@@ -299,9 +333,13 @@ export type Database = {
           best_streak?: number
           created_at?: string
           current_streak?: number
+          daily_medals_bronze?: number | null
+          daily_medals_gold?: number | null
+          daily_medals_silver?: number | null
           id?: string
           last_activity_date?: string | null
           level?: number
+          life_goal_trophies?: number | null
           tree_stage?: string
           updated_at?: string
           user_id: string
@@ -311,9 +349,13 @@ export type Database = {
           best_streak?: number
           created_at?: string
           current_streak?: number
+          daily_medals_bronze?: number | null
+          daily_medals_gold?: number | null
+          daily_medals_silver?: number | null
           id?: string
           last_activity_date?: string | null
           level?: number
+          life_goal_trophies?: number | null
           tree_stage?: string
           updated_at?: string
           user_id?: string

@@ -1,7 +1,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { LogOut, Moon, Sun, TrendingUp, Flame, Sparkles } from 'lucide-react';
+import { LogOut, Moon, Sun, TrendingUp, Flame, Trophy } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,13 +33,13 @@ export const TopBar = () => {
     if (data) setStats(data);
   };
 
-  const getTreeStageName = (stage: string) => {
+  const getTrophyStageName = (stage: string) => {
     const stageNames: { [key: string]: string } = {
-      seed: 'Semente',
-      sprout: 'Broto',
-      young: 'Jovem',
-      flourish: 'Frondosa',
-      splendid: 'Esplêndida',
+      municipal: 'Municipal',
+      estadual: 'Estadual',
+      regional: 'Regional',
+      nacional: 'Nacional',
+      internacional: 'Internacional',
     };
     return stageNames[stage] || stage;
   };
@@ -73,10 +73,10 @@ export const TopBar = () => {
 
             <div className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-4 py-2 rounded-lg shadow-glow">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-primary" />
+                <Trophy className="w-5 h-5 text-primary" />
                 <div>
-                  <p className="text-xs text-primary/70 font-body">Árvore</p>
-                  <p className="font-bold text-sm text-primary font-body">{getTreeStageName(stats.tree_stage)}</p>
+                  <p className="text-xs text-primary/70 font-body">Troféu</p>
+                  <p className="font-bold text-sm text-primary font-body">{getTrophyStageName(stats.tree_stage)}</p>
                 </div>
               </div>
             </div>

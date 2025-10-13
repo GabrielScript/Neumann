@@ -318,7 +318,7 @@ const Dashboard = () => {
                 </div>
                 
                 <div className="relative z-10">
-                  <p className="text-4xl font-black text-accent mb-2 font-display">
+                  <p className="text-4xl font-black text-primary mb-2 font-display">
                     {stats?.current_streak}
                   </p>
                   <p className="text-sm text-accent/80 uppercase tracking-wider font-body font-bold">
@@ -344,7 +344,7 @@ const Dashboard = () => {
                 </div>
                 
                 <div className="relative z-10">
-                  <p className="text-4xl font-black text-success mb-2 font-display">
+                  <p className="text-4xl font-black text-primary mb-2 font-display">
                     {stats?.best_streak}
                   </p>
                   <p className="text-sm text-accent/80 uppercase tracking-wider font-body font-bold">
