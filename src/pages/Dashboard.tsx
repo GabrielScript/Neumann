@@ -166,7 +166,7 @@ const Dashboard = () => {
               {activeChallenge ? (
                 <>
                   <div className="flex-1 mb-4">
-                    <div className="p-2 rounded-xl bg-background/50 border border-primary/20">
+                    <div className="p-1.5 rounded-xl bg-background/50 border border-primary/20">
                       <h3 className="font-bold text-xl mb-2 text-primary font-display">
                         {activeChallenge.name}
                       </h3>
