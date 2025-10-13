@@ -244,7 +244,7 @@ const Dashboard = () => {
                   </ul>
                   <Button 
                     variant="outline" 
-                    className="w-full border-2 border-accent/30 text-accent hover:bg-accent/10 font-bold text-lg py-6 font-display"
+                    className="w-full border-2 border-accent/30 text-accent hover:bg-accent/10 font-bold text-lg py-6 font-display mt-4"
                     onClick={() => navigate('/goals')}
                   >
                     Ver Todos
