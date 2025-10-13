@@ -233,7 +233,7 @@ const Dashboard = () => {
                       {goals.map((goal) => (
                         <li
                           key={goal.id}
-                          className="p-3 rounded-xl bg-background/50 border border-primary/20 hover:border-primary/40 transition-all hover:shadow-glow"
+                          className="p-4 rounded-xl bg-background/50 border border-primary/20 hover:border-primary/40 transition-all hover:shadow-glow"
                         >
                           <span className="font-bold text-lg text-primary font-display">{goal.title}</span>
                         </li>
