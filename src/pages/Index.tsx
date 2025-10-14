@@ -12,10 +12,12 @@ const Index = () => {
 
   useEffect(() => {
     if (!loading && !isLoadingOnboarding && user) {
-      if (onboardingStatus?.completed) {
-        navigate('/dashboard');
-      } else {
+      // Se não há registro de onboarding ou não foi completado -> onboarding
+      if (!onboardingStatus || !onboardingStatus.completed) {
         navigate('/onboarding');
+      } else {
+        // Se já completou -> dashboard
+        navigate('/dashboard');
       }
     }
   }, [user, loading, isLoadingOnboarding, onboardingStatus, navigate]);
