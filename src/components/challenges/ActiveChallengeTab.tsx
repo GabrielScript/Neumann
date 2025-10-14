@@ -71,7 +71,7 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
       return;
     }
 
-    queryClient.invalidateQueries({ queryKey: ["active-challenge"] });
+    queryClient.invalidateQueries({ queryKey: ["active-challenges"] });
     toast({
       title: "Desafio abandonado",
       description: "Você pode iniciar um novo desafio quando quiser.",

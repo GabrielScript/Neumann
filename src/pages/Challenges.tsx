@@ -14,9 +14,9 @@ import { toast } from "@/hooks/use-toast";
 export default function Challenges() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const { challenge } = useActiveChallenge();
+  const { challenges } = useActiveChallenge();
   const { checkDailyChallengeLimit } = useSubscription();
-  const [activeTab, setActiveTab] = useState(challenge ? "active" : "library");
+  const [activeTab, setActiveTab] = useState(challenges && challenges.length > 0 ? "active" : "library");
   const [upgradePromptOpen, setUpgradePromptOpen] = useState(false);
 
   useEffect(() => {
@@ -57,20 +57,24 @@ export default function Challenges() {
 
         <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="active" disabled={!challenge}>
-              Desafio Ativo
+            <TabsTrigger value="active" disabled={!challenges || challenges.length === 0}>
+              Desafios Ativos {challenges && challenges.length > 0 && `(${challenges.length})`}
             </TabsTrigger>
             <TabsTrigger value="library">Biblioteca</TabsTrigger>
             <TabsTrigger value="create">Criar Personalizado</TabsTrigger>
           </TabsList>
 
           <TabsContent value="active" className="mt-6">
-            {challenge ? (
-              <ActiveChallengeTab challenge={challenge} />
+            {challenges && challenges.length > 0 ? (
+              <div className="space-y-6">
+                {challenges.map((challenge) => (
+                  <ActiveChallengeTab key={challenge.id} challenge={challenge} />
+                ))}
+              </div>
             ) : (
               <div className="text-center py-16">
                 <p className="text-muted-foreground">
-                  Você não tem um desafio ativo no momento.
+                  Você não tem desafios ativos no momento.
                 </p>
               </div>
             )}
