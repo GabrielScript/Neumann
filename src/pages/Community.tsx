@@ -32,7 +32,7 @@ const Community = () => {
   }, [user, navigate]);
 
   useEffect(() => {
-    if (userCommunities && userCommunities.length > 0 && !selectedCommunity) {
+    if (userCommunities && userCommunities.length > 0 && !selectedCommunity && userCommunities[0]?.id) {
       setSelectedCommunity(userCommunities[0].id);
     }
   }, [userCommunities, selectedCommunity]);
