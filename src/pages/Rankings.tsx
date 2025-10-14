@@ -1,18 +1,13 @@
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useCommunity } from "@/hooks/useCommunity";
 import { useCommunityRankings } from "@/hooks/useCommunityRankings";
 import { RankingList } from "@/components/community/RankingList";
 import { UserProfileModal } from "@/components/community/UserProfileModal";
-import { Trophy, Flame, TrendingUp, Target, Sparkles, Users } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Trophy, Flame, TrendingUp, Target, Sparkles } from "lucide-react";
 
 const Rankings = () => {
-  const { userCommunities, isLoading: communitiesLoading } = useCommunity();
-  const [selectedCommunityId, setSelectedCommunityId] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
@@ -23,95 +18,25 @@ const Rankings = () => {
     lifeGoalTrophiesRanking,
     challengesCompletedRanking,
     isLoading: rankingsLoading,
-  } = useCommunityRankings(selectedCommunityId);
-
-  const handleCommunityChange = (communityId: string) => {
-    setSelectedCommunityId(communityId);
-  };
+  } = useCommunityRankings();
 
   const handleViewProfile = (userId: string) => {
     setSelectedUserId(userId);
     setIsProfileModalOpen(true);
   };
 
-  // Auto-select first community if available
-  if (!selectedCommunityId && userCommunities.length > 0 && !communitiesLoading) {
-    setSelectedCommunityId(userCommunities[0].id);
-  }
-
-  if (communitiesLoading) {
-    return (
-      <Layout>
-        <div className="container mx-auto p-6">
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">Carregando comunidades...</p>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
-  if (userCommunities.length === 0) {
-    return (
-      <Layout>
-        <div className="container mx-auto p-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="w-6 h-6 text-primary" />
-                Rankings da Comunidade
-              </CardTitle>
-              <CardDescription>
-                Veja os rankings dos membros da sua comunidade
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Alert>
-                <AlertDescription>
-                  Você ainda não é membro de nenhuma comunidade. 
-                  <br />
-                  Para acessar os rankings, você precisa ter uma assinatura Plus e fazer parte de uma comunidade.
-                </AlertDescription>
-              </Alert>
-            </CardContent>
-          </Card>
-        </div>
-      </Layout>
-    );
-  }
-
   return (
     <Layout>
       <div className="container mx-auto p-6">
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <CardTitle className="flex items-center gap-2 text-2xl">
-                  <Trophy className="w-7 h-7 text-primary" />
-                  Rankings da Comunidade
-                </CardTitle>
-                <CardDescription className="mt-2">
-                  Veja os rankings dos membros da comunidade
-                </CardDescription>
-              </div>
-              
-              <Select 
-                value={selectedCommunityId || undefined} 
-                onValueChange={handleCommunityChange}
-              >
-                <SelectTrigger className="w-[280px]">
-                  <SelectValue placeholder="Selecione uma comunidade" />
-                </SelectTrigger>
-                <SelectContent>
-                  {userCommunities.map((community) => (
-                    <SelectItem key={community.id} value={community.id}>
-                      {community.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <CardTitle className="flex items-center gap-2 text-2xl">
+              <Trophy className="w-7 h-7 text-primary" />
+              Rankings Globais
+            </CardTitle>
+            <CardDescription className="mt-2">
+              Veja os rankings de todos os usuários do Neumann
+            </CardDescription>
           </CardHeader>
 
           <CardContent>

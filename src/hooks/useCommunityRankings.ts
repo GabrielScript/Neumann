@@ -29,19 +29,18 @@ interface RawMemberData {
   } | null;
 }
 
-export function useCommunityRankings(communityId: string | null) {
+export function useCommunityRankings() {
   const { data, isLoading } = useQuery({
-    queryKey: ["community-rankings", communityId],
+    queryKey: ["global-rankings"],
     queryFn: async () => {
-      if (!communityId) throw new Error("Community ID is required");
+      // Fetch all users data
+      const [profilesData, statsData, subscriptionsData] = await Promise.all([
+        supabase.from("profiles").select("id, full_name"),
+        supabase.from("user_stats").select("user_id, level, current_streak, best_streak, life_goal_trophies, challenges_completed, tree_stage"),
+        supabase.from("user_subscriptions").select("user_id, tier"),
+      ]);
 
-      const { data: membersData, error } = await supabase
-        .from("community_members")
-        .select("user_id")
-        .eq("community_id", communityId);
-
-      if (error) throw error;
-      if (!membersData || membersData.length === 0) {
+      if (!statsData.data || statsData.data.length === 0) {
         return {
           levelRanking: [],
           currentStreakRanking: [],
@@ -51,15 +50,8 @@ export function useCommunityRankings(communityId: string | null) {
         };
       }
 
-      // Get user IDs
-      const userIds = membersData.map(m => m.user_id);
-
-      // Fetch all data separately
-      const [profilesData, statsData, subscriptionsData] = await Promise.all([
-        supabase.from("profiles").select("id, full_name").in("id", userIds),
-        supabase.from("user_stats").select("user_id, level, current_streak, best_streak, life_goal_trophies, challenges_completed, tree_stage").in("user_id", userIds),
-        supabase.from("user_subscriptions").select("user_id, tier").in("user_id", userIds),
-      ]);
+      // Get all user IDs from stats
+      const userIds = statsData.data.map(s => s.user_id);
 
       // Process rankings for each category
       const processRanking = (valueKey: 'level' | 'current_streak' | 'best_streak' | 'life_goal_trophies' | 'challenges_completed'): RankingEntry[] => {
@@ -95,7 +87,6 @@ export function useCommunityRankings(communityId: string | null) {
         challengesCompletedRanking: processRanking('challenges_completed'),
       };
     },
-    enabled: !!communityId,
   });
 
   return {
