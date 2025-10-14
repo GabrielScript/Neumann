@@ -28,23 +28,17 @@ serve(async (req) => {
     if (!authHeader) throw new Error("No authorization header provided");
     logStep("Authorization header found");
     
-    // Create client with auth header
+    const token = authHeader.replace("Bearer ", "");
+    logStep("Extracted token from header");
+    
+    // Use service role client and pass token explicitly
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      {
-        global: { 
-          headers: { Authorization: authHeader }
-        },
-        auth: {
-          persistSession: false,
-          autoRefreshToken: false
-        }
-      }
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
     logStep("Authenticating user with token");
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError) throw new Error(`Authentication error: ${userError.message}`);
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
@@ -108,13 +102,8 @@ serve(async (req) => {
       
       logStep("Determined subscription tier", { tier });
 
-      // Update user subscription in database using service role
-      const serviceClient = createClient(
-        Deno.env.get("SUPABASE_URL") ?? "",
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-      );
-      
-      await serviceClient
+      // Update user subscription in database
+      await supabaseClient
         .from('user_subscriptions')
         .update({ 
           tier, 
@@ -129,12 +118,7 @@ serve(async (req) => {
     } else {
       logStep("No active subscription found, updating to free tier");
       
-      const serviceClient = createClient(
-        Deno.env.get("SUPABASE_URL") ?? "",
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-      );
-      
-      await serviceClient
+      await supabaseClient
         .from('user_subscriptions')
         .update({ 
           tier: 'free', 
