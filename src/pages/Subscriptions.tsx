@@ -98,7 +98,7 @@ export default function Subscriptions() {
       tier: 'plus_monthly',
       name: 'Neumann Plus Mensal',
       price: 'R$ 14,90',
-      priceId: 'price_1SI9z2L3BOpdMEko0nn5YMrA',
+      priceId: 'price_1SIBXMPzwST7RaKh5ePjbrBw',
       period: '/mês',
       features: [
         '5 desafios por dia',
@@ -113,7 +113,7 @@ export default function Subscriptions() {
       tier: 'plus_annual',
       name: 'Neumann Plus Anual',
       price: 'R$ 129,90',
-      priceId: 'price_1SI9zNL3BOpdMEkoWIOrKXN0',
+      priceId: 'price_1SIBZVPzwST7RaKhOOEadBxR',
       period: '/ano',
       discount: '30% de desconto',
       features: [
