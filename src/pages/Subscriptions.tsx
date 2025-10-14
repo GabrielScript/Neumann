@@ -8,7 +8,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { PixCheckoutModal } from '@/components/payment/PixCheckoutModal';
+import { FastSpringCheckout } from '@/components/payment/FastSpringCheckout';
+import {
+  Dialog,
+  DialogContent,
+} from '@/components/ui/dialog';
 
 export default function Subscriptions() {
   const { user } = useAuth();
@@ -17,10 +21,8 @@ export default function Subscriptions() {
   
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<{
-    tier: string;
+    path: string;
     name: string;
-    price: string;
-    priceValue: number;
   } | null>(null);
 
   useEffect(() => {
@@ -51,10 +53,8 @@ export default function Subscriptions() {
     }
     
     setSelectedPlan({
-      tier: plan.tier,
+      path: plan.path,
       name: plan.name,
-      price: plan.price,
-      priceValue: plan.priceValue,
     });
     setCheckoutModalOpen(true);
   };
@@ -64,7 +64,7 @@ export default function Subscriptions() {
       tier: 'free',
       name: 'Neumann Free',
       price: 'Grátis',
-      priceValue: 0,
+      path: '',
       features: [
         'Apenas 1 desafio ativo',
         '1 objetivo por mês',
@@ -79,7 +79,7 @@ export default function Subscriptions() {
       tier: 'plus_monthly',
       name: 'Neumann Plus Mensal',
       price: 'R$ 9,90',
-      priceValue: 9.9,
+      path: 'neumann-plus-mensal',
       period: '/mês',
       features: [
         'Até 6 desafios ativos simultâneos',
@@ -96,7 +96,7 @@ export default function Subscriptions() {
       tier: 'plus_annual',
       name: 'Neumann Plus Anual',
       price: 'R$ 89,90',
-      priceValue: 89.9,
+      path: 'neumann-plus-anual',
       period: '/ano',
       discount: '10% de desconto',
       features: [
@@ -218,18 +218,20 @@ export default function Subscriptions() {
           <p>Todos os planos podem ser cancelados a qualquer momento.</p>
         </div>
 
-        {selectedPlan && (
-          <PixCheckoutModal
-            isOpen={checkoutModalOpen}
-            onClose={() => {
-              setCheckoutModalOpen(false);
-              setSelectedPlan(null);
-            }}
-            amount={selectedPlan.priceValue}
-            planName={selectedPlan.name}
-            planDescription={selectedPlan.price}
-          />
-        )}
+        <Dialog open={checkoutModalOpen} onOpenChange={(open) => {
+          setCheckoutModalOpen(open);
+          if (!open) setSelectedPlan(null);
+        }}>
+          <DialogContent>
+            {selectedPlan && (
+              <FastSpringCheckout
+                planPath={selectedPlan.path}
+                planName={selectedPlan.name}
+                onClose={() => setCheckoutModalOpen(false)}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </Layout>
   );
