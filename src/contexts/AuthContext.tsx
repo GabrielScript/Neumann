@@ -22,19 +22,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session);
-        
-        // Handle token refresh
-        if (event === 'TOKEN_REFRESHED') {
-          console.log('Token refreshed successfully');
-        }
+        console.log('Auth state changed:', event);
         
         // Handle signed out or expired token
         if (event === 'SIGNED_OUT' || !session) {
           setSession(null);
           setUser(null);
           setLoading(false);
+          navigate('/auth');
           return;
+        }
+
+        // Handle token refresh
+        if (event === 'TOKEN_REFRESHED') {
+          console.log('Token refreshed successfully');
         }
 
         setSession(session);
@@ -43,15 +44,55 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     );
 
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    // Check for existing session and validate token
+    const checkSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error || !session) {
+        setSession(null);
+        setUser(null);
+        setLoading(false);
+        if (window.location.pathname !== '/auth') {
+          navigate('/auth');
+        }
+        return;
+      }
 
-    return () => subscription.unsubscribe();
-  }, []);
+      // Check if token is about to expire (within 5 minutes)
+      const expiresAt = session.expires_at ? session.expires_at * 1000 : 0;
+      const now = Date.now();
+      const fiveMinutes = 5 * 60 * 1000;
+
+      if (expiresAt - now < fiveMinutes) {
+        console.log('Token expiring soon, refreshing...');
+        const { data, error: refreshError } = await supabase.auth.refreshSession();
+        if (refreshError || !data.session) {
+          console.error('Failed to refresh token:', refreshError);
+          setSession(null);
+          setUser(null);
+          navigate('/auth');
+          return;
+        }
+        setSession(data.session);
+        setUser(data.session.user);
+      } else {
+        setSession(session);
+        setUser(session.user);
+      }
+      
+      setLoading(false);
+    };
+
+    checkSession();
+
+    // Check token validity every minute
+    const interval = setInterval(checkSession, 60 * 1000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearInterval(interval);
+    };
+  }, [navigate]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
