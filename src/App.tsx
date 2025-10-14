@@ -15,6 +15,7 @@ import Trophy from "./pages/Trophy";
 import ProcessTrophies from "./pages/ProcessTrophies";
 import Subscriptions from "./pages/Subscriptions";
 import Community from "./pages/Community";
+import Rankings from "./pages/Rankings";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
@@ -39,6 +40,7 @@ const App = () => (
               <Route path="/process-trophies" element={<ProcessTrophies />} />
               <Route path="/subscriptions" element={<Subscriptions />} />
               <Route path="/community" element={<Community />} />
+              <Route path="/rankings" element={<Rankings />} />
               <Route path="/settings" element={<Settings />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
