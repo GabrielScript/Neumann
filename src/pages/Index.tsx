@@ -74,9 +74,9 @@ const Index = () => {
 
           <div className="bg-card p-8 rounded-2xl shadow-card hover:shadow-primary transition-all duration-300 animate-fade-in">
             <Users className="w-12 h-12 text-primary mb-4" />
-            <h3 className="text-2xl font-bold mb-3">Comunidades</h3>
+            <h3 className="text-2xl font-bold mb-3">Comunidades e Rankings</h3>
             <p className="text-muted-foreground">
-              Participe de comunidades, compartilhe desafios e evolua junto com outras pessoas em busca dos mesmos objetivos.
+              Participe de comunidades, compartilhe desafios e evolua junto com outras pessoas. Acompanhe seu progresso no ranking global baseado em nível, XP e conquistas.
             </p>
           </div>
         </div>
