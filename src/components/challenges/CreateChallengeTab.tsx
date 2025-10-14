@@ -25,6 +25,9 @@ interface Habit {
   title: string;
   description: string;
   priority: string;
+  facilitators: string;
+  reminder_time: string;
+  happiness_level: string;
 }
 
 interface CreateChallengeTabProps {
@@ -39,6 +42,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [difficulty, setDifficulty] = useState("3");
   const [duration, setDuration] = useState("21");
   const [customDuration, setCustomDuration] = useState("");
   const [habits, setHabits] = useState<Habit[]>([]);
@@ -52,6 +56,9 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
         title: "",
         description: "",
         priority: "importante",
+        facilitators: "",
+        reminder_time: "",
+        happiness_level: "5",
       },
     ]);
   };
@@ -75,6 +82,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
         name,
         description: description || undefined,
         duration_days: durationDays,
+        difficulty: parseInt(difficulty),
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -101,8 +109,11 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
       for (const habit of habits) {
         habitSchema.parse({
           title: habit.title,
-          description: habit.description || undefined,
+          description: habit.description,
           priority: habit.priority,
+          facilitators: habit.facilitators || undefined,
+          reminder_time: habit.reminder_time || undefined,
+          happiness_level: habit.happiness_level ? parseInt(habit.happiness_level) : undefined,
         });
       }
     } catch (error) {
@@ -144,6 +155,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
           user_id: user.id,
           name,
           duration_days: durationDays,
+          difficulty: parseInt(difficulty),
           start_date: startDate.toISOString().split("T")[0],
           end_date: endDate.toISOString().split("T")[0],
           is_active: true,
@@ -157,8 +169,11 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
       const items = habits.map((habit, index) => ({
         challenge_id: newChallenge.id,
         title: habit.title,
-        description: habit.description || null,
+        description: habit.description,
         priority: habit.priority as "imprescindivel" | "importante" | "acessorio",
+        facilitators: habit.facilitators || null,
+        reminder_time: habit.reminder_time || null,
+        happiness_level: habit.happiness_level ? parseInt(habit.happiness_level) : null,
         position: index,
       }));
 
@@ -178,6 +193,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
       // Reset form
       setName("");
       setDescription("");
+      setDifficulty("3");
       setDuration("21");
       setHabits([]);
       
@@ -220,6 +236,22 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
             rows={3}
             maxLength={1000}
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="difficulty">Nível de Dificuldade (1-5)</Label>
+          <Select value={difficulty} onValueChange={setDifficulty}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1">1 - Muito Fácil</SelectItem>
+              <SelectItem value="2">2 - Fácil</SelectItem>
+              <SelectItem value="3">3 - Médio</SelectItem>
+              <SelectItem value="4">4 - Difícil</SelectItem>
+              <SelectItem value="5">5 - Muito Difícil</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-2">
@@ -287,10 +319,37 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
                     <Textarea
                       value={habit.description}
                       onChange={(e) => updateHabit(habit.id, "description", e.target.value)}
-                      placeholder="Descrição (opcional)"
+                      placeholder="Descrição *"
                       rows={2}
                       maxLength={500}
                     />
+
+                    <Textarea
+                      value={habit.facilitators}
+                      onChange={(e) => updateHabit(habit.id, "facilitators", e.target.value)}
+                      placeholder="O que você tem que fazer para tornar o hábito mais acessível possível (opcional)"
+                      rows={2}
+                      maxLength={500}
+                    />
+
+                    <Input
+                      type="time"
+                      value={habit.reminder_time}
+                      onChange={(e) => updateHabit(habit.id, "reminder_time", e.target.value)}
+                      placeholder="Horário (opcional)"
+                    />
+
+                    <div className="space-y-2">
+                      <Label>Nível de felicidade ao cumpri-lo (1-10)</Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        max="10"
+                        value={habit.happiness_level}
+                        onChange={(e) => updateHabit(habit.id, "happiness_level", e.target.value)}
+                        placeholder="5"
+                      />
+                    </div>
 
                     <Select
                       value={habit.priority}

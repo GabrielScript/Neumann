@@ -22,6 +22,7 @@ export type Database = {
           description: string | null
           difficulty: number | null
           facilitators: string | null
+          happiness_level: number | null
           id: string
           position: number
           priority: Database["public"]["Enums"]["priority_level"]
@@ -36,6 +37,7 @@ export type Database = {
           description?: string | null
           difficulty?: number | null
           facilitators?: string | null
+          happiness_level?: number | null
           id?: string
           position?: number
           priority?: Database["public"]["Enums"]["priority_level"]
@@ -50,6 +52,7 @@ export type Database = {
           description?: string | null
           difficulty?: number | null
           facilitators?: string | null
+          happiness_level?: number | null
           id?: string
           position?: number
           priority?: Database["public"]["Enums"]["priority_level"]
@@ -162,6 +165,7 @@ export type Database = {
           completed_at: string | null
           completed_days: number
           created_at: string
+          difficulty: number | null
           duration_days: number
           end_date: string
           id: string
@@ -175,6 +179,7 @@ export type Database = {
           completed_at?: string | null
           completed_days?: number
           created_at?: string
+          difficulty?: number | null
           duration_days: number
           end_date: string
           id?: string
@@ -188,6 +193,7 @@ export type Database = {
           completed_at?: string | null
           completed_days?: number
           created_at?: string
+          difficulty?: number | null
           duration_days?: number
           end_date?: string
           id?: string
