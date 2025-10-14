@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { useChallengeProgress } from "@/hooks/useChallengeProgress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, CheckCircle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,6 +49,7 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
     useChallengeProgress(challenge.id, today);
   
   const [abandonDialogOpen, setAbandonDialogOpen] = useState(false);
+  const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -79,6 +80,29 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
     setAbandonDialogOpen(false);
   };
 
+  const handleCompleteChallenge = async () => {
+    const { error } = await supabase
+      .from("challenges")
+      .update({ is_active: false, is_completed: true })
+      .eq("id", challenge.id);
+
+    if (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível concluir o desafio.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    queryClient.invalidateQueries({ queryKey: ["active-challenges"] });
+    toast({
+      title: "Parabéns! 🎉",
+      description: "Desafio concluído com sucesso!",
+    });
+    setCompleteDialogOpen(false);
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -100,9 +124,19 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
                 {new Date(challenge.end_date).toLocaleDateString()}
               </CardDescription>
             </div>
-            <Button variant="destructive" onClick={() => setAbandonDialogOpen(true)}>
-              Abandonar Desafio
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                variant="default" 
+                onClick={() => setCompleteDialogOpen(true)}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Concluído
+              </Button>
+              <Button variant="destructive" onClick={() => setAbandonDialogOpen(true)}>
+                Abandonar Desafio
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -165,6 +199,27 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
           </div>
         </CardContent>
       </Card>
+
+      <AlertDialog open={completeDialogOpen} onOpenChange={setCompleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Concluir Desafio?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Parabéns! Tem certeza que deseja marcar este desafio como concluído? 
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleCompleteChallenge} 
+              className="bg-green-600 hover:bg-green-700"
+            >
+              Concluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={abandonDialogOpen} onOpenChange={setAbandonDialogOpen}>
         <AlertDialogContent>
