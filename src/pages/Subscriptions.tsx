@@ -48,6 +48,8 @@ export default function Subscriptions() {
         'Limite de nível 25',
         'Sem medalhas',
         'Sem acesso à comunidade',
+        'Sincronização em nuvem',
+        'Suporte básico via email',
       ],
     },
     {
@@ -63,6 +65,7 @@ export default function Subscriptions() {
         'Medalhas desbloqueadas',
         'Acesso à comunidade',
         'Ajuste dos desafios padrão',
+        'Suporte prioritário',
       ],
       popular: true,
     },
@@ -132,7 +135,7 @@ export default function Subscriptions() {
             return (
               <Card 
                 key={plan.tier}
-                className={`relative ${
+                className={`relative flex flex-col ${
                   plan.popular 
                     ? 'border-primary border-2 shadow-lg' 
                     : ''
@@ -162,7 +165,7 @@ export default function Subscriptions() {
                   </CardDescription>
                 </CardHeader>
 
-                <CardContent>
+                <CardContent className="flex-grow">
                   <ul className="space-y-3">
                     {plan.features.map((feature, index) => (
                       <li key={index} className="flex items-start gap-2">
@@ -173,7 +176,7 @@ export default function Subscriptions() {
                   </ul>
                 </CardContent>
 
-                <CardFooter>
+                <CardFooter className="mt-auto">
                   <Button 
                     className="w-full"
                     variant={isCurrentPlan ? 'outline' : 'default'}
