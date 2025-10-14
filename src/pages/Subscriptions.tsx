@@ -43,7 +43,7 @@ export default function Subscriptions() {
       price: 'Grátis',
       priceValue: 0,
       features: [
-        'Apenas 1 desafio por dia',
+        'Apenas 1 desafio ativo',
         '1 objetivo por mês',
         'Limite de nível 25',
         'Sem medalhas',
@@ -59,7 +59,7 @@ export default function Subscriptions() {
       priceValue: 9.9,
       period: '/mês',
       features: [
-        'Até 6 desafios diários',
+        'Até 6 desafios ativos simultâneos',
         'Objetivos de vida ilimitados',
         'Nível XP ilimitado',
         'Medalhas desbloqueadas',
@@ -77,7 +77,7 @@ export default function Subscriptions() {
       period: '/ano',
       discount: '10% de desconto',
       features: [
-        'Desafios ilimitados',
+        'Desafios ativos simultâneos ilimitados',
         'Objetivos de vida ilimitados',
         'Nível XP ilimitado',
         'Medalhas desbloqueadas',

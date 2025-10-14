@@ -13,6 +13,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Globe, AlertCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,6 +21,7 @@ import { useCommunityChallenges } from '@/hooks/useCommunityChallenges';
 import { useCommunityMembers } from '@/hooks/useCommunityMembers';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { CreateChallengeTab } from '@/components/challenges/CreateChallengeTab';
 
 interface CreateCommunityChallengeModalProps {
   open: boolean;
@@ -34,6 +36,7 @@ export const CreateCommunityChallengeModal = ({
 }: CreateCommunityChallengeModalProps) => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
   const [isGlobal, setIsGlobal] = useState(false);
+  const [activeTab, setActiveTab] = useState('biblioteca');
   const { createChallenge } = useCommunityChallenges(communityId);
   const { userRole } = useCommunityMembers(communityId);
   const { subscription } = useSubscription();
@@ -71,11 +74,11 @@ export const CreateCommunityChallengeModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle>Criar Desafio Comunitário</DialogTitle>
           <DialogDescription>
-            Escolha um template de desafio para compartilhar com a comunidade.
+            Escolha um template da biblioteca ou crie um desafio personalizado.
           </DialogDescription>
         </DialogHeader>
 
@@ -102,50 +105,69 @@ export const CreateCommunityChallengeModal = ({
           </div>
         )}
 
-        <ScrollArea className="h-[400px] pr-4">
-          {!templates || templates.length === 0 ? (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-muted-foreground">Nenhum template disponível.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {templates.map((template) => (
-                <Card
-                  key={template.id}
-                  className={`p-4 cursor-pointer transition-all ${
-                    selectedTemplateId === template.id
-                      ? 'border-primary bg-primary/5'
-                      : 'hover:border-primary/50'
-                  }`}
-                  onClick={() => setSelectedTemplateId(template.id)}
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-semibold">{template.name}</h3>
-                        <Badge variant="secondary">{template.duration_days} dias</Badge>
-                      </div>
-                      {template.description && (
-                        <p className="text-sm text-muted-foreground">
-                          {template.description}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          )}
-        </ScrollArea>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="biblioteca">Biblioteca</TabsTrigger>
+            <TabsTrigger value="personalizado">Criar Personalizado</TabsTrigger>
+          </TabsList>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancelar
-          </Button>
-          <Button onClick={handleSubmit} disabled={!selectedTemplateId}>
-            Criar Desafio
-          </Button>
-        </DialogFooter>
+          <TabsContent value="biblioteca" className="mt-4">
+            <ScrollArea className="h-[400px] pr-4">
+              {!templates || templates.length === 0 ? (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-muted-foreground">Nenhum template disponível.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {templates.map((template) => (
+                    <Card
+                      key={template.id}
+                      className={`p-4 cursor-pointer transition-all ${
+                        selectedTemplateId === template.id
+                          ? 'border-primary bg-primary/5'
+                          : 'hover:border-primary/50'
+                      }`}
+                      onClick={() => setSelectedTemplateId(template.id)}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold">{template.name}</h3>
+                            <Badge variant="secondary">{template.duration_days} dias</Badge>
+                          </div>
+                          {template.description && (
+                            <p className="text-sm text-muted-foreground">
+                              {template.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </ScrollArea>
+
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => onOpenChange(false)}>
+                Cancelar
+              </Button>
+              <Button onClick={handleSubmit} disabled={!selectedTemplateId}>
+                Criar Desafio
+              </Button>
+            </DialogFooter>
+          </TabsContent>
+
+          <TabsContent value="personalizado" className="mt-4">
+            <div className="h-[400px] overflow-y-auto pr-2">
+              <CreateChallengeTab 
+                onChallengeCreated={() => {
+                  onOpenChange(false);
+                }} 
+              />
+            </div>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

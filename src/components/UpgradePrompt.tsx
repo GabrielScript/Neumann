@@ -24,7 +24,7 @@ export const UpgradePrompt = ({ open, onOpenChange, limitType }: UpgradePromptPr
       case 'challenge':
         return {
           title: 'Limite de Desafios Atingido',
-          description: 'Você atingiu o limite de 1 desafio diário do plano Free. Faça upgrade para o Neumann Plus e crie até 6 desafios por dia!',
+          description: 'Você atingiu o limite de 1 desafio ativo do plano Free. Faça upgrade para o Neumann Plus e tenha até 6 desafios ativos simultâneos!',
         };
       case 'goal':
         return {
