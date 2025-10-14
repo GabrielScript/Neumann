@@ -19,7 +19,7 @@ const slides = [
   },
   {
     icon: Award,
-    title: 'Troféus e Medalhas',
+    title: 'Troféus',
     description: 'Conquiste troféus ao completar objetivos de vida em diferentes níveis (municipal, estadual, regional, nacional e internacional).',
   },
   {
