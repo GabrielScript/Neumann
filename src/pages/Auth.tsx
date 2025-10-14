@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useOnboarding } from '@/hooks/useOnboarding';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,13 +17,18 @@ const Auth = () => {
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
+  const { onboardingStatus, isLoading: isLoadingOnboarding } = useOnboarding();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
-      navigate('/dashboard');
+    if (user && !isLoadingOnboarding) {
+      if (onboardingStatus?.completed) {
+        navigate('/dashboard');
+      } else {
+        navigate('/onboarding');
+      }
     }
-  }, [user, navigate]);
+  }, [user, onboardingStatus, isLoadingOnboarding, navigate]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +49,6 @@ const Auth = () => {
       toast.error(error.message);
     } else {
       toast.success('Conta criada! Redirecionando...');
-      navigate('/dashboard');
     }
     setLoading(false);
   };
@@ -61,7 +66,6 @@ const Auth = () => {
       toast.error(error.message);
     } else {
       toast.success('Bem-vindo de volta!');
-      navigate('/dashboard');
     }
     setLoading(false);
   };

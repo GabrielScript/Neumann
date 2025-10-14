@@ -1,18 +1,24 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useOnboarding } from '@/hooks/useOnboarding';
 import { Button } from '@/components/ui/button';
 import { Sprout, Target, Trophy, TreeDeciduous, TrendingUp } from 'lucide-react';
 
 const Index = () => {
   const { user, loading } = useAuth();
+  const { onboardingStatus, isLoading: isLoadingOnboarding } = useOnboarding();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && user) {
-      navigate('/dashboard');
+    if (!loading && !isLoadingOnboarding && user) {
+      if (onboardingStatus?.completed) {
+        navigate('/dashboard');
+      } else {
+        navigate('/onboarding');
+      }
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, isLoadingOnboarding, onboardingStatus, navigate]);
 
   if (loading) {
     return (
