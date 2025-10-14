@@ -83,7 +83,10 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
   const handleCompleteChallenge = async () => {
     const { error } = await supabase
       .from("challenges")
-      .update({ is_active: false, is_completed: true })
+      .update({ 
+        is_active: false, 
+        completed_at: new Date().toISOString() 
+      })
       .eq("id", challenge.id);
 
     if (error) {
