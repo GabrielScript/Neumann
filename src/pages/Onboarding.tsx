@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Target, Trophy, TreeDeciduous, TrendingUp } from 'lucide-react';
+import { Target, Trophy, Medal, TrendingUp } from 'lucide-react';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -10,22 +10,22 @@ const slides = [
   {
     icon: Target,
     title: 'Desafios Estruturados',
-    description: 'Complete desafios diários para construir hábitos poderosos e alcançar seus objetivos de vida.',
+    description: 'Complete desafios diários para construir hábitos poderosos e alcançar seus objetivos de vida. Um desafio por vez para foco máximo.',
   },
   {
     icon: Trophy,
     title: 'Objetivos de Vida',
-    description: 'Defina suas metas mais importantes e acompanhe seu progresso em direção aos seus sonhos.',
+    description: 'Defina suas metas mais importantes e acompanhe seu progresso em direção aos seus sonhos. Celebre cada conquista alcançada.',
   },
   {
-    icon: TreeDeciduous,
-    title: 'Árvore da Vida',
-    description: 'Veja sua evolução crescer como uma árvore, desde a semente até a maturidade completa.',
+    icon: Medal,
+    title: 'Trofeus e Medalhas',
+    description: 'Conquiste medalhas diárias (ouro, prata, bronze) e trofeus ao completar seus objetivos de vida. Acompanhe seu histórico de conquistas.',
   },
   {
     icon: TrendingUp,
-    title: 'Sistema de XP e Progresso',
-    description: 'Ganhe experiência, suba de nível e conquiste medalhas enquanto transforma sua vida.',
+    title: 'Sistema de XP e Níveis',
+    description: 'Ganhe experiência a cada desafio completo, suba de nível e evolua constantemente. Mantenha sequências de dias consecutivos.',
   },
 ];
 

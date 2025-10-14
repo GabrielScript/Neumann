@@ -94,9 +94,9 @@ const Auth = () => {
               <Trophy className="w-12 h-12 text-primary" />
             </div>
           </div>
-          <CardTitle className="text-3xl font-bold font-display">Challenger Champions</CardTitle>
+          <CardTitle className="text-3xl font-bold font-display">Neumann</CardTitle>
           <CardDescription className="text-base">
-            Desbloqueie seu potencial máximo através de desafios e crescimento consistente.
+            Transforme sua vida através de desafios estruturados e crescimento consistente.
           </CardDescription>
         </CardHeader>
         <CardContent>
