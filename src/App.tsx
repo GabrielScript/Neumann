@@ -17,6 +17,7 @@ import Subscriptions from "./pages/Subscriptions";
 import Community from "./pages/Community";
 import Rankings from "./pages/Rankings";
 import Settings from "./pages/Settings";
+import Feedback from "./pages/Feedback";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="/community" element={<Community />} />
               <Route path="/rankings" element={<Rankings />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/feedback" element={<Feedback />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

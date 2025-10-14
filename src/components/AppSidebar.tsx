@@ -11,7 +11,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Target, Trophy, Award, Users, Settings, Sparkles, CreditCard, BarChart3 } from 'lucide-react';
+import { Target, Trophy, Award, Users, Settings, Sparkles, CreditCard, BarChart3, MessageSquare } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import logo from '@/assets/logo.png';
 
@@ -24,6 +24,7 @@ const navItems = [
   { title: 'Rankings', url: '/rankings', icon: BarChart3 },
   { title: 'Assinaturas', url: '/subscriptions', icon: CreditCard },
   { title: 'Configurações', url: '/settings', icon: Settings },
+  { title: 'Feedback', url: '/feedback', icon: MessageSquare },
 ];
 
 export const AppSidebar = () => {
