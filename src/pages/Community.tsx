@@ -106,29 +106,35 @@ const Community = () => {
           🚧 Em Desenvolvimento - Versão Beta
         </Badge>
       </div>
-      <div className="flex gap-4 h-[calc(100vh-10rem)]">
-        {/* Sidebar esquerda - Lista de comunidades */}
-        <div className="w-64 flex-shrink-0">
-          <CommunityList
-            communities={userCommunities}
-            selectedCommunityId={selectedCommunity}
-            onSelectCommunity={setSelectedCommunity}
-            onCreateCommunity={() => setShowCreateModal(true)}
-            onJoinCommunity={() => setShowJoinModal(true)}
-          />
-        </div>
+      {selectedCommunity ? (
+        <div className="flex gap-4 h-[calc(100vh-10rem)]">
+          {/* Sidebar esquerda - Lista de comunidades */}
+          <div className="w-64 flex-shrink-0">
+            <CommunityList
+              communities={userCommunities}
+              selectedCommunityId={selectedCommunity}
+              onSelectCommunity={setSelectedCommunity}
+              onCreateCommunity={() => setShowCreateModal(true)}
+              onJoinCommunity={() => setShowJoinModal(true)}
+            />
+          </div>
 
-        {/* Centro - Header e Desafios */}
-        <div className="flex-1 flex flex-col gap-4 overflow-hidden">
-          <CommunityHeader communityId={selectedCommunity} />
-          <CommunityChallenges communityId={selectedCommunity} />
-        </div>
+          {/* Centro - Header e Desafios */}
+          <div className="flex-1 flex flex-col gap-4 overflow-hidden">
+            <CommunityHeader communityId={selectedCommunity} />
+            <CommunityChallenges communityId={selectedCommunity} />
+          </div>
 
-        {/* Sidebar direita - Chat */}
-        <div className="w-80 flex-shrink-0">
-          <CommunityChat communityId={selectedCommunity} />
+          {/* Sidebar direita - Chat */}
+          <div className="w-80 flex-shrink-0">
+            <CommunityChat communityId={selectedCommunity} />
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="flex items-center justify-center h-[calc(100vh-10rem)]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      )}
 
       <CreateCommunityModal open={showCreateModal} onOpenChange={setShowCreateModal} />
       <JoinCommunityModal open={showJoinModal} onOpenChange={setShowJoinModal} />
