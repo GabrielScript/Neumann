@@ -160,6 +160,7 @@ export type Database = {
       challenges: {
         Row: {
           completed_at: string | null
+          completed_days: number
           created_at: string
           duration_days: number
           end_date: string
@@ -172,6 +173,7 @@ export type Database = {
         }
         Insert: {
           completed_at?: string | null
+          completed_days?: number
           created_at?: string
           duration_days: number
           end_date: string
@@ -184,6 +186,7 @@ export type Database = {
         }
         Update: {
           completed_at?: string | null
+          completed_days?: number
           created_at?: string
           duration_days?: number
           end_date?: string

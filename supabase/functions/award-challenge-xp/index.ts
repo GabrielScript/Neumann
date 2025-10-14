@@ -221,6 +221,69 @@ Deno.serve(async (req) => {
         result.newLevel = bonusLevel;
         result.leveledUp = bonusLevel > oldLevel;
 
+        // Check if this day was already completed before (to track completed days)
+        const { data: challengeData } = await supabase
+          .from('challenges')
+          .select('completed_days, duration_days')
+          .eq('id', challenge_id)
+          .single();
+
+        // Count unique completed days
+        const { data: completedDays } = await supabase
+          .from('challenge_progress')
+          .select('date')
+          .eq('challenge_id', challenge_id)
+          .eq('completed', true);
+
+        // Group by date to get unique days
+        const uniqueDays = new Set(completedDays?.map(d => d.date));
+        const newCompletedDays = uniqueDays.size;
+
+        if (challengeData && newCompletedDays !== challengeData.completed_days) {
+          // Update completed_days count
+          await supabase
+            .from('challenges')
+            .update({ completed_days: newCompletedDays })
+            .eq('id', challenge_id);
+
+          // Check if challenge is now complete (all days done)
+          if (newCompletedDays >= challengeData.duration_days) {
+            await supabase
+              .from('challenges')
+              .update({ 
+                is_active: false, 
+                completed_at: new Date().toISOString() 
+              })
+              .eq('id', challenge_id);
+            
+            // Award challenge completion bonus - 200 XP
+            const challengeBonus = 200;
+            const challengeBonusXP = bonusXP + challengeBonus;
+            const challengeBonusLevel = calculateLevel(challengeBonusXP);
+            const challengeBonusTrophyStage = getTrophyStage(challengeBonusLevel);
+
+            await supabase
+              .from('user_stats')
+              .update({
+                xp: challengeBonusXP,
+                level: challengeBonusLevel,
+                tree_stage: challengeBonusTrophyStage,
+              })
+              .eq('user_id', user.id);
+
+            await supabase.from('xp_audit_log').insert({
+              user_id: user.id,
+              amount: challengeBonus,
+              reason: 'challenge_completed',
+              metadata: { challenge_id, completed_days: newCompletedDays },
+            });
+
+            result.xpAwarded += challengeBonus;
+            result.newLevel = challengeBonusLevel;
+            result.leveledUp = challengeBonusLevel > oldLevel;
+          }
+        }
+
         // Update streak (call the streak function)
         const { error: streakError } = await supabase.functions.invoke('update-user-streak', {
           body: { date },

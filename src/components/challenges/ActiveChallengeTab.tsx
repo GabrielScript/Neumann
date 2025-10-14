@@ -5,8 +5,9 @@ import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { useChallengeProgress } from "@/hooks/useChallengeProgress";
+import { useChallengeStats } from "@/hooks/useChallengeStats";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Trash2, CheckCircle } from "lucide-react";
+import { Plus, Trash2, CheckCircle, Calendar } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,9 +48,9 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
   const today = new Date().toISOString().split("T")[0];
   const { items, progress, isLoading, toggleItem, completedToday, totalItems, progressPercentage } =
     useChallengeProgress(challenge.id, today);
+  const { stats, isLoading: statsLoading } = useChallengeStats(challenge.id);
   
   const [abandonDialogOpen, setAbandonDialogOpen] = useState(false);
-  const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -80,33 +81,7 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
     setAbandonDialogOpen(false);
   };
 
-  const handleCompleteChallenge = async () => {
-    const { error } = await supabase
-      .from("challenges")
-      .update({ 
-        is_active: false, 
-        completed_at: new Date().toISOString() 
-      })
-      .eq("id", challenge.id);
-
-    if (error) {
-      toast({
-        title: "Erro",
-        description: "Não foi possível concluir o desafio.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    queryClient.invalidateQueries({ queryKey: ["active-challenges"] });
-    toast({
-      title: "Parabéns! 🎉",
-      description: "Desafio concluído com sucesso!",
-    });
-    setCompleteDialogOpen(false);
-  };
-
-  if (isLoading) {
+  if (isLoading || statsLoading) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-32" />
@@ -127,15 +102,11 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
                 {new Date(challenge.end_date).toLocaleDateString()}
               </CardDescription>
             </div>
-            <div className="flex gap-2">
-              <Button 
-                variant="default" 
-                onClick={() => setCompleteDialogOpen(true)}
-                className="bg-green-600 hover:bg-green-700"
-              >
-                <CheckCircle className="mr-2 h-4 w-4" />
-                Concluído
-              </Button>
+            <div className="flex gap-2 items-center">
+              <Badge variant="secondary" className="flex items-center gap-1">
+                <Calendar className="w-3 h-3" />
+                Dias Restantes: {stats?.remainingDays || 0}
+              </Badge>
               <Button variant="destructive" onClick={() => setAbandonDialogOpen(true)}>
                 Abandonar Desafio
               </Button>
@@ -143,14 +114,26 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>Progresso de Hoje</span>
-              <span className="font-semibold">
-                {completedToday}/{totalItems} itens
-              </span>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="font-semibold">Progresso Total</span>
+                <span className="font-semibold text-primary">
+                  {stats?.completedDays || 0}/{stats?.totalDays || 0} dias
+                </span>
+              </div>
+              <Progress value={stats?.progressPercentage || 0} className="h-3" />
             </div>
-            <Progress value={progressPercentage} />
+            
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Progresso de Hoje</span>
+                <span className="font-semibold">
+                  {completedToday}/{totalItems} itens
+                </span>
+              </div>
+              <Progress value={progressPercentage} />
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -202,27 +185,6 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
           </div>
         </CardContent>
       </Card>
-
-      <AlertDialog open={completeDialogOpen} onOpenChange={setCompleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Concluir Desafio?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Parabéns! Tem certeza que deseja marcar este desafio como concluído? 
-              Esta ação não pode ser desfeita.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleCompleteChallenge} 
-              className="bg-green-600 hover:bg-green-700"
-            >
-              Concluir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       <AlertDialog open={abandonDialogOpen} onOpenChange={setAbandonDialogOpen}>
         <AlertDialogContent>
