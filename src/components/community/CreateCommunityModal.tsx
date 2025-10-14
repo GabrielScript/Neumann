@@ -13,6 +13,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useCommunity } from '@/hooks/useCommunity';
 import { useSubscription } from '@/hooks/useSubscription';
+import { communitySchema } from '@/lib/validation';
+import { z } from 'zod';
+import { toast } from 'sonner';
 
 interface CreateCommunityModalProps {
   open: boolean;
@@ -28,7 +31,18 @@ export const CreateCommunityModal = ({ open, onOpenChange }: CreateCommunityModa
   const canCreate = subscription?.tier === 'plus_annual';
 
   const handleSubmit = () => {
-    if (!name.trim()) return;
+    // Validate community data
+    try {
+      communitySchema.parse({
+        name,
+        description: description || undefined,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+        return;
+      }
+    }
     
     createCommunity({ name, description });
     setName('');

@@ -10,6 +10,9 @@ import { useCommunityMembers } from '@/hooks/useCommunityMembers';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { chatMessageSchema } from '@/lib/validation';
+import { z } from 'zod';
+import { toast } from 'sonner';
 
 interface CommunityChatProps {
   communityId: string | undefined;
@@ -29,7 +32,16 @@ export const CommunityChat = ({ communityId }: CommunityChatProps) => {
   }, [messages]);
 
   const handleSend = () => {
-    if (!message.trim()) return;
+    // Validate message
+    try {
+      chatMessageSchema.parse({ message });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+        return;
+      }
+    }
+    
     sendMessage(message);
     setMessage('');
   };
@@ -106,6 +118,7 @@ export const CommunityChat = ({ communityId }: CommunityChatProps) => {
               onKeyPress={(e) => e.key === 'Enter' && handleSend()}
               placeholder="Digite sua mensagem..."
               className="flex-1"
+              maxLength={1000}
             />
             <Button onClick={handleSend} size="icon">
               <Send className="w-4 h-4" />

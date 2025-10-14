@@ -17,6 +17,8 @@ import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { challengeSchema, habitSchema } from "@/lib/validation";
+import { z } from "zod";
 
 interface Habit {
   id: string;
@@ -65,15 +67,27 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
   const handleCreate = async () => {
     if (!user?.id) return;
 
-    if (!name.trim()) {
-      toast({
-        title: "Erro",
-        description: "Nome do desafio é obrigatório",
-        variant: "destructive",
+    // Validate challenge data
+    try {
+      const durationDays = duration === "custom" ? parseInt(customDuration) : parseInt(duration);
+      
+      challengeSchema.parse({
+        name,
+        description: description || undefined,
+        duration_days: durationDays,
       });
-      return;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Erro de validação",
+          description: error.errors[0].message,
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
+    // Validate habits
     if (habits.length === 0) {
       toast({
         title: "Erro",
@@ -83,14 +97,23 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
       return;
     }
 
-    const invalidHabit = habits.find((h) => !h.title.trim());
-    if (invalidHabit) {
-      toast({
-        title: "Erro",
-        description: "Todos os hábitos precisam ter um título",
-        variant: "destructive",
-      });
-      return;
+    try {
+      for (const habit of habits) {
+        habitSchema.parse({
+          title: habit.title,
+          description: habit.description || undefined,
+          priority: habit.priority,
+        });
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Erro de validação nos hábitos",
+          description: error.errors[0].message,
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     // Verificar limite de desafios ativos
@@ -195,6 +218,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Descreva os objetivos do seu desafio..."
             rows={3}
+            maxLength={1000}
           />
         </div>
 
@@ -257,6 +281,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
                       value={habit.title}
                       onChange={(e) => updateHabit(habit.id, "title", e.target.value)}
                       placeholder="Nome do hábito *"
+                      maxLength={100}
                     />
 
                     <Textarea
@@ -264,6 +289,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
                       onChange={(e) => updateHabit(habit.id, "description", e.target.value)}
                       placeholder="Descrição (opcional)"
                       rows={2}
+                      maxLength={500}
                     />
 
                     <Select

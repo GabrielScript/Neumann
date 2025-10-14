@@ -10,6 +10,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
+import { lifeGoalSchema } from "@/lib/validation";
+import { z } from "zod";
+import { useToast } from "@/hooks/use-toast";
 
 interface GoalFormModalProps {
   open: boolean;
@@ -43,6 +46,7 @@ export function GoalFormModal({
   );
   const [motivation, setMotivation] = useState(initialData?.motivation || "");
   const [actionPlan, setActionPlan] = useState(initialData?.action_plan || "");
+  const { toast } = useToast();
 
   // Reset form when modal opens or initialData changes
   useEffect(() => {
@@ -57,6 +61,26 @@ export function GoalFormModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate goal data
+    try {
+      lifeGoalSchema.parse({
+        title,
+        deadline: deadline || undefined,
+        happiness_level: happinessLevel,
+        motivation,
+        action_plan: actionPlan,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          title: "Erro de validação",
+          description: error.errors[0].message,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
     
     onSubmit({
       title,
@@ -136,6 +160,7 @@ export function GoalFormModal({
               onChange={(e) => setMotivation(e.target.value)}
               placeholder="Descreva suas motivações mais profundas..."
               rows={4}
+              maxLength={2000}
               required
             />
           </div>
@@ -148,6 +173,7 @@ export function GoalFormModal({
               onChange={(e) => setActionPlan(e.target.value)}
               placeholder="Descreva os passos necessários para alcançar este objetivo..."
               rows={6}
+              maxLength={2000}
               required
             />
           </div>

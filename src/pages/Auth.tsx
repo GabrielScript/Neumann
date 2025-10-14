@@ -10,6 +10,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { Trophy } from 'lucide-react';
+import { signUpSchema, signInSchema } from '@/lib/validation';
+import { z } from 'zod';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -36,6 +38,21 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
 
+    // Validate signup data
+    try {
+      signUpSchema.parse({
+        email,
+        password,
+        fullName,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+        setLoading(false);
+        return;
+      }
+    }
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -58,6 +75,20 @@ const Auth = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    // Validate signin data
+    try {
+      signInSchema.parse({
+        email,
+        password,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+        setLoading(false);
+        return;
+      }
+    }
 
     const { error } = await supabase.auth.signInWithPassword({
       email,
@@ -118,6 +149,7 @@ const Auth = () => {
                     placeholder="seu@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    maxLength={255}
                     required
                   />
                 </div>
@@ -129,6 +161,7 @@ const Auth = () => {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    maxLength={72}
                     required
                   />
                 </div>
@@ -148,6 +181,7 @@ const Auth = () => {
                     placeholder="Seu nome"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
+                    maxLength={100}
                     required
                   />
                 </div>
@@ -159,6 +193,7 @@ const Auth = () => {
                     placeholder="seu@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    maxLength={255}
                     required
                   />
                 </div>
@@ -172,6 +207,7 @@ const Auth = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     minLength={6}
+                    maxLength={72}
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
