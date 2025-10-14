@@ -211,6 +211,151 @@ export type Database = {
           },
         ]
       }
+      communities: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      community_challenges: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          community_id: string | null
+          created_at: string
+          created_by: string
+          id: string
+          is_global: boolean
+          status: string
+          template_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          community_id?: string | null
+          created_at?: string
+          created_by: string
+          id?: string
+          is_global?: boolean
+          status?: string
+          template_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          community_id?: string | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_global?: boolean
+          status?: string
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_challenges_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_challenges_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "challenge_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_chat_messages: {
+        Row: {
+          community_id: string
+          created_at: string
+          id: string
+          message: string
+          user_id: string
+        }
+        Insert: {
+          community_id: string
+          created_at?: string
+          id?: string
+          message: string
+          user_id: string
+        }
+        Update: {
+          community_id?: string
+          created_at?: string
+          id?: string
+          message?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_chat_messages_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_members: {
+        Row: {
+          community_id: string
+          id: string
+          joined_at: string
+          role: Database["public"]["Enums"]["community_role"]
+          user_id: string
+        }
+        Insert: {
+          community_id: string
+          id?: string
+          joined_at?: string
+          role?: Database["public"]["Enums"]["community_role"]
+          user_id: string
+        }
+        Update: {
+          community_id?: string
+          id?: string
+          joined_at?: string
+          role?: Database["public"]["Enums"]["community_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_members_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_medals: {
         Row: {
           challenges_completed: number
@@ -439,8 +584,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_create_community: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       check_daily_challenge_limit: {
         Args: { p_user_id: string }
+        Returns: boolean
+      }
+      check_leader_limit: {
+        Args: { p_community_id: string }
         Returns: boolean
       }
       check_level_limit: {
@@ -451,8 +604,17 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: boolean
       }
+      get_user_community_role: {
+        Args: { p_community_id: string; p_user_id: string }
+        Returns: Database["public"]["Enums"]["community_role"]
+      }
+      has_plus_subscription: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
+      community_role: "challenger_leader" | "champion" | "novice"
       priority_level: "imprescindivel" | "importante" | "acessorio"
       subscription_tier: "free" | "plus_monthly" | "plus_annual"
     }
@@ -582,6 +744,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      community_role: ["challenger_leader", "champion", "novice"],
       priority_level: ["imprescindivel", "importante", "acessorio"],
       subscription_tier: ["free", "plus_monthly", "plus_annual"],
     },

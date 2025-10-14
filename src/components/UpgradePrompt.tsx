@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router-dom';
 interface UpgradePromptProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  limitType: 'challenge' | 'goal' | 'level';
+  limitType: 'challenge' | 'goal' | 'level' | 'community';
 }
 
 export const UpgradePrompt = ({ open, onOpenChange, limitType }: UpgradePromptProps) => {
@@ -35,6 +35,11 @@ export const UpgradePrompt = ({ open, onOpenChange, limitType }: UpgradePromptPr
         return {
           title: 'Nível Máximo Atingido',
           description: 'Você atingiu o nível 25, o máximo do plano Free. Faça upgrade para o Neumann Plus e continue evoluindo sem limites!',
+        };
+      case 'community':
+        return {
+          title: 'Comunidades - Recurso Premium',
+          description: 'Comunidades são um recurso exclusivo para usuários Neumann Plus. Faça upgrade para participar de comunidades e compartilhar desafios!',
         };
       default:
         return {

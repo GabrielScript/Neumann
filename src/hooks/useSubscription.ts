@@ -80,6 +80,7 @@ export const useSubscription = () => {
           hasCommunity: false,
           canAdjustChallenges: false,
           canCreateChallenges: false,
+          canCreateGlobalChallenges: false,
         };
       case 'plus_monthly':
         return {
@@ -91,6 +92,7 @@ export const useSubscription = () => {
           hasCommunity: true,
           canAdjustChallenges: true,
           canCreateChallenges: false,
+          canCreateGlobalChallenges: false,
         };
       case 'plus_annual':
         return {
@@ -102,6 +104,7 @@ export const useSubscription = () => {
           hasCommunity: true,
           canAdjustChallenges: true,
           canCreateChallenges: true,
+          canCreateGlobalChallenges: true,
         };
       default:
         return null;
