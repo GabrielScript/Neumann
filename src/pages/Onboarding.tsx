@@ -28,6 +28,11 @@ const slides = [
     description: 'Com a assinatura Plus, junte-se a comunidades de pessoas com objetivos similares. Participe de desafios em grupo, chat ao vivo e tenha acesso a líderes que motivam e guiam. Plus Annual permite criar suas próprias comunidades.',
   },
   {
+    icon: Award,
+    title: 'Rankings e Competição',
+    description: 'Acompanhe sua posição no ranking global baseado em nível e XP. Compare seu progresso com outros usuários e veja quem está dominando os desafios. Dentro das comunidades, rankings específicos mostram os melhores performers do grupo.',
+  },
+  {
     icon: TrendingUp,
     title: 'Sistema de XP e Níveis',
     description: 'Ganhe experiência a cada desafio completo, suba de nível e evolua constantemente. Mantenha sequências de dias consecutivos para maximizar seu crescimento.',
