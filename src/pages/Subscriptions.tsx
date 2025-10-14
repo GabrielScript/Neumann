@@ -179,10 +179,10 @@ export default function Subscriptions() {
                 <CardFooter className="mt-auto">
                   <Button 
                     className="w-full"
-                    variant={isCurrentPlan ? 'outline' : 'default'}
-                    disabled={isCurrentPlan}
+                    variant={isCurrentPlan || plan.tier === 'free' ? 'outline' : 'default'}
+                    disabled={isCurrentPlan || plan.tier === 'free'}
                   >
-                    {isCurrentPlan ? 'Plano Atual' : 'Assinar'}
+                    {plan.tier === 'free' ? 'Meu plano atual' : (isCurrentPlan ? 'Plano Atual' : 'Assinar')}
                   </Button>
                 </CardFooter>
               </Card>
