@@ -12,7 +12,7 @@ const Index = () => {
         <div className="flex flex-col items-center text-center max-w-4xl mx-auto space-y-8">
           {/* Logo */}
           <div className="p-6 bg-primary/10 rounded-3xl shadow-glow animate-scale-in">
-            <Sparkles className="w-20 h-20 text-primary" />
+            <Trophy className="w-20 h-20 text-yellow-500" />
           </div>
 
           {/* Title & Description */}
