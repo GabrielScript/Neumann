@@ -102,10 +102,6 @@ export default function Feedback() {
                 />
               </div>
 
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>📧 Seu email: {user?.email}</span>
-              </div>
-
               <Button type="submit" disabled={isSubmitting} className="w-full">
                 {isSubmitting ? (
                   <>
