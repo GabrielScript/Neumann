@@ -18,7 +18,7 @@ const navItems = [
   { title: 'Objetivos de Vida', url: '/goals', icon: Sparkles },
   { title: 'Meu Troféu', url: '/trophy', icon: Award },
   { title: 'Assinaturas', url: '/subscriptions', icon: CreditCard },
-  { title: 'Comunidade', url: '/community', icon: Users },
+  { title: 'Comunidade (Beta)', url: '/community', icon: Users },
   { title: 'Configurações', url: '/settings', icon: Settings },
 ];
 
