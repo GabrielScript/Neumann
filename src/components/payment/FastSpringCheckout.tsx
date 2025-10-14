@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 
@@ -21,14 +21,25 @@ declare global {
 }
 
 export const FastSpringCheckout = ({ planPath, planName, onClose }: FastSpringCheckoutProps) => {
+  const [isScriptLoaded, setIsScriptLoaded] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
   useEffect(() => {
     // Load FastSpring script
     const script = document.createElement('script');
     script.src = 'https://d1f8f9xcsvx3ha.cloudfront.net/sbl/0.8.5/fastspring-builder.min.js';
-    script.async = true;
     script.setAttribute('data-storefront', import.meta.env.VITE_FASTSPRING_STORE_ID || 'neumann.test.onfastspring.com');
     script.setAttribute('data-data-callback', 'onFastSpringData');
     script.setAttribute('data-popup-closed', 'onFastSpringPopupClosed');
+    
+    script.onload = () => {
+      console.log('FastSpring script loaded successfully');
+      setIsScriptLoaded(true);
+    };
+    
+    script.onerror = () => {
+      console.error('Failed to load FastSpring script');
+    };
     
     document.body.appendChild(script);
     
@@ -54,7 +65,13 @@ export const FastSpringCheckout = ({ planPath, planName, onClose }: FastSpringCh
   }, [onClose]);
 
   const handleCheckout = () => {
-    if (window.fastspring) {
+    if (!isScriptLoaded || !window.fastspring) {
+      console.error('FastSpring not ready yet');
+      return;
+    }
+    
+    setIsProcessing(true);
+    try {
       window.fastspring.builder.push({
         reset: true,
         products: [
@@ -65,8 +82,9 @@ export const FastSpringCheckout = ({ planPath, planName, onClose }: FastSpringCh
         ],
         checkout: true
       });
-    } else {
-      console.error('FastSpring not loaded');
+    } catch (error) {
+      console.error('Error opening FastSpring checkout:', error);
+      setIsProcessing(false);
     }
   };
 
@@ -76,8 +94,25 @@ export const FastSpringCheckout = ({ planPath, planName, onClose }: FastSpringCh
       <p className="text-muted-foreground text-center">
         Você será redirecionado para o checkout seguro do FastSpring
       </p>
-      <Button onClick={handleCheckout} size="lg" className="w-full">
-        Continuar para Pagamento
+      <Button 
+        onClick={handleCheckout} 
+        size="lg" 
+        className="w-full"
+        disabled={!isScriptLoaded || isProcessing}
+      >
+        {!isScriptLoaded ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Carregando...
+          </>
+        ) : isProcessing ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Abrindo checkout...
+          </>
+        ) : (
+          'Continuar para Pagamento'
+        )}
       </Button>
     </div>
   );
