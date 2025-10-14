@@ -27,21 +27,23 @@ serve(async (req) => {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) throw new Error("No authorization header provided");
     logStep("Authorization header found");
-
-    const token = authHeader.replace("Bearer ", "");
-    logStep("Authenticating user with token");
     
-    // Use service role client for authentication
+    // Create client with auth header
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { 
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      {
         global: { 
           headers: { Authorization: authHeader }
+        },
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false
         }
       }
     );
-    
+
+    logStep("Authenticating user with token");
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
     if (userError) throw new Error(`Authentication error: ${userError.message}`);
     if (!user?.email) throw new Error("User not authenticated or email not available");
@@ -106,8 +108,13 @@ serve(async (req) => {
       
       logStep("Determined subscription tier", { tier });
 
-      // Update user subscription in database
-      await supabaseClient
+      // Update user subscription in database using service role
+      const serviceClient = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      );
+      
+      await serviceClient
         .from('user_subscriptions')
         .update({ 
           tier, 
@@ -122,7 +129,12 @@ serve(async (req) => {
     } else {
       logStep("No active subscription found, updating to free tier");
       
-      await supabaseClient
+      const serviceClient = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+      );
+      
+      await serviceClient
         .from('user_subscriptions')
         .update({ 
           tier: 'free', 
