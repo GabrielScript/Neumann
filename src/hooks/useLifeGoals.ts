@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { awardXP, awardLifeGoalTrophy } from "@/lib/xp";
 import { useToast } from "@/hooks/use-toast";
 
 export function useLifeGoals() {
@@ -78,32 +77,33 @@ export function useLifeGoals() {
     mutationFn: async (goalId: string) => {
       if (!user?.id) throw new Error("User not authenticated");
 
-      const { error } = await supabase
-        .from("life_goals")
-        .update({
-          is_completed: true,
-          completed_at: new Date().toISOString(),
-        })
-        .eq("id", goalId);
+      // Call secure Edge Function to complete goal and award XP/trophy server-side
+      const { data, error } = await supabase.functions.invoke('complete-life-goal', {
+        body: {
+          goal_id: goalId,
+        },
+      });
 
       if (error) throw error;
 
-      // Award big XP bonus
-      const result = await awardXP(user.id, 500);
-      
-      // Award special life goal trophy
-      await awardLifeGoalTrophy(user.id);
-      
-      return result;
+      return data;
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["life-goals"] });
       queryClient.invalidateQueries({ queryKey: ["user-stats"] });
       
-      toast({
-        title: "🎉 Parabéns!",
-        description: `Objetivo concluído! +500 XP e Troféu Especial conquistado!${result.leveledUp ? ` | Nível ${result.newLevel}!` : ''}`,
-      });
+      if (result.blocked) {
+        toast({
+          title: "⚠️ Limite Atingido",
+          description: "Você atingiu o limite de nível do plano gratuito. Faça upgrade para continuar!",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "🎉 Parabéns!",
+          description: `Objetivo concluído! +${result.xpAwarded} XP e Troféu Especial conquistado!${result.leveledUp ? ` | Nível ${result.newLevel}!` : ''}`,
+        });
+      }
     },
   });
 

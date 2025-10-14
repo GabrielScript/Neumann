@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { awardXP, updateStreak } from "@/lib/xp";
 import { useToast } from "@/hooks/use-toast";
 
 export function useChallengeProgress(challengeId: string | undefined, date: string) {
@@ -47,73 +46,42 @@ export function useChallengeProgress(challengeId: string | undefined, date: stri
     mutationFn: async ({ itemId, completed }: { itemId: string; completed: boolean }) => {
       if (!challengeId || !user?.id) throw new Error("Missing data");
 
-      const { data: existing, error: fetchError } = await supabase
-        .from("challenge_progress")
-        .select("*")
-        .eq("challenge_id", challengeId)
-        .eq("item_id", itemId)
-        .eq("date", date)
-        .maybeSingle();
+      // Call secure Edge Function to handle XP award server-side
+      const { data, error } = await supabase.functions.invoke('award-challenge-xp', {
+        body: {
+          challenge_id: challengeId,
+          item_id: itemId,
+          date,
+          completed,
+        },
+      });
 
-      if (fetchError) throw fetchError;
+      if (error) throw error;
 
-      if (existing) {
-        const { error } = await supabase
-          .from("challenge_progress")
-          .update({ completed })
-          .eq("id", existing.id);
-
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from("challenge_progress")
-          .insert({
-            challenge_id: challengeId,
-            item_id: itemId,
-            date,
-            completed,
-          });
-
-        if (error) throw error;
-      }
-
-      // Award XP if completing
-      if (completed) {
-        const result = await awardXP(user.id, 10);
-        
-        if (result.leveledUp) {
-          toast({
-            title: "🎉 Level Up!",
-            description: `Você alcançou o nível ${result.newLevel}!`,
-          });
-        }
-
-        // Check if all items are completed
-        const { data: allProgress } = await supabase
-          .from("challenge_progress")
-          .select("*")
-          .eq("challenge_id", challengeId)
-          .eq("date", date);
-
-        const totalItems = items?.length || 0;
-        const completedItems = allProgress?.filter((p) => p.completed).length || 0;
-
-        if (totalItems > 0 && completedItems === totalItems) {
-          // Day complete bonus
-          await awardXP(user.id, 50);
-          await updateStreak(user.id, null);
-          
-          toast({
-            title: "✨ Dia Completo!",
-            description: "+50 XP de bônus! Continue assim!",
-          });
-        }
-
-        queryClient.invalidateQueries({ queryKey: ["user-stats"] });
-      }
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      if (data?.leveledUp) {
+        toast({
+          title: "🎉 Level Up!",
+          description: `Você alcançou o nível ${data.newLevel}!`,
+        });
+      }
+
+      if (data?.dayComplete) {
+        toast({
+          title: "✨ Dia Completo!",
+          description: `+${data.xpAwarded} XP! Continue assim!`,
+        });
+      } else if (data?.xpAwarded > 0) {
+        toast({
+          title: "✅ Item Completo!",
+          description: `+${data.xpAwarded} XP`,
+        });
+      }
+
       queryClient.invalidateQueries({ queryKey: ["challenge-progress", challengeId, date] });
+      queryClient.invalidateQueries({ queryKey: ["user-stats"] });
     },
   });
 

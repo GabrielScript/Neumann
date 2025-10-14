@@ -1,15 +1,41 @@
-import { supabase } from "@/integrations/supabase/client";
+/**
+ * XP Calculation Library
+ * 
+ * ⚠️ SECURITY NOTE:
+ * This file contains ONLY calculation functions for UI/display purposes.
+ * All XP awards, level updates, trophy awards, and streak management
+ * are now handled SERVER-SIDE via Edge Functions for security.
+ * 
+ * DO NOT add functions here that modify database values - those must
+ * be implemented in Edge Functions to prevent client-side manipulation.
+ * 
+ * DEPRECATED FUNCTIONS (now server-side):
+ * - awardXP() -> use Edge Function: award-challenge-xp or complete-life-goal
+ * - awardLifeGoalTrophy() -> use Edge Function: complete-life-goal
+ * - awardDailyMedal() -> use Edge Function: award-daily-medal
+ * - updateStreak() -> use Edge Function: update-user-streak
+ */
 
 export type TrophyStage = "municipal" | "estadual" | "regional" | "nacional" | "internacional";
 
+/**
+ * Calculate user level based on XP
+ * Formula: level = floor(xp / 100) + 1
+ */
 export function calculateLevel(xp: number): number {
   return Math.floor(xp / 100) + 1;
 }
 
+/**
+ * Calculate XP required for next level
+ */
 export function getXPForNextLevel(level: number): number {
   return level * 100;
 }
 
+/**
+ * Determine trophy stage based on level
+ */
 export function getTrophyStage(level: number): TrophyStage {
   if (level <= 10) return "municipal";
   if (level <= 25) return "estadual";
@@ -18,6 +44,9 @@ export function getTrophyStage(level: number): TrophyStage {
   return "internacional";
 }
 
+/**
+ * Get human-readable trophy stage name
+ */
 export function getTrophyStageName(stage: TrophyStage): string {
   const names: Record<TrophyStage, string> = {
     municipal: "Troféu Municipal",
@@ -29,184 +58,23 @@ export function getTrophyStageName(stage: TrophyStage): string {
   return names[stage];
 }
 
-export async function awardXP(userId: string, amount: number): Promise<{
-  newXP: number;
-  newLevel: number;
-  leveledUp: boolean;
-  newTrophyStage: TrophyStage;
-  stageChanged: boolean;
-  blocked?: boolean;
-}> {
-  // Get current stats
-  const { data: currentStats, error: fetchError } = await supabase
-    .from("user_stats")
-    .select("*")
-    .eq("user_id", userId)
-    .single();
-
-  if (fetchError) throw fetchError;
-
-  const oldXP = currentStats.xp;
-  const oldLevel = currentStats.level;
-  const oldTrophyStage = currentStats.tree_stage as TrophyStage;
-
-  const newXP = oldXP + amount;
-  const newLevel = calculateLevel(newXP);
-  
-  // Check level limit
-  const { data: canLevelUp } = await supabase.rpc('check_level_limit', {
-    p_user_id: userId,
-    p_new_level: newLevel,
-  });
-
-  // If level limit reached, don't update level or XP
-  if (!canLevelUp) {
-    return {
-      newXP: oldXP,
-      newLevel: oldLevel,
-      leveledUp: false,
-      newTrophyStage: oldTrophyStage,
-      stageChanged: false,
-      blocked: true,
-    };
-  }
-
-  const newTrophyStage = getTrophyStage(newLevel);
-
-  const leveledUp = newLevel > oldLevel;
-  const stageChanged = newTrophyStage !== oldTrophyStage;
-
-  // Update stats
-  const { error: updateError } = await supabase
-    .from("user_stats")
-    .update({
-      xp: newXP,
-      level: newLevel,
-      tree_stage: newTrophyStage,
-    })
-    .eq("user_id", userId);
-
-  if (updateError) throw updateError;
-
-  return {
-    newXP,
-    newLevel,
-    leveledUp,
-    newTrophyStage,
-    stageChanged,
-  };
+/**
+ * Calculate XP progress within current level (0-100%)
+ */
+export function getLevelProgress(xp: number): number {
+  const currentLevel = calculateLevel(xp);
+  const xpForCurrentLevel = (currentLevel - 1) * 100;
+  const xpInCurrentLevel = xp - xpForCurrentLevel;
+  return (xpInCurrentLevel / 100) * 100;
 }
 
-export async function awardLifeGoalTrophy(userId: string): Promise<void> {
-  const { data: currentStats } = await supabase
-    .from("user_stats")
-    .select("life_goal_trophies")
-    .eq("user_id", userId)
-    .single();
-  
-  if (currentStats) {
-    await supabase
-      .from("user_stats")
-      .update({ life_goal_trophies: (currentStats.life_goal_trophies || 0) + 1 })
-      .eq("user_id", userId);
-  }
+/**
+ * Calculate XP needed to reach next level
+ */
+export function getXPToNextLevel(xp: number): number {
+  const currentLevel = calculateLevel(xp);
+  const xpForNextLevel = getXPForNextLevel(currentLevel);
+  return xpForNextLevel - xp;
 }
 
 export type DailyMedalType = "gold" | "silver" | "bronze";
-
-export async function awardDailyMedal(
-  userId: string,
-  challengesCompleted: number,
-  totalChallenges: number
-): Promise<DailyMedalType> {
-  let medalType: DailyMedalType;
-  
-  if (challengesCompleted === totalChallenges && totalChallenges > 0) {
-    medalType = "gold";
-  } else if (challengesCompleted > 0) {
-    medalType = "silver";
-  } else {
-    medalType = "bronze";
-  }
-
-  const today = new Date().toISOString().split('T')[0];
-
-  // Insert or update daily medal
-  await supabase
-    .from("daily_medals")
-    .upsert({
-      user_id: userId,
-      date: today,
-      medal_type: medalType,
-      challenges_completed: challengesCompleted,
-      total_challenges: totalChallenges,
-    }, {
-      onConflict: 'user_id,date'
-    });
-
-  // Update medal count in user_stats
-  const columnName = `daily_medals_${medalType}`;
-  const { data: currentStats } = await supabase
-    .from("user_stats")
-    .select(columnName)
-    .eq("user_id", userId)
-    .single();
-
-  if (currentStats) {
-    await supabase
-      .from("user_stats")
-      .update({ [columnName]: (currentStats[columnName] || 0) + 1 })
-      .eq("user_id", userId);
-  }
-
-  return medalType;
-}
-
-export async function updateStreak(userId: string, lastActivityDate: string | null): Promise<void> {
-  const today = new Date().toISOString().split('T')[0];
-  
-  if (lastActivityDate === today) {
-    // Already updated today
-    return;
-  }
-
-  const { data: currentStats, error: fetchError } = await supabase
-    .from("user_stats")
-    .select("*")
-    .eq("user_id", userId)
-    .single();
-
-  if (fetchError) throw fetchError;
-
-  let newStreak = currentStats.current_streak;
-  
-  if (lastActivityDate) {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().split('T')[0];
-    
-    if (lastActivityDate === yesterdayStr) {
-      // Consecutive day
-      newStreak += 1;
-    } else {
-      // Streak broken
-      newStreak = 1;
-    }
-  } else {
-    // First activity
-    newStreak = 1;
-  }
-
-  const newBestStreak = Math.max(currentStats.best_streak, newStreak);
-
-  const { error: updateError } = await supabase
-    .from("user_stats")
-    .update({
-      current_streak: newStreak,
-      best_streak: newBestStreak,
-      last_activity_date: today,
-    })
-    .eq("user_id", userId);
-
-  if (updateError) throw updateError;
-}
