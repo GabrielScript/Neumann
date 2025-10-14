@@ -18,7 +18,7 @@ const Index = () => {
 
           {/* Title & Description */}
           <div className="space-y-4 animate-fade-in">
-            <h1 className="text-5xl md:text-6xl font-bold font-display bg-gradient-primary bg-clip-text text-transparent">
+            <h1 className="text-5xl md:text-6xl font-bold font-display text-foreground">
               Neumann
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl">
