@@ -8,6 +8,11 @@ import { Trophy, Medal, Award, TrendingUp, Sparkles } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { getTrophyStage, getTrophyStageName, getXPForNextLevel } from '@/lib/xp';
 import { Skeleton } from '@/components/ui/skeleton';
+import trophyMunicipal from '@/assets/trophies/trophy-municipal.png';
+import trophyEstadual from '@/assets/trophies/trophy-estadual.png';
+import trophyRegional from '@/assets/trophies/trophy-regional.png';
+import trophyNacional from '@/assets/trophies/trophy-nacional.png';
+import trophyInternacional from '@/assets/trophies/trophy-internacional.png';
 
 interface UserStats {
   xp: number;
@@ -69,11 +74,11 @@ const TrophyPage = () => {
   const progressInLevel = ((stats?.xp || 0) - currentLevelXP) / 100 * 100;
 
   const trophyHierarchy = [
-    { stage: 'municipal', name: 'Troféu Municipal', minLevel: 1, maxLevel: 10, icon: '🏆' },
-    { stage: 'estadual', name: 'Troféu Estadual', minLevel: 11, maxLevel: 25, icon: '🥇' },
-    { stage: 'regional', name: 'Troféu Regional', minLevel: 26, maxLevel: 45, icon: '🏅' },
-    { stage: 'nacional', name: 'Troféu Nacional', minLevel: 46, maxLevel: 70, icon: '👑' },
-    { stage: 'internacional', name: 'Troféu Internacional', minLevel: 71, maxLevel: 999, icon: '🌟' },
+    { stage: 'municipal', name: 'Troféu Municipal', minLevel: 1, maxLevel: 10, image: trophyMunicipal },
+    { stage: 'estadual', name: 'Troféu Estadual', minLevel: 11, maxLevel: 25, image: trophyEstadual },
+    { stage: 'regional', name: 'Troféu Regional', minLevel: 26, maxLevel: 45, image: trophyRegional },
+    { stage: 'nacional', name: 'Troféu Nacional', minLevel: 46, maxLevel: 70, image: trophyNacional },
+    { stage: 'internacional', name: 'Troféu Internacional', minLevel: 71, maxLevel: 999, image: trophyInternacional },
   ];
 
   return (
@@ -99,7 +104,11 @@ const TrophyPage = () => {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-8">
-              <div className="text-8xl">{trophyHierarchy.find(t => t.stage === currentStage)?.icon}</div>
+              <img 
+                src={trophyHierarchy.find(t => t.stage === currentStage)?.image} 
+                alt={getTrophyStageName(currentStage)}
+                className="w-32 h-32 object-contain"
+              />
               <div className="flex-1 space-y-4">
                 <div>
                   <h3 className="text-3xl font-black text-primary font-display">
@@ -151,7 +160,11 @@ const TrophyPage = () => {
                     `}
                   >
                     <div className="flex items-center gap-4">
-                      <div className="text-4xl">{trophy.icon}</div>
+                      <img 
+                        src={trophy.image} 
+                        alt={trophy.name}
+                        className="w-16 h-16 object-contain"
+                      />
                       <div className="flex-1">
                         <h4 className="font-bold text-lg text-primary font-display">
                           {trophy.name}
@@ -247,7 +260,11 @@ const TrophyPage = () => {
             </CardHeader>
             <CardContent>
               <div className="text-center py-8">
-                <div className="text-6xl mb-4">🏆</div>
+                <img 
+                  src={trophyNacional} 
+                  alt="Troféu Especial"
+                  className="w-24 h-24 object-contain mx-auto mb-4"
+                />
                 <p className="text-5xl font-black text-primary font-display mb-2">
                   {stats?.life_goal_trophies || 0}
                 </p>
