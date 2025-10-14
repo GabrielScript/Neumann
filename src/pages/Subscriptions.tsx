@@ -3,12 +3,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useSubscription } from '@/hooks/useSubscription';
-import { Check, Sparkles, RefreshCw } from 'lucide-react';
+import { Check, Sparkles, RefreshCw, Settings } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { FastSpringCheckout } from '@/components/payment/FastSpringCheckout';
+import { StripeCheckout } from '@/components/payment/StripeCheckout';
+import { supabase } from '@/integrations/supabase/client';
 import {
   Dialog,
   DialogContent,
@@ -23,7 +24,7 @@ export default function Subscriptions() {
   
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<{
-    path: string;
+    priceId: string;
     name: string;
   } | null>(null);
 
@@ -55,10 +56,28 @@ export default function Subscriptions() {
     }
     
     setSelectedPlan({
-      path: plan.path,
+      priceId: plan.priceId,
       name: plan.name,
     });
     setCheckoutModalOpen(true);
+  };
+
+  const handleManageSubscription = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      
+      if (error) throw error;
+      
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível abrir o portal de gerenciamento.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const plans = [
@@ -66,7 +85,7 @@ export default function Subscriptions() {
       tier: 'free',
       name: 'Neumann Free',
       price: 'Grátis',
-      path: '',
+      priceId: '',
       features: [
         'Apenas 1 desafio ativo por dia',
         '1 objetivo por mês',
@@ -79,7 +98,7 @@ export default function Subscriptions() {
       tier: 'plus_monthly',
       name: 'Neumann Plus Mensal',
       price: 'R$ 14,90',
-      path: 'neumann-plus-mensal',
+      priceId: 'price_1SI9z2L3BOpdMEko0nn5YMrA',
       period: '/mês',
       features: [
         '5 desafios por dia',
@@ -94,7 +113,7 @@ export default function Subscriptions() {
       tier: 'plus_annual',
       name: 'Neumann Plus Anual',
       price: 'R$ 129,90',
-      path: 'neumann-plus-anual',
+      priceId: 'price_1SI9zNL3BOpdMEkoWIOrKXN0',
       period: '/ano',
       discount: '30% de desconto',
       features: [
@@ -130,7 +149,7 @@ export default function Subscriptions() {
           <p className="text-muted-foreground font-body">Escolha o plano ideal para você</p>
           
           {currentFeatures && (
-            <div className="mt-4 flex items-center justify-center gap-2">
+            <div className="mt-4 flex items-center justify-center gap-2 flex-wrap">
               <Badge className="text-sm py-1 px-3">
                 Plano Atual: {currentFeatures.name}
               </Badge>
@@ -143,6 +162,17 @@ export default function Subscriptions() {
                 <RefreshCw className="w-4 h-4" />
                 Atualizar Perfil
               </Button>
+              {subscription?.tier !== 'free' && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleManageSubscription}
+                  className="gap-2"
+                >
+                  <Settings className="w-4 h-4" />
+                  Gerenciar Assinatura
+                </Button>
+              )}
             </div>
           )}
         </div>
@@ -224,8 +254,8 @@ export default function Subscriptions() {
               Complete o processo de assinatura do plano {selectedPlan?.name}
             </DialogDescription>
             {selectedPlan && (
-              <FastSpringCheckout
-                planPath={selectedPlan.path}
+              <StripeCheckout
+                priceId={selectedPlan.priceId}
                 planName={selectedPlan.name}
                 onClose={() => setCheckoutModalOpen(false)}
               />

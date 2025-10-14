@@ -82,6 +82,14 @@ export const useSubscription = () => {
   };
 
   const refreshSubscription = async () => {
+    // Call Stripe edge function to check and update subscription
+    try {
+      await supabase.functions.invoke('check-subscription');
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+    }
+    
+    // Invalidate and refetch local data
     await queryClient.invalidateQueries({ queryKey: ['subscription', user?.id] });
   };
 
@@ -102,10 +110,10 @@ export const useSubscription = () => {
       case 'plus_monthly':
         return {
           name: 'Neumann Plus Mensal',
-          dailyChallenges: 6,
-          monthlyGoals: Infinity,
+          dailyChallenges: 5,
+          monthlyGoals: 5,
           maxLevel: Infinity,
-          hasMedals: true,
+          hasMedals: false,
           hasCommunity: true,
           canAdjustChallenges: true,
           canCreateChallenges: false,
@@ -118,7 +126,7 @@ export const useSubscription = () => {
           monthlyGoals: Infinity,
           maxLevel: Infinity,
           hasMedals: true,
-          hasCommunity: true,
+          hasCommunity: false,
           canAdjustChallenges: true,
           canCreateChallenges: true,
           canCreateGlobalChallenges: true,

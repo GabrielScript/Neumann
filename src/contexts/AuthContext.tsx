@@ -41,6 +41,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
+        
+        // Check subscription status with Stripe (async, don't block)
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          setTimeout(async () => {
+            try {
+              console.log('Checking Stripe subscription status...');
+              await supabase.functions.invoke('check-subscription');
+              console.log('Subscription status updated');
+            } catch (error) {
+              console.error('Error checking subscription:', error);
+            }
+          }, 0);
+        }
       }
     );
 
