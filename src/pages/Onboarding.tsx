@@ -13,12 +13,12 @@ const slides = [
     description: 'Complete desafios diários para construir hábitos poderosos e alcançar seus objetivos de vida. Um desafio por vez para foco máximo.',
   },
   {
-    icon: Trophy,
+    icon: Sparkles,
     title: 'Objetivos de Vida',
     description: 'Defina suas metas mais importantes e acompanhe seu progresso em direção aos seus sonhos. Celebre cada conquista alcançada.',
   },
   {
-    icon: Sparkles,
+    icon: Trophy,
     title: 'Troféus',
     description: 'Conquiste troféus ao completar objetivos de vida em diferentes níveis (municipal, estadual, regional, nacional e internacional).',
   },
