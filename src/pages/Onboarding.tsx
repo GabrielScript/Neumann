@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Target, Trophy, TrendingUp } from 'lucide-react';
+import { Target, Trophy, TrendingUp, Users, Award } from 'lucide-react';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -18,9 +18,19 @@ const slides = [
     description: 'Defina suas metas mais importantes e acompanhe seu progresso em direção aos seus sonhos. Celebre cada conquista alcançada.',
   },
   {
+    icon: Award,
+    title: 'Troféus e Medalhas',
+    description: 'Conquiste troféus ao completar objetivos de vida em diferentes níveis (municipal, estadual, regional, nacional e internacional). Ganhe medalhas diárias de bronze, prata ou ouro baseado na sua performance.',
+  },
+  {
+    icon: Users,
+    title: 'Comunidades Plus',
+    description: 'Com a assinatura Plus, junte-se a comunidades de pessoas com objetivos similares. Participe de desafios em grupo, chat ao vivo e tenha acesso a líderes que motivam e guiam. Plus Annual permite criar suas próprias comunidades.',
+  },
+  {
     icon: TrendingUp,
     title: 'Sistema de XP e Níveis',
-    description: 'Ganhe experiência a cada desafio completo, suba de nível e evolua constantemente. Mantenha sequências de dias consecutivos.',
+    description: 'Ganhe experiência a cada desafio completo, suba de nível e evolua constantemente. Mantenha sequências de dias consecutivos para maximizar seu crescimento.',
   },
 ];
 
