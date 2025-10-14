@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface FastSpringCheckoutProps {
   planPath: string;
@@ -8,52 +7,32 @@ interface FastSpringCheckoutProps {
   onClose?: () => void;
 }
 
-// Declare FastSpring global
-declare global {
-  interface Window {
-    fastspring?: {
-      builder: {
-        checkout: (config: any) => void;
-        push: (config: any) => void;
-      };
-    };
-  }
-}
-
 export const FastSpringCheckout = ({ planPath, planName, onClose }: FastSpringCheckoutProps) => {
-  const [isScriptLoaded, setIsScriptLoaded] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
-    // Load FastSpring script
+    // Check if script already exists
+    const existingScript = document.getElementById('fsc-api');
+    if (existingScript) {
+      console.log('FastSpring script already loaded');
+      return;
+    }
+
+    // Load FastSpring script only once
     const script = document.createElement('script');
     script.id = 'fsc-api';
     script.src = 'https://d1f8f9xcsvx3ha.cloudfront.net/sbl/0.8.5/fastspring-builder.min.js';
     script.type = 'text/javascript';
-    // IMPORTANT: This needs to be the FULL URL to your popup checkout
-    // Format: yourstore.test.onfastspring.com/popup-checkout
-    // Get this from FastSpring: Checkouts > Popup Checkouts > Place on your Website
-    const storefrontUrl = import.meta.env.VITE_FASTSPRING_STORE_ID || 'neumann.test.onfastspring.com/popup-neumann';
-    script.setAttribute('data-storefront', storefrontUrl);
-    script.setAttribute('data-data-callback', 'onFastSpringData');
+    script.setAttribute('data-storefront', import.meta.env.VITE_FASTSPRING_STORE_ID || 'neumann.test.onfastspring.com');
     script.setAttribute('data-popup-closed', 'onFastSpringPopupClosed');
     
     script.onload = () => {
       console.log('FastSpring script loaded successfully');
-      setIsScriptLoaded(true);
-    };
-    
-    script.onerror = () => {
-      console.error('Failed to load FastSpring script');
     };
     
     document.body.appendChild(script);
     
-    // Setup callbacks
-    (window as any).onFastSpringData = (data: any) => {
-      console.log('FastSpring data:', data);
-    };
-    
+    // Setup popup closed callback
     (window as any).onFastSpringPopupClosed = (data: any) => {
       console.log('FastSpring popup closed:', data);
       if (data && data.completed) {
@@ -64,35 +43,12 @@ export const FastSpringCheckout = ({ planPath, planName, onClose }: FastSpringCh
     };
     
     return () => {
-      document.body.removeChild(script);
-      delete (window as any).onFastSpringData;
+      // Don't remove script on unmount as it's reused
       delete (window as any).onFastSpringPopupClosed;
     };
   }, [onClose]);
 
-  const handleCheckout = () => {
-    if (!isScriptLoaded || !window.fastspring) {
-      console.error('FastSpring not ready yet');
-      return;
-    }
-    
-    setIsProcessing(true);
-    try {
-      window.fastspring.builder.push({
-        reset: true,
-        products: [
-          {
-            path: planPath,
-            quantity: 1
-          }
-        ],
-        checkout: true
-      });
-    } catch (error) {
-      console.error('Error opening FastSpring checkout:', error);
-      setIsProcessing(false);
-    }
-  };
+  const sessionData = user?.email ? JSON.stringify({ customer_email: user.email }) : '{}';
 
   return (
     <div className="flex flex-col items-center gap-4 p-6">
@@ -100,26 +56,14 @@ export const FastSpringCheckout = ({ planPath, planName, onClose }: FastSpringCh
       <p className="text-muted-foreground text-center">
         Você será redirecionado para o checkout seguro do FastSpring
       </p>
-      <Button 
-        onClick={handleCheckout} 
-        size="lg" 
-        className="w-full"
-        disabled={!isScriptLoaded || isProcessing}
+      <button
+        data-fsc-item-path-value={planPath}
+        data-fsc-action="Add,Checkout"
+        data-fsc-session={sessionData}
+        className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-8 w-full"
       >
-        {!isScriptLoaded ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Carregando...
-          </>
-        ) : isProcessing ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Abrindo checkout...
-          </>
-        ) : (
-          'Continuar para Pagamento'
-        )}
-      </Button>
+        Continuar para Pagamento
+      </button>
     </div>
   );
 };
