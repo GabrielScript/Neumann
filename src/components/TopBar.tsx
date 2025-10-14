@@ -2,7 +2,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { LogOut, Moon, Sun, TrendingUp, Flame, Trophy } from 'lucide-react';
+import { LogOut, Moon, Sun, TrendingUp, Flame, Trophy, CreditCard } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,7 +21,7 @@ export const TopBar = () => {
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const [stats, setStats] = useState<UserStats | null>(null);
-  const { getFeatures, getTierBadgeColor } = useSubscription();
+  const { subscription, getFeatures, getTierBadgeColor } = useSubscription();
 
   useEffect(() => {
     if (user) {
@@ -51,20 +51,25 @@ export const TopBar = () => {
     return stageNames[stage] || stage;
   };
 
+  const getPlanDisplayName = () => {
+    if (!subscription?.tier) return 'Free';
+    switch (subscription.tier) {
+      case 'free':
+        return 'Free';
+      case 'plus_monthly':
+        return 'Plus Mensal';
+      case 'plus_annual':
+        return 'Plus Anual';
+      default:
+        return 'Free';
+    }
+  };
+
   return (
     <header className="h-16 border-b-2 border-primary/20 bg-card/50 backdrop-blur-sm flex items-center justify-between px-6">
       <SidebarTrigger />
       
       <div className="flex items-center gap-3">
-        {getFeatures() && (
-          <Badge 
-            className={`cursor-pointer ${getTierBadgeColor()}`}
-            onClick={() => navigate('/subscriptions')}
-          >
-            {getFeatures()?.name}
-          </Badge>
-        )}
-        
         {stats && (
           <>
             <div className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-4 py-2 rounded-lg shadow-glow">
@@ -93,6 +98,20 @@ export const TopBar = () => {
                 <div>
                   <p className="text-xs text-success/70 font-body">Troféu</p>
                   <p className="font-bold text-sm text-primary font-body">{getTrophyStageName(stats.level)}</p>
+                </div>
+              </div>
+            </div>
+
+            <div 
+              className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-4 py-2 rounded-lg shadow-glow cursor-pointer hover:bg-background/90 transition-colors"
+              onClick={() => navigate('/subscriptions')}
+              title="Ver planos"
+            >
+              <div className="flex items-center gap-2">
+                <CreditCard className="w-5 h-5 text-primary" />
+                <div>
+                  <p className="text-xs text-success/70 font-body">Plano</p>
+                  <p className="font-bold text-sm text-primary font-body">{getPlanDisplayName()}</p>
                 </div>
               </div>
             </div>
