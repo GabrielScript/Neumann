@@ -16,10 +16,10 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import logo from '@/assets/logo.png';
 
 const navItems = [
-  { title: 'Dashboard', url: '/dashboard', icon: Trophy },
+  { title: 'Dashboard', url: '/dashboard', icon: Award },
   { title: 'Desafios', url: '/challenges', icon: Target },
   { title: 'Objetivos de Vida', url: '/goals', icon: Sparkles },
-  { title: 'Meus Troféus', url: '/trophy', icon: Award },
+  { title: 'Meus Troféus', url: '/trophy', icon: Trophy },
   { title: 'Comunidade (Beta)', url: '/community', icon: Users },
   { title: 'Assinaturas', url: '/subscriptions', icon: CreditCard },
   { title: 'Configurações', url: '/settings', icon: Settings },
@@ -48,7 +48,7 @@ export const AppSidebar = () => {
             {!isCollapsed && (
               <>
                 <img src={logo} alt="Neumann Logo" className="w-10 h-10" />
-                <span className="font-display font-black text-xl text-primary">
+                <span className="font-display font-black text-xl text-foreground">
                   Neumann
                 </span>
               </>

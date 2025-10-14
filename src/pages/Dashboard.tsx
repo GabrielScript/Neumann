@@ -15,6 +15,8 @@ interface UserStats {
   current_streak: number;
   best_streak: number;
   tree_stage: string;
+  life_goal_trophies: number;
+  challenges_completed: number;
 }
 
 interface Challenge {
@@ -358,7 +360,7 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* XP Total */}
+              {/* Objetivos Vencidos */}
               <div className="
                 relative
                 p-6 rounded-xl
@@ -371,15 +373,41 @@ const Dashboard = () => {
                 group
               ">
                 <div className="absolute top-2 right-2 opacity-10 group-hover:opacity-20 transition-opacity">
-                  <Sparkles className="w-16 h-16 text-primary" />
+                  <Sparkles className="w-16 h-16 text-yellow-400" />
                 </div>
                 
                 <div className="relative z-10">
                   <p className="text-4xl font-black text-primary mb-2 font-display">
-                    {stats?.xp}
+                    {stats?.life_goal_trophies || 0}
                   </p>
                   <p className="text-sm text-accent/80 uppercase tracking-wider font-body font-bold">
-                    XP Total
+                    Objetivos Vencidos
+                  </p>
+                </div>
+              </div>
+
+              {/* Desafios Conquistados */}
+              <div className="
+                relative
+                p-6 rounded-xl
+                border-2 border-accent/30
+                bg-background/50
+                backdrop-blur-sm
+                hover:border-primary/50
+                hover:shadow-glow
+                transition-all duration-300
+                group
+              ">
+                <div className="absolute top-2 right-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <Target className="w-16 h-16 text-primary" />
+                </div>
+                
+                <div className="relative z-10">
+                  <p className="text-4xl font-black text-primary mb-2 font-display">
+                    {stats?.challenges_completed || 0}
+                  </p>
+                  <p className="text-sm text-accent/80 uppercase tracking-wider font-body font-bold">
+                    Desafios Conquistados
                   </p>
                 </div>
               </div>

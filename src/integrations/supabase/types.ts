@@ -523,6 +523,7 @@ export type Database = {
       user_stats: {
         Row: {
           best_streak: number
+          challenges_completed: number
           created_at: string
           current_streak: number
           daily_medals_bronze: number | null
@@ -539,6 +540,7 @@ export type Database = {
         }
         Insert: {
           best_streak?: number
+          challenges_completed?: number
           created_at?: string
           current_streak?: number
           daily_medals_bronze?: number | null
@@ -555,6 +557,7 @@ export type Database = {
         }
         Update: {
           best_streak?: number
+          challenges_completed?: number
           created_at?: string
           current_streak?: number
           daily_medals_bronze?: number | null
