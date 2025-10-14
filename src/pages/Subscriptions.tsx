@@ -6,13 +6,22 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { Check, Sparkles, RefreshCw } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from '@/hooks/use-toast';
+import { PixCheckoutModal } from '@/components/payment/PixCheckoutModal';
 
 export default function Subscriptions() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { subscription, isLoading, getFeatures, refreshSubscription } = useSubscription();
+  
+  const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<{
+    tier: string;
+    name: string;
+    price: string;
+    priceValue: number;
+  } | null>(null);
 
   useEffect(() => {
     if (!user) {
@@ -34,6 +43,20 @@ export default function Subscriptions() {
         variant: 'destructive',
       });
     }
+  };
+
+  const handleSubscribe = (plan: typeof plans[0]) => {
+    if (plan.tier === 'free' || subscription?.tier === plan.tier) {
+      return;
+    }
+    
+    setSelectedPlan({
+      tier: plan.tier,
+      name: plan.name,
+      price: plan.price,
+      priceValue: plan.priceValue,
+    });
+    setCheckoutModalOpen(true);
   };
 
   const plans = [
@@ -181,6 +204,7 @@ export default function Subscriptions() {
                     className="w-full"
                     variant={isCurrentPlan || plan.tier === 'free' ? 'outline' : 'default'}
                     disabled={isCurrentPlan || plan.tier === 'free'}
+                    onClick={() => handleSubscribe(plan)}
                   >
                     {plan.tier === 'free' ? 'Meu plano atual' : (isCurrentPlan ? 'Plano Atual' : 'Assinar')}
                   </Button>
@@ -193,6 +217,19 @@ export default function Subscriptions() {
         <div className="mt-8 text-center text-sm text-muted-foreground">
           <p>Todos os planos podem ser cancelados a qualquer momento.</p>
         </div>
+
+        {selectedPlan && (
+          <PixCheckoutModal
+            isOpen={checkoutModalOpen}
+            onClose={() => {
+              setCheckoutModalOpen(false);
+              setSelectedPlan(null);
+            }}
+            amount={selectedPlan.priceValue}
+            planName={selectedPlan.name}
+            planDescription={selectedPlan.price}
+          />
+        )}
       </div>
     </Layout>
   );

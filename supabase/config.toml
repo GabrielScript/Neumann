@@ -1,1 +1,4 @@
 project_id = "jlqntjsxhyyquhfufihd"
+
+[functions.create-pix-qrcode]
+verify_jwt = false
