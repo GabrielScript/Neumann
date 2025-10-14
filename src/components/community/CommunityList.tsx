@@ -42,11 +42,6 @@ export const CommunityList = ({
               }`}
             >
               <div className="font-medium truncate">{community.name}</div>
-              {community.description && (
-                <div className="text-xs opacity-80 truncate mt-1">
-                  {community.description}
-                </div>
-              )}
             </button>
           ))}
         </div>
