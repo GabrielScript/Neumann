@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Trophy, Medal, Award, TrendingUp, Sparkles } from 'lucide-react';
+import { Trophy, Award, TrendingUp, Sparkles } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { getTrophyStage, getTrophyStageName, getXPForNextLevel } from '@/lib/xp';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -18,9 +18,6 @@ interface UserStats {
   xp: number;
   level: number;
   tree_stage: string;
-  daily_medals_gold: number;
-  daily_medals_silver: number;
-  daily_medals_bronze: number;
   life_goal_trophies: number;
 }
 
@@ -191,64 +188,8 @@ const TrophyPage = () => {
           </CardContent>
         </Card>
 
-        {/* Grid de Conquistas */}
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Medalhas Diárias */}
-          <Card className="border-2 border-primary/30 bg-gradient-card shadow-card animate-fade-in">
-            <CardHeader>
-              <CardTitle className="text-xl text-primary flex items-center gap-2 font-display">
-                <Medal className="w-5 h-5" />
-                Medalhas Diárias
-              </CardTitle>
-              <CardDescription className="font-body">
-                Conquistas por completar desafios
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-background/50">
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl">🥇</span>
-                    <span className="font-bold text-primary font-body">Ouro</span>
-                  </div>
-                  <span className="text-2xl font-black text-primary font-display">
-                    {stats?.daily_medals_gold || 0}
-                  </span>
-                </div>
-                
-                <div className="flex items-center justify-between p-3 rounded-lg bg-background/50">
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl">🥈</span>
-                    <span className="font-bold text-primary font-body">Prata</span>
-                  </div>
-                  <span className="text-2xl font-black text-primary font-display">
-                    {stats?.daily_medals_silver || 0}
-                  </span>
-                </div>
-                
-                <div className="flex items-center justify-between p-3 rounded-lg bg-background/50">
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl">🥉</span>
-                    <span className="font-bold text-primary font-body">Bronze</span>
-                  </div>
-                  <span className="text-2xl font-black text-primary font-display">
-                    {stats?.daily_medals_bronze || 0}
-                  </span>
-                </div>
-              </div>
-              
-              <div className="mt-4 p-3 rounded-lg bg-primary/10 border border-primary/30">
-                <p className="text-xs text-accent/70 font-body">
-                  <strong className="text-primary">🥇 Ouro:</strong> Completou todos os desafios do dia<br/>
-                  <strong className="text-primary">🥈 Prata:</strong> Completou alguns desafios<br/>
-                  <strong className="text-primary">🥉 Bronze:</strong> Não completou nenhum desafio
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Troféus de Objetivos de Vida */}
-          <Card className="border-2 border-primary/30 bg-gradient-card shadow-card animate-fade-in">
+        {/* Troféus de Objetivos de Vida */}
+        <Card className="border-2 border-primary/30 bg-gradient-card shadow-card animate-fade-in max-w-2xl mx-auto">
             <CardHeader>
               <CardTitle className="text-xl text-primary flex items-center gap-2 font-display">
                 <Award className="w-5 h-5" />
@@ -279,8 +220,7 @@ const TrophyPage = () => {
                 </p>
               </div>
             </CardContent>
-          </Card>
-        </div>
+        </Card>
       </div>
     </Layout>
   );

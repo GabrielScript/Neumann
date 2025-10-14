@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Target, Trophy, Medal, TrendingUp } from 'lucide-react';
+import { Target, Trophy, TrendingUp } from 'lucide-react';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -16,11 +16,6 @@ const slides = [
     icon: Trophy,
     title: 'Objetivos de Vida',
     description: 'Defina suas metas mais importantes e acompanhe seu progresso em direção aos seus sonhos. Celebre cada conquista alcançada.',
-  },
-  {
-    icon: Medal,
-    title: 'Trofeus e Medalhas',
-    description: 'Conquiste medalhas diárias (ouro, prata, bronze) e trofeus ao completar seus objetivos de vida. Acompanhe seu histórico de conquistas.',
   },
   {
     icon: TrendingUp,
