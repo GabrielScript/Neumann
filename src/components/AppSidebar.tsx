@@ -38,7 +38,7 @@ export const AppSidebar = () => {
               <>
                 <Trophy className="w-10 h-10 text-primary" />
                 <span className="font-display font-black text-xl text-primary">
-                  Challenger Champions
+                  Neumann
                 </span>
               </>
             )}
