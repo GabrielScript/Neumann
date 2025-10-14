@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { Layout } from "@/components/Layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useActiveChallenge } from "@/hooks/useActiveChallenge";
@@ -7,8 +9,16 @@ import { ChallengeLibraryTab } from "@/components/challenges/ChallengeLibraryTab
 import { CreateChallengeTab } from "@/components/challenges/CreateChallengeTab";
 
 export default function Challenges() {
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const { challenge } = useActiveChallenge();
   const [activeTab, setActiveTab] = useState(challenge ? "active" : "library");
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/auth');
+    }
+  }, [user, authLoading, navigate]);
 
   return (
     <Layout>

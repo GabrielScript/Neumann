@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { GoalCard } from "@/components/goals/GoalCard";
@@ -25,8 +27,16 @@ import {
 import { ChevronDown } from "lucide-react";
 
 export default function Goals() {
+  const { user, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const { activeGoals, completedGoals, isLoading, createGoal, updateGoal, completeGoal, deleteGoal } =
     useLifeGoals();
+  
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/auth');
+    }
+  }, [user, authLoading, navigate]);
   
   const [formOpen, setFormOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<any>(null);

@@ -36,7 +36,7 @@ interface Profile {
 }
 
 const Dashboard = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [activeChallenge, setActiveChallenge] = useState<Challenge | null>(null);
@@ -45,10 +45,14 @@ const Dashboard = () => {
   const [userName, setUserName] = useState<string>('Champion');
 
   useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/auth');
+      return;
+    }
     if (user) {
       loadDashboardData();
     }
-  }, [user]);
+  }, [user, authLoading, navigate]);
 
   const loadDashboardData = async () => {
     try {
