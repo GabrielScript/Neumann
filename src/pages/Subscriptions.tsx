@@ -12,6 +12,8 @@ import { FastSpringCheckout } from '@/components/payment/FastSpringCheckout';
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
 
 export default function Subscriptions() {
@@ -223,6 +225,10 @@ export default function Subscriptions() {
           if (!open) setSelectedPlan(null);
         }}>
           <DialogContent>
+            <DialogTitle className="sr-only">Finalizar Assinatura</DialogTitle>
+            <DialogDescription className="sr-only">
+              Complete o processo de assinatura do plano {selectedPlan?.name}
+            </DialogDescription>
             {selectedPlan && (
               <FastSpringCheckout
                 planPath={selectedPlan.path}

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface FastSpringCheckoutProps {
@@ -9,12 +9,24 @@ interface FastSpringCheckoutProps {
 
 export const FastSpringCheckout = ({ planPath, planName, onClose }: FastSpringCheckoutProps) => {
   const { user } = useAuth();
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     // Check if script already exists
     const existingScript = document.getElementById('fsc-api');
     if (existingScript) {
       console.log('FastSpring script already loaded');
+      // If script exists, check if fastspring is ready
+      if ((window as any).fastspring) {
+        setIsReady(true);
+        // Force FastSpring to reprocess elements
+        setTimeout(() => {
+          if ((window as any).fastspring?.builder?.reset) {
+            console.log('Resetting FastSpring builder');
+            (window as any).fastspring.builder.reset();
+          }
+        }, 100);
+      }
       return;
     }
 
@@ -23,11 +35,21 @@ export const FastSpringCheckout = ({ planPath, planName, onClose }: FastSpringCh
     script.id = 'fsc-api';
     script.src = 'https://d1f8f9xcsvx3ha.cloudfront.net/sbl/0.8.5/fastspring-builder.min.js';
     script.type = 'text/javascript';
-    script.setAttribute('data-storefront', import.meta.env.VITE_FASTSPRING_STORE_ID || 'neumann.test.onfastspring.com');
+    // Add trailing slash as per FastSpring requirements
+    const storefrontId = import.meta.env.VITE_FASTSPRING_STORE_ID || 'neumann.test.onfastspring.com';
+    script.setAttribute('data-storefront', storefrontId.endsWith('/') ? storefrontId : `${storefrontId}/`);
     script.setAttribute('data-popup-closed', 'onFastSpringPopupClosed');
     
     script.onload = () => {
       console.log('FastSpring script loaded successfully');
+      setIsReady(true);
+      // Force FastSpring to process elements after load
+      setTimeout(() => {
+        if ((window as any).fastspring?.builder?.reset) {
+          console.log('Resetting FastSpring builder after load');
+          (window as any).fastspring.builder.reset();
+        }
+      }, 100);
     };
     
     document.body.appendChild(script);
@@ -50,6 +72,30 @@ export const FastSpringCheckout = ({ planPath, planName, onClose }: FastSpringCh
 
   const sessionData = user?.email ? JSON.stringify({ customer_email: user.email }) : '{}';
 
+  const handleCheckoutClick = () => {
+    console.log('Checkout button clicked');
+    console.log('Plan path:', planPath);
+    console.log('Session data:', sessionData);
+    console.log('FastSpring ready:', isReady);
+    console.log('Window.fastspring:', (window as any).fastspring);
+    
+    // Fallback: programmatically trigger FastSpring checkout
+    if ((window as any).fastspring?.builder) {
+      console.log('Using programmatic FastSpring checkout');
+      try {
+        (window as any).fastspring.builder.push({
+          products: [{ path: planPath }],
+          checkout: true,
+          session: user?.email ? { customer_email: user.email } : undefined
+        });
+      } catch (error) {
+        console.error('Error triggering FastSpring checkout:', error);
+      }
+    } else {
+      console.warn('FastSpring not ready yet');
+    }
+  };
+
   return (
     <div className="flex flex-col items-center gap-4 p-6">
       <h3 className="text-xl font-semibold">Assinar {planName}</h3>
@@ -60,9 +106,11 @@ export const FastSpringCheckout = ({ planPath, planName, onClose }: FastSpringCh
         data-fsc-item-path-value={planPath}
         data-fsc-action="Add,Checkout"
         data-fsc-session={sessionData}
+        onClick={handleCheckoutClick}
+        disabled={!isReady}
         className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-8 w-full"
       >
-        Continuar para Pagamento
+        {isReady ? 'Continuar para Pagamento' : 'Carregando...'}
       </button>
     </div>
   );
