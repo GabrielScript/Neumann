@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Target, Trophy, Medal, TrendingUp } from 'lucide-react';
+import { Sparkles, Target, Trophy, Medal, TrendingUp, Users } from 'lucide-react';
 import logo from '@/assets/logo.png';
 
 const Index = () => {
@@ -47,7 +47,7 @@ const Index = () => {
         </div>
 
         {/* Features Grid */}
-        <div className="grid md:grid-cols-3 gap-8 mt-20 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mt-20 max-w-7xl mx-auto">
           <div className="bg-card p-8 rounded-2xl shadow-card hover:shadow-primary transition-all duration-300 animate-fade-in">
             <Target className="w-12 h-12 text-primary mb-4" />
             <h3 className="text-2xl font-bold mb-3">Desafios Estruturados</h3>
@@ -69,6 +69,14 @@ const Index = () => {
             <h3 className="text-2xl font-bold mb-3">Trofeus de Conquista</h3>
             <p className="text-muted-foreground">
               Ganhe trofeus permanentes ao completar seus objetivos de vida. Construa seu legado de conquistas.
+            </p>
+          </div>
+
+          <div className="bg-card p-8 rounded-2xl shadow-card hover:shadow-primary transition-all duration-300 animate-fade-in">
+            <Users className="w-12 h-12 text-primary mb-4" />
+            <h3 className="text-2xl font-bold mb-3">Comunidades</h3>
+            <p className="text-muted-foreground">
+              Participe de comunidades, compartilhe desafios e evolua junto com outras pessoas em busca dos mesmos objetivos.
             </p>
           </div>
         </div>
