@@ -10,7 +10,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Target, Trophy, Award, Users, Settings, Sparkles, CreditCard } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import logo from '@/assets/logo.png';
 
 const navItems = [
@@ -24,13 +26,20 @@ const navItems = [
 ];
 
 export const AppSidebar = () => {
-  const { state } = useSidebar();
+  const { state, setOpenMobile } = useSidebar();
   const location = useLocation();
+  const isMobile = useIsMobile();
   const isCollapsed = state === 'collapsed';
+
+  const handleNavClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   return (
     <Sidebar 
-      className={`${isCollapsed ? 'w-20' : 'w-72'} transition-all duration-300 border-r-2 border-primary/20`} 
+      className={`${isCollapsed ? 'w-16' : 'w-72'} transition-all duration-300 border-r-2 border-primary/20`} 
       collapsible="icon"
     >
       <SidebarContent className="p-4">
@@ -51,34 +60,46 @@ export const AppSidebar = () => {
         <SidebarGroup>
           <SidebarGroupLabel className={isCollapsed ? 'sr-only' : 'text-base'}>Menu</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-2 mx-2">
-              {navItems.map((item) => {
-                const isActive = location.pathname === item.url;
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton 
-                      asChild
-                      className="h-auto py-3 px-4 rounded-xl"
-                    >
-                      <NavLink
-                        to={item.url}
-                        className={`flex items-center gap-3 ${
-                          isActive 
-                            ? 'bg-primary/20 text-primary font-bold border-l-4 border-primary' 
-                            : 'hover:bg-accent/10 hover:text-accent'
-                        }`}
-                      >
-                        <item.icon className="h-7 w-7" />
-                        {!isCollapsed && (
-                          <span className="text-lg font-medium font-body">
-                            {item.title}
-                          </span>
+            <SidebarMenu className={`space-y-2 ${isCollapsed ? 'mx-0' : 'mx-2'}`}>
+              <TooltipProvider>
+                {navItems.map((item) => {
+                  const isActive = location.pathname === item.url;
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <SidebarMenuButton 
+                            asChild
+                            className={`h-auto ${isCollapsed ? 'py-3 px-0' : 'py-3 px-4'} rounded-xl`}
+                          >
+                            <NavLink
+                              to={item.url}
+                              onClick={handleNavClick}
+                              className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} ${
+                                isActive 
+                                  ? 'bg-primary/20 text-primary font-bold border-l-4 border-primary' 
+                                  : 'hover:bg-accent/10 hover:text-accent'
+                              }`}
+                            >
+                              <item.icon className="h-7 w-7" />
+                              {!isCollapsed && (
+                                <span className="text-lg font-medium font-body">
+                                  {item.title}
+                                </span>
+                              )}
+                            </NavLink>
+                          </SidebarMenuButton>
+                        </TooltipTrigger>
+                        {isCollapsed && (
+                          <TooltipContent side="right">
+                            <p>{item.title}</p>
+                          </TooltipContent>
                         )}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+                      </Tooltip>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </TooltipProvider>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
