@@ -5,7 +5,7 @@ import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Target, Trophy, TrendingUp, Flame, Sparkles, Zap } from 'lucide-react';
+import { Target, Trophy, TrendingUp, Flame, Sparkles, Zap, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -45,6 +45,7 @@ const Dashboard = () => {
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState<string>('Champion');
+  const [rankingPosition, setRankingPosition] = useState<number | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -78,6 +79,18 @@ const Dashboard = () => {
 
       if (statsError) throw statsError;
       setStats(statsData);
+
+      // Calculate user ranking position based on level
+      if (statsData?.level) {
+        const { count, error: countError } = await supabase
+          .from('user_stats')
+          .select('*', { count: 'exact', head: true })
+          .gt('level', statsData.level);
+
+        if (!countError && count !== null) {
+          setRankingPosition(count + 1);
+        }
+      }
 
       // Load active challenges (all of them, not just one)
       const { data: challengesData } = await supabase
@@ -288,7 +301,33 @@ const Dashboard = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+              {/* Posição no Ranking */}
+              <div className="
+                relative
+                p-6 rounded-xl
+                border-2 border-yellow-500/30
+                bg-gradient-to-br from-yellow-500/10 to-orange-500/10
+                backdrop-blur-sm
+                hover:border-yellow-500/50
+                hover:shadow-glow
+                transition-all duration-300
+                group
+              ">
+                <div className="absolute top-2 right-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <Award className="w-16 h-16 text-yellow-500" />
+                </div>
+                
+                <div className="relative z-10">
+                  <p className="text-4xl font-black text-yellow-600 dark:text-yellow-400 mb-2 font-display">
+                    #{rankingPosition || '...'}
+                  </p>
+                  <p className="text-sm text-accent/80 uppercase tracking-wider font-body font-bold">
+                    Ranking Global
+                  </p>
+                </div>
+              </div>
+
               {/* Nível Atual */}
               <div className="
                 relative
