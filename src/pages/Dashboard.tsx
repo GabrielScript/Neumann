@@ -139,9 +139,6 @@ const Dashboard = () => {
             <h1 className="text-4xl font-black text-primary font-display">
               Olá, {userName}!
             </h1>
-            <p className="text-accent mt-1 font-body text-lg">
-              Pronto para conquistar seus desafios hoje?
-            </p>
           </div>
         </div>
 
