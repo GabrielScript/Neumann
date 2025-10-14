@@ -87,7 +87,7 @@ export const signUpSchema = z.object({
     .email('Email inválido')
     .max(255, 'Email deve ter no máximo 255 caracteres'),
   password: z.string()
-    .min(8, 'Senha deve ter pelo menos 8 caracteres')
+    .min(9, 'Senha deve ter pelo menos 9 caracteres')
     .max(72, 'Senha deve ter no máximo 72 caracteres')
     .regex(/[A-Z]/, 'Senha deve conter pelo menos uma letra maiúscula')
     .regex(/[a-z]/, 'Senha deve conter pelo menos uma letra minúscula')
@@ -108,6 +108,29 @@ export const signInSchema = z.object({
     .max(255, 'Email deve ter no máximo 255 caracteres'),
   password: z.string()
     .min(1, 'Senha é obrigatória'),
+});
+
+export const resetPasswordSchema = z.object({
+  password: z.string()
+    .min(9, 'Senha deve ter pelo menos 9 caracteres')
+    .max(72, 'Senha deve ter no máximo 72 caracteres')
+    .regex(/[A-Z]/, 'Senha deve conter pelo menos uma letra maiúscula')
+    .regex(/[a-z]/, 'Senha deve conter pelo menos uma letra minúscula')
+    .regex(/[0-9]/, 'Senha deve conter pelo menos um número')
+    .regex(/[^A-Za-z0-9]/, 'Senha deve conter pelo menos um caractere especial (!@#$%^&*, etc.)'),
+  confirmPassword: z.string()
+    .min(1, 'Confirmação de senha é obrigatória'),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: 'As senhas não coincidem',
+  path: ['confirmPassword'],
+});
+
+export const forgotPasswordSchema = z.object({
+  email: z.string()
+    .trim()
+    .min(1, 'Email é obrigatório')
+    .email('Email inválido')
+    .max(255, 'Email deve ter no máximo 255 caracteres'),
 });
 
 // Community validation schemas
