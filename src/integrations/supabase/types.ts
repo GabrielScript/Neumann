@@ -612,6 +612,10 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: boolean
       }
+      is_community_member: {
+        Args: { p_community_id: string; p_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       community_role: "challenger_leader" | "champion" | "novice"

@@ -23,9 +23,26 @@ export const useSubscription = () => {
         .from('user_subscriptions')
         .select('*')
         .eq('user_id', user?.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      
+      // Se não existir subscription, cria uma free
+      if (!data && user?.id) {
+        const { data: newSub, error: insertError } = await supabase
+          .from('user_subscriptions')
+          .insert({
+            user_id: user.id,
+            tier: 'free',
+            status: 'active',
+          })
+          .select()
+          .single();
+        
+        if (insertError) throw insertError;
+        return newSub as Subscription;
+      }
+      
       return data as Subscription;
     },
     enabled: !!user?.id,
