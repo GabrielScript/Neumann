@@ -1,34 +1,9 @@
-import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { useOnboarding } from '@/hooks/useOnboarding';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Target, Trophy, Medal, TrendingUp } from 'lucide-react';
 
 const Index = () => {
-  const { user, loading } = useAuth();
-  const { onboardingStatus, isLoading: isLoadingOnboarding } = useOnboarding();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!loading && !isLoadingOnboarding && user) {
-      // Se não há registro de onboarding ou não foi completado -> onboarding
-      if (!onboardingStatus || !onboardingStatus.completed) {
-        navigate('/onboarding');
-      } else {
-        // Se já completou -> dashboard
-        navigate('/dashboard');
-      }
-    }
-  }, [user, loading, isLoadingOnboarding, onboardingStatus, navigate]);
-
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gradient-hero">
-        <div className="animate-pulse">Carregando...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-hero">
