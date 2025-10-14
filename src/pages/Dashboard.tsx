@@ -41,7 +41,7 @@ const Dashboard = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<UserStats | null>(null);
-  const [activeChallenge, setActiveChallenge] = useState<Challenge | null>(null);
+  const [activeChallenges, setActiveChallenges] = useState<Challenge[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState<string>('Champion');
@@ -79,15 +79,15 @@ const Dashboard = () => {
       if (statsError) throw statsError;
       setStats(statsData);
 
-      // Load active challenge
-      const { data: challengeData } = await supabase
+      // Load active challenges (all of them, not just one)
+      const { data: challengesData } = await supabase
         .from('challenges')
         .select('*')
         .eq('user_id', user?.id)
         .eq('is_active', true)
-        .maybeSingle();
+        .order('created_at', { ascending: false });
 
-      setActiveChallenge(challengeData);
+      setActiveChallenges(challengesData || []);
 
       // Load goals
       const { data: goalsData } = await supabase
@@ -134,7 +134,7 @@ const Dashboard = () => {
 
         {/* Main Content Grid - FOCO EM DESAFIOS E OBJETIVOS */}
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Active Challenge Card - REDESENHADO */}
+          {/* Active Challenges Card - REDESENHADO */}
           <Card className="
             relative overflow-hidden
             border-2 border-primary/30
@@ -154,29 +154,36 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Target className="w-8 h-8 text-primary group-hover:scale-110 transition-transform" />
-                  <CardTitle className="text-2xl font-bold text-primary font-display">Desafio Ativo</CardTitle>
+                  <CardTitle className="text-2xl font-bold text-primary font-display">Desafios Ativos</CardTitle>
                 </div>
-                {activeChallenge && (
+                {activeChallenges.length > 0 && (
                   <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30 font-body">
-                    {activeChallenge.duration_days} dias
+                    {activeChallenges.length} {activeChallenges.length === 1 ? 'desafio' : 'desafios'}
                   </Badge>
                 )}
               </div>
               <CardDescription className="text-base text-accent/80 font-body">
-                {activeChallenge
-                  ? 'Continue seu desafio atual'
+                {activeChallenges.length > 0
+                  ? 'Continue seus desafios em andamento'
                   : 'Desbloqueie seu potencial máximo'}
               </CardDescription>
             </CardHeader>
             <CardContent className="relative z-10 flex flex-col">
-              {activeChallenge ? (
+              {activeChallenges.length > 0 ? (
                 <>
-                  <div className="flex-1 mb-4">
-                    <div className="p-3 rounded-xl bg-background/50 border border-primary/20">
-                      <h3 className="font-bold text-lg mb-1 text-primary font-display">
-                        {activeChallenge.name}
-                      </h3>
-                    </div>
+                  <div className="flex-1 mb-4 space-y-3 max-h-[200px] overflow-y-auto">
+                    {activeChallenges.map((challenge) => (
+                      <div key={challenge.id} className="p-3 rounded-xl bg-background/50 border border-primary/20 hover:border-primary/40 transition-all">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-bold text-lg text-primary font-display">
+                            {challenge.name}
+                          </h3>
+                          <Badge variant="outline" className="text-xs">
+                            {challenge.duration_days} dias
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                   <Button 
                     className="w-full bg-primary hover:bg-primary-glow text-primary-foreground font-bold text-lg py-6 font-display shadow-glow" 
