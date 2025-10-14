@@ -12,6 +12,7 @@ import { CommunityChat } from '@/components/community/CommunityChat';
 import { CreateCommunityModal } from '@/components/community/CreateCommunityModal';
 import { JoinCommunityModal } from '@/components/community/JoinCommunityModal';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Users, Plus } from 'lucide-react';
 
 const Community = () => {
@@ -100,7 +101,12 @@ const Community = () => {
 
   return (
     <Layout>
-      <div className="flex gap-4 h-[calc(100vh-8rem)]">
+      <div className="mb-4 flex items-center justify-center">
+        <Badge variant="outline" className="text-sm py-1 px-4 border-yellow-500 text-yellow-600 dark:text-yellow-400">
+          🚧 Em Desenvolvimento - Versão Beta
+        </Badge>
+      </div>
+      <div className="flex gap-4 h-[calc(100vh-10rem)]">
         {/* Sidebar esquerda - Lista de comunidades */}
         <div className="w-64 flex-shrink-0">
           <CommunityList
