@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -43,6 +43,17 @@ export function GoalFormModal({
   );
   const [motivation, setMotivation] = useState(initialData?.motivation || "");
   const [actionPlan, setActionPlan] = useState(initialData?.action_plan || "");
+
+  // Reset form when modal opens or initialData changes
+  useEffect(() => {
+    if (open) {
+      setTitle(initialData?.title || "");
+      setDeadline(initialData?.deadline || "");
+      setHappinessLevel(initialData?.happiness_level || 5);
+      setMotivation(initialData?.motivation || "");
+      setActionPlan(initialData?.action_plan || "");
+    }
+  }, [open, initialData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
