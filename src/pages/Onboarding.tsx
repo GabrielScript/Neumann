@@ -20,7 +20,7 @@ const slides = [
   {
     icon: Award,
     title: 'Troféus e Medalhas',
-    description: 'Conquiste troféus ao completar objetivos de vida em diferentes níveis (municipal, estadual, regional, nacional e internacional). Ganhe medalhas diárias de bronze, prata ou ouro baseado na sua performance.',
+    description: 'Conquiste troféus ao completar objetivos de vida em diferentes níveis (municipal, estadual, regional, nacional e internacional).',
   },
   {
     icon: Users,
