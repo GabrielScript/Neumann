@@ -65,7 +65,7 @@ const Index = () => {
           </div>
 
           <div className="bg-card p-8 rounded-2xl shadow-card hover:shadow-primary transition-all duration-300 animate-fade-in">
-            <Medal className="w-12 h-12 text-success mb-4" />
+            <Medal className="w-12 h-12 text-yellow-500 mb-4" />
             <h3 className="text-2xl font-bold mb-3">Medalhas e Trofeus</h3>
             <p className="text-muted-foreground">
               Ganhe medalhas diárias (ouro, prata, bronze) e trofeus permanentes. Construa seu legado de conquistas.
