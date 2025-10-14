@@ -4,14 +4,21 @@ import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, LogOut } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Badge } from '@/components/ui/badge';
+import { useNavigate } from 'react-router-dom';
 
 export default function Settings() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { subscription } = useSubscription();
   const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
+  };
 
   const getPlanDisplayName = () => {
     if (!subscription?.tier) return 'Free';
@@ -92,6 +99,23 @@ export default function Settings() {
                 Escuro
               </Button>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Conta</CardTitle>
+            <CardDescription>Gerenciar sua conta e sessão</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              variant="destructive"
+              onClick={handleSignOut}
+              className="flex items-center gap-2"
+            >
+              <LogOut className="h-5 w-5" />
+              Sair da Conta
+            </Button>
           </CardContent>
         </Card>
       </div>

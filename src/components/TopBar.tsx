@@ -2,7 +2,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { LogOut, TrendingUp, Flame, Trophy, CreditCard } from 'lucide-react';
+import { TrendingUp, Flame, Trophy, CreditCard } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { getTrophyStage } from '@/lib/xp';
@@ -16,7 +16,7 @@ interface UserStats {
 }
 
 export const TopBar = () => {
-  const { signOut, user } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<UserStats | null>(null);
   const { subscription, getFeatures, getTierBadgeColor } = useSubscription();
@@ -115,10 +115,6 @@ export const TopBar = () => {
             </div>
           </>
         )}
-        
-        <Button variant="ghost" size="icon" onClick={signOut}>
-          <LogOut className="h-5 w-5" />
-        </Button>
       </div>
     </header>
   );
