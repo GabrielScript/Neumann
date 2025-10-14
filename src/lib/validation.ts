@@ -70,8 +70,12 @@ export const signUpSchema = z.object({
     .email('Email inválido')
     .max(255, 'Email deve ter no máximo 255 caracteres'),
   password: z.string()
-    .min(6, 'Senha deve ter pelo menos 6 caracteres')
-    .max(72, 'Senha deve ter no máximo 72 caracteres'),
+    .min(8, 'Senha deve ter pelo menos 8 caracteres')
+    .max(72, 'Senha deve ter no máximo 72 caracteres')
+    .regex(/[A-Z]/, 'Senha deve conter pelo menos uma letra maiúscula')
+    .regex(/[a-z]/, 'Senha deve conter pelo menos uma letra minúscula')
+    .regex(/[0-9]/, 'Senha deve conter pelo menos um número')
+    .regex(/[^A-Za-z0-9]/, 'Senha deve conter pelo menos um caractere especial (!@#$%^&*, etc.)'),
   fullName: z.string()
     .trim()
     .min(1, 'Nome completo é obrigatório')
