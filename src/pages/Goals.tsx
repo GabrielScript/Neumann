@@ -6,9 +6,12 @@ import { Button } from "@/components/ui/button";
 import { GoalCard } from "@/components/goals/GoalCard";
 import { GoalFormModal } from "@/components/goals/GoalFormModal";
 import { CompletionCelebration } from "@/components/goals/CompletionCelebration";
+import { UpgradePrompt } from "@/components/UpgradePrompt";
 import { useLifeGoals } from "@/hooks/useLifeGoals";
+import { useSubscription } from "@/hooks/useSubscription";
 import { Plus } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "@/hooks/use-toast";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,6 +34,7 @@ export default function Goals() {
   const navigate = useNavigate();
   const { activeGoals, completedGoals, isLoading, createGoal, updateGoal, completeGoal, deleteGoal } =
     useLifeGoals();
+  const { checkMonthlyGoalLimit } = useSubscription();
   
   useEffect(() => {
     if (!authLoading && !user) {
@@ -45,6 +49,7 @@ export default function Goals() {
   const [goalToDelete, setGoalToDelete] = useState<string | null>(null);
   const [celebrationOpen, setCelebrationOpen] = useState(false);
   const [completedGoalData, setCompletedGoalData] = useState<{ title: string; xp: number } | null>(null);
+  const [upgradePromptOpen, setUpgradePromptOpen] = useState(false);
 
   const handleEdit = (goal: any) => {
     setEditingGoal(goal);
@@ -77,14 +82,46 @@ export default function Goals() {
     }
   };
 
-  const handleSubmit = (goalData: any) => {
+  const handleSubmit = async (goalData: any) => {
     if (editingGoal) {
       updateGoal({ id: editingGoal.id, ...goalData });
       setEditingGoal(null);
+      setFormOpen(false);
     } else {
-      createGoal(goalData);
+      try {
+        const canCreate = await checkMonthlyGoalLimit();
+        if (!canCreate) {
+          setUpgradePromptOpen(true);
+          setFormOpen(false);
+          return;
+        }
+        createGoal(goalData);
+        setFormOpen(false);
+      } catch (error) {
+        toast({
+          title: "Erro",
+          description: "Não foi possível verificar o limite de objetivos.",
+          variant: "destructive",
+        });
+      }
     }
-    setFormOpen(false);
+  };
+
+  const handleNewGoal = async () => {
+    try {
+      const canCreate = await checkMonthlyGoalLimit();
+      if (!canCreate) {
+        setUpgradePromptOpen(true);
+        return;
+      }
+      setFormOpen(true);
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível verificar o limite de objetivos.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -97,7 +134,7 @@ export default function Goals() {
               Defina e acompanhe suas metas mais importantes
             </p>
           </div>
-          <Button onClick={() => setFormOpen(true)} size="lg">
+          <Button onClick={handleNewGoal} size="lg">
             <Plus className="mr-2 h-5 w-5" />
             Novo Objetivo
           </Button>
@@ -220,6 +257,12 @@ export default function Goals() {
             xpAwarded={completedGoalData.xp}
           />
         )}
+
+        <UpgradePrompt 
+          open={upgradePromptOpen}
+          onOpenChange={setUpgradePromptOpen}
+          limitType="goal"
+        />
       </div>
     </Layout>
   );

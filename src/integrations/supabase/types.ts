@@ -395,15 +395,66 @@ export type Database = {
           },
         ]
       }
+      user_subscriptions: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          started_at: string
+          status: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          tier: Database["public"]["Enums"]["subscription_tier"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          started_at?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          started_at?: string
+          status?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_daily_challenge_limit: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
+      check_level_limit: {
+        Args: { p_new_level: number; p_user_id: string }
+        Returns: boolean
+      }
+      check_monthly_goal_limit: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       priority_level: "imprescindivel" | "importante" | "acessorio"
+      subscription_tier: "free" | "plus_monthly" | "plus_annual"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -532,6 +583,7 @@ export const Constants = {
   public: {
     Enums: {
       priority_level: ["imprescindivel", "importante", "acessorio"],
+      subscription_tier: ["free", "plus_monthly", "plus_annual"],
     },
   },
 } as const

@@ -13,6 +13,7 @@ import Challenges from "./pages/Challenges";
 import Goals from "./pages/Goals";
 import Trophy from "./pages/Trophy";
 import ProcessTrophies from "./pages/ProcessTrophies";
+import Subscriptions from "./pages/Subscriptions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="/goals" element={<Goals />} />
               <Route path="/trophy" element={<Trophy />} />
               <Route path="/process-trophies" element={<ProcessTrophies />} />
+              <Route path="/subscriptions" element={<Subscriptions />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

@@ -1,0 +1,196 @@
+import { Layout } from '@/components/Layout';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { useSubscription } from '@/hooks/useSubscription';
+import { Check, Sparkles, RefreshCw } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { toast } from '@/hooks/use-toast';
+
+export default function Subscriptions() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { subscription, isLoading, getFeatures, refreshSubscription } = useSubscription();
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/auth');
+    }
+  }, [user, navigate]);
+
+  const handleRefreshProfile = async () => {
+    try {
+      await refreshSubscription();
+      toast({
+        title: 'Perfil atualizado',
+        description: 'Seu status de assinatura foi atualizado.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível atualizar o perfil.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const plans = [
+    {
+      tier: 'free',
+      name: 'Neumann Free',
+      price: 'Grátis',
+      priceValue: 0,
+      features: [
+        'Apenas 1 desafio por dia',
+        '1 objetivo por mês',
+        'Limite de nível 25',
+        'Sem medalhas',
+        'Sem acesso à comunidade',
+      ],
+    },
+    {
+      tier: 'plus_monthly',
+      name: 'Neumann Plus Mensal',
+      price: 'R$ 9,90',
+      priceValue: 9.9,
+      period: '/mês',
+      features: [
+        'Até 6 desafios diários',
+        'Objetivos de vida ilimitados',
+        'Nível XP ilimitado',
+        'Medalhas desbloqueadas',
+        'Acesso à comunidade',
+        'Ajuste dos desafios padrão',
+      ],
+      popular: true,
+    },
+    {
+      tier: 'plus_annual',
+      name: 'Neumann Plus Anual',
+      price: 'R$ 89,90',
+      priceValue: 89.9,
+      period: '/ano',
+      discount: '10% de desconto',
+      features: [
+        'Desafios ilimitados',
+        'Objetivos de vida ilimitados',
+        'Nível XP ilimitado',
+        'Medalhas desbloqueadas',
+        'Acesso à comunidade',
+        'Criação de novos desafios na comunidade',
+        'Todos os benefícios do Plus Mensal',
+      ],
+      badge: 'Melhor Valor',
+    },
+  ];
+
+  const currentFeatures = getFeatures();
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="container mx-auto p-6">
+          <div className="flex items-center justify-center min-h-[60vh]">
+            <p className="text-muted-foreground">Carregando...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout>
+      <div className="container mx-auto p-6 max-w-7xl">
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl font-bold mb-2 font-display text-primary">Assinaturas</h1>
+          <p className="text-muted-foreground font-body">Escolha o plano ideal para você</p>
+          
+          {currentFeatures && (
+            <div className="mt-4 flex items-center justify-center gap-2">
+              <Badge className="text-sm py-1 px-3">
+                Plano Atual: {currentFeatures.name}
+              </Badge>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleRefreshProfile}
+                className="gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Atualizar Perfil
+              </Button>
+            </div>
+          )}
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {plans.map((plan) => {
+            const isCurrentPlan = subscription?.tier === plan.tier;
+
+            return (
+              <Card 
+                key={plan.tier}
+                className={`relative ${
+                  plan.popular 
+                    ? 'border-primary border-2 shadow-lg' 
+                    : ''
+                } ${isCurrentPlan ? 'ring-2 ring-primary' : ''}`}
+              >
+                {plan.badge && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <Badge className="bg-primary text-primary-foreground">
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      {plan.badge}
+                    </Badge>
+                  </div>
+                )}
+
+                <CardHeader>
+                  <CardTitle className="text-2xl font-display">{plan.name}</CardTitle>
+                  <CardDescription>
+                    <div className="mt-2">
+                      <span className="text-4xl font-bold text-primary">{plan.price}</span>
+                      {plan.period && <span className="text-muted-foreground">{plan.period}</span>}
+                    </div>
+                    {plan.discount && (
+                      <Badge variant="outline" className="mt-2 text-success">
+                        {plan.discount}
+                      </Badge>
+                    )}
+                  </CardDescription>
+                </CardHeader>
+
+                <CardContent>
+                  <ul className="space-y-3">
+                    {plan.features.map((feature, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <Check className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+                        <span className="text-sm font-body">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+
+                <CardFooter>
+                  <Button 
+                    className="w-full"
+                    variant={isCurrentPlan ? 'outline' : 'default'}
+                    disabled={isCurrentPlan}
+                  >
+                    {isCurrentPlan ? 'Plano Atual' : 'Assinar'}
+                  </Button>
+                </CardFooter>
+              </Card>
+            );
+          })}
+        </div>
+
+        <div className="mt-8 text-center text-sm text-muted-foreground">
+          <p>Todos os planos podem ser cancelados a qualquer momento.</p>
+        </div>
+      </div>
+    </Layout>
+  );
+}

@@ -5,9 +5,10 @@ import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Target, Trophy, TrendingUp, Flame, Sparkles, Zap } from 'lucide-react';
+import { Target, Trophy, TrendingUp, Flame, Sparkles, Zap, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useSubscription } from '@/hooks/useSubscription';
 
 interface UserStats {
   xp: number;
@@ -38,6 +39,7 @@ interface Profile {
 const Dashboard = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const { canAccessMedals } = useSubscription();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [activeChallenge, setActiveChallenge] = useState<Challenge | null>(null);
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -271,13 +273,14 @@ const Dashboard = () => {
         </div>
 
         {/* Estatísticas Detalhadas - REDESENHADO */}
-        <Card className="border-2 border-primary/30 bg-gradient-card shadow-card animate-fade-in">
-          <CardHeader>
-            <CardTitle className="text-2xl text-primary flex items-center gap-2 font-display font-black">
-              <Zap className="w-6 h-6" />
-              Seu Arsenal de Conquistas
-            </CardTitle>
-          </CardHeader>
+        {canAccessMedals() ? (
+          <Card className="border-2 border-primary/30 bg-gradient-card shadow-card animate-fade-in">
+            <CardHeader>
+              <CardTitle className="text-2xl text-primary flex items-center gap-2 font-display font-black">
+                <Zap className="w-6 h-6" />
+                Seu Arsenal de Conquistas
+              </CardTitle>
+            </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {/* Nível Atual */}
@@ -386,6 +389,27 @@ const Dashboard = () => {
             </div>
           </CardContent>
         </Card>
+        ) : (
+          <Card className="border-2 border-muted bg-gradient-card shadow-card animate-fade-in">
+            <CardHeader>
+              <CardTitle className="text-2xl text-muted-foreground flex items-center gap-2 font-display font-black">
+                <Lock className="w-6 h-6" />
+                Estatísticas Bloqueadas
+              </CardTitle>
+              <CardDescription>
+                Faça upgrade para o Neumann Plus para desbloquear medalhas e estatísticas detalhadas
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                onClick={() => navigate('/subscriptions')}
+                className="w-full"
+              >
+                Ver Planos
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </Layout>
   );

@@ -35,6 +35,7 @@ export async function awardXP(userId: string, amount: number): Promise<{
   leveledUp: boolean;
   newTrophyStage: TrophyStage;
   stageChanged: boolean;
+  blocked?: boolean;
 }> {
   // Get current stats
   const { data: currentStats, error: fetchError } = await supabase
@@ -51,6 +52,25 @@ export async function awardXP(userId: string, amount: number): Promise<{
 
   const newXP = oldXP + amount;
   const newLevel = calculateLevel(newXP);
+  
+  // Check level limit
+  const { data: canLevelUp } = await supabase.rpc('check_level_limit', {
+    p_user_id: userId,
+    p_new_level: newLevel,
+  });
+
+  // If level limit reached, don't update level or XP
+  if (!canLevelUp) {
+    return {
+      newXP: oldXP,
+      newLevel: oldLevel,
+      leveledUp: false,
+      newTrophyStage: oldTrophyStage,
+      stageChanged: false,
+      blocked: true,
+    };
+  }
+
   const newTrophyStage = getTrophyStage(newLevel);
 
   const leveledUp = newLevel > oldLevel;

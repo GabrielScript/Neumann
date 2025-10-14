@@ -1,11 +1,14 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { LogOut, Moon, Sun, TrendingUp, Flame, Trophy } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { getTrophyStage } from '@/lib/xp';
+import { useSubscription } from '@/hooks/useSubscription';
+import { useNavigate } from 'react-router-dom';
 
 interface UserStats {
   level: number;
@@ -16,7 +19,9 @@ interface UserStats {
 export const TopBar = () => {
   const { signOut, user } = useAuth();
   const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
   const [stats, setStats] = useState<UserStats | null>(null);
+  const { getFeatures, getTierBadgeColor } = useSubscription();
 
   useEffect(() => {
     if (user) {
@@ -51,6 +56,15 @@ export const TopBar = () => {
       <SidebarTrigger />
       
       <div className="flex items-center gap-3">
+        {getFeatures() && (
+          <Badge 
+            className={`cursor-pointer ${getTierBadgeColor()}`}
+            onClick={() => navigate('/subscriptions')}
+          >
+            {getFeatures()?.name}
+          </Badge>
+        )}
+        
         {stats && (
           <>
             <div className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-4 py-2 rounded-lg shadow-glow">

@@ -4,21 +4,46 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Layout } from "@/components/Layout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useActiveChallenge } from "@/hooks/useActiveChallenge";
+import { useSubscription } from "@/hooks/useSubscription";
+import { UpgradePrompt } from "@/components/UpgradePrompt";
 import { ActiveChallengeTab } from "@/components/challenges/ActiveChallengeTab";
 import { ChallengeLibraryTab } from "@/components/challenges/ChallengeLibraryTab";
 import { CreateChallengeTab } from "@/components/challenges/CreateChallengeTab";
+import { toast } from "@/hooks/use-toast";
 
 export default function Challenges() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { challenge } = useActiveChallenge();
+  const { checkDailyChallengeLimit } = useSubscription();
   const [activeTab, setActiveTab] = useState(challenge ? "active" : "library");
+  const [upgradePromptOpen, setUpgradePromptOpen] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/auth');
     }
   }, [user, authLoading, navigate]);
+
+  const handleTabChange = async (value: string) => {
+    if (value === "create" || value === "library") {
+      try {
+        const canCreate = await checkDailyChallengeLimit();
+        if (!canCreate) {
+          setUpgradePromptOpen(true);
+          return;
+        }
+      } catch (error) {
+        toast({
+          title: "Erro",
+          description: "Não foi possível verificar o limite de desafios.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+    setActiveTab(value);
+  };
 
   return (
     <Layout>
@@ -30,7 +55,7 @@ export default function Challenges() {
           </p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="active" disabled={!challenge}>
               Desafio Ativo
@@ -59,6 +84,12 @@ export default function Challenges() {
             <CreateChallengeTab onChallengeCreated={() => setActiveTab("active")} />
           </TabsContent>
         </Tabs>
+
+        <UpgradePrompt 
+          open={upgradePromptOpen}
+          onOpenChange={setUpgradePromptOpen}
+          limitType="challenge"
+        />
       </div>
     </Layout>
   );
