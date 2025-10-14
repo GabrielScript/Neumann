@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Plus, Trash2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -32,6 +33,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { checkDailyChallengeLimit } = useSubscription();
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -91,6 +93,17 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
       return;
     }
 
+    // Verificar limite de desafios ativos
+    const canCreate = await checkDailyChallengeLimit();
+    if (!canCreate) {
+      toast({
+        title: "Limite atingido",
+        description: "Você atingiu o limite de desafios ativos do seu plano.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsCreating(true);
 
     try {
@@ -132,7 +145,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
 
       if (itemsError) throw itemsError;
 
-      queryClient.invalidateQueries({ queryKey: ["active-challenge"] });
+      queryClient.invalidateQueries({ queryKey: ["active-challenges"] });
       
       toast({
         title: "🚀 Desafio criado!",

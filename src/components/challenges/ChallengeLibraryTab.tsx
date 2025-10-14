@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import { ChallengeCard } from "./ChallengeCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -14,17 +15,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { useActiveChallenge } from "@/hooks/useActiveChallenge";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 interface ChallengeLibraryTabProps {
   onChallengeStarted: () => void;
@@ -34,12 +24,10 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { challenge: activeChallenge } = useActiveChallenge();
+  const { checkDailyChallengeLimit } = useSubscription();
   
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [replaceDialogOpen, setReplaceDialogOpen] = useState(false);
-  const [pendingTemplate, setPendingTemplate] = useState<any>(null);
 
   const { data: templates, isLoading } = useQuery({
     queryKey: ["challenge-templates"],
@@ -131,7 +119,7 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
       return newChallenge;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["active-challenge"] });
+      queryClient.invalidateQueries({ queryKey: ["active-challenges"] });
       toast({
         title: "🚀 Desafio iniciado!",
         description: "Boa sorte na sua jornada!",
@@ -146,28 +134,21 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
     setDetailsOpen(true);
   };
 
-  const handleStartChallenge = (template: any) => {
-    if (activeChallenge) {
-      setPendingTemplate(template);
-      setReplaceDialogOpen(true);
-    } else {
-      startChallengeMutation.mutate(template.id);
+  const handleStartChallenge = async (template: any) => {
+    // Verificar limite de desafios ativos
+    const canCreate = await checkDailyChallengeLimit();
+    
+    if (!canCreate) {
+      toast({
+        title: "Limite atingido",
+        description: "Você atingiu o limite de desafios ativos do seu plano.",
+        variant: "destructive",
+      });
+      return;
     }
-  };
-
-  const confirmReplaceChallenge = async () => {
-    if (!activeChallenge || !pendingTemplate) return;
-
-    // Deactivate current challenge
-    await supabase
-      .from("challenges")
-      .update({ is_active: false })
-      .eq("id", activeChallenge.id);
-
-    // Start new challenge
-    startChallengeMutation.mutate(pendingTemplate.id);
-    setReplaceDialogOpen(false);
-    setPendingTemplate(null);
+    
+    // Se pode criar, inicia o desafio direto
+    startChallengeMutation.mutate(template.id);
   };
 
   if (isLoading) {
@@ -247,24 +228,6 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
           </div>
         </DialogContent>
       </Dialog>
-
-      <AlertDialog open={replaceDialogOpen} onOpenChange={setReplaceDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Substituir desafio ativo?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Você já tem um desafio em andamento. Deseja abandoná-lo e iniciar este novo
-              desafio?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmReplaceChallenge}>
-              Sim, Iniciar Novo
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }
