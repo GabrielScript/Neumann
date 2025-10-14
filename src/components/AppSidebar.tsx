@@ -11,6 +11,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Target, Trophy, Award, Users, Settings, Sparkles, CreditCard } from 'lucide-react';
+import logo from '@/assets/logo.png';
 
 const navItems = [
   { title: 'Dashboard', url: '/dashboard', icon: Trophy },
@@ -37,13 +38,13 @@ export const AppSidebar = () => {
           <div className="flex items-center gap-3">
             {!isCollapsed && (
               <>
-                <Trophy className="w-10 h-10 text-primary" />
+                <img src={logo} alt="Neumann Logo" className="w-10 h-10" />
                 <span className="font-display font-black text-xl text-primary">
                   Neumann
                 </span>
               </>
             )}
-            {isCollapsed && <Trophy className="w-10 h-10 text-primary" />}
+            {isCollapsed && <img src={logo} alt="Neumann Logo" className="w-10 h-10" />}
           </div>
         </div>
         
