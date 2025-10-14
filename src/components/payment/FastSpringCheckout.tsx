@@ -27,8 +27,14 @@ export const FastSpringCheckout = ({ planPath, planName, onClose }: FastSpringCh
   useEffect(() => {
     // Load FastSpring script
     const script = document.createElement('script');
+    script.id = 'fsc-api';
     script.src = 'https://d1f8f9xcsvx3ha.cloudfront.net/sbl/0.8.5/fastspring-builder.min.js';
-    script.setAttribute('data-storefront', import.meta.env.VITE_FASTSPRING_STORE_ID || 'neumann.test.onfastspring.com');
+    script.type = 'text/javascript';
+    // IMPORTANT: This needs to be the FULL URL to your popup checkout
+    // Format: yourstore.test.onfastspring.com/popup-checkout
+    // Get this from FastSpring: Checkouts > Popup Checkouts > Place on your Website
+    const storefrontUrl = import.meta.env.VITE_FASTSPRING_STORE_ID || 'neumann.test.onfastspring.com/popup-neumann';
+    script.setAttribute('data-storefront', storefrontUrl);
     script.setAttribute('data-data-callback', 'onFastSpringData');
     script.setAttribute('data-popup-closed', 'onFastSpringPopupClosed');
     
