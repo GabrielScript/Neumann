@@ -2,8 +2,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { LogOut, Moon, Sun, TrendingUp, Flame, Trophy, CreditCard } from 'lucide-react';
-import { useTheme } from 'next-themes';
+import { LogOut, TrendingUp, Flame, Trophy, CreditCard } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { getTrophyStage } from '@/lib/xp';
@@ -18,7 +17,6 @@ interface UserStats {
 
 export const TopBar = () => {
   const { signOut, user } = useAuth();
-  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const [stats, setStats] = useState<UserStats | null>(null);
   const { subscription, getFeatures, getTierBadgeColor } = useSubscription();
@@ -118,14 +116,6 @@ export const TopBar = () => {
           </>
         )}
         
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-        >
-          <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-        </Button>
         <Button variant="ghost" size="icon" onClick={signOut}>
           <LogOut className="h-5 w-5" />
         </Button>
