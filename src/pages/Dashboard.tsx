@@ -261,7 +261,7 @@ const Dashboard = () => {
                     </p>
                   </div>
                   <Button 
-                    className="w-full bg-accent hover:bg-accent/90 text-accent-foreground font-bold text-lg py-6 font-display shadow-glow"
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg py-6 font-display shadow-glow"
                     onClick={() => navigate('/goals')}
                   >
                     Criar Objetivo
