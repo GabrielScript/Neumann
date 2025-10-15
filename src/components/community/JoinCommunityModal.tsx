@@ -35,13 +35,13 @@ export const JoinCommunityModal = ({ open, onOpenChange }: JoinCommunityModalPro
     try {
       const canJoin = await checkCommunityMemberLimit();
       if (!canJoin) {
-        toast.error('Você atingiu o limite de comunidades do seu plano');
+        toast.error('Você atingiu o limite de comunidades do seu plano.');
         return;
       }
       joinCommunity(communityId);
       onOpenChange(false);
     } catch (error) {
-      toast.error('Erro ao verificar limite de comunidades');
+      toast.error('Erro ao verificar limite de comunidades.');
     }
   };
 

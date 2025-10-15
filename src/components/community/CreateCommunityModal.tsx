@@ -44,15 +44,15 @@ export const CreateCommunityModal = ({ open, onOpenChange }: CreateCommunityModa
       }
     }
 
-    // Verificar limite de liderança
+    // Check leader limit
     try {
       const canLead = await checkCommunityLeaderLimit();
       if (!canLead) {
-        toast.error('Você atingiu o limite de 5 comunidades lideradas');
+        toast.error('Você atingiu o limite de 5 comunidades lideradas.');
         return;
       }
     } catch (error) {
-      toast.error('Erro ao verificar limite de liderança');
+      toast.error('Erro ao verificar limite de liderança.');
       return;
     }
     
