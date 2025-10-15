@@ -34,9 +34,6 @@ export const habitSchema = z.object({
     .trim()
     .min(1, 'Facilitadores são obrigatórios')
     .max(500, 'Facilitadores devem ter no máximo 500 caracteres'),
-  reminder_time: z.string()
-    .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Horário inválido (use formato HH:MM)')
-    .optional(),
 });
 
 export const challengeItemSchema = z.object({
