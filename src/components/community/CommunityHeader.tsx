@@ -2,14 +2,25 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Settings, CheckCircle, UserPlus, Users } from 'lucide-react';
+import { Settings, CheckCircle, UserPlus, Users, Trash2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Community } from '@/hooks/useCommunity';
+import { Community, useCommunity } from '@/hooks/useCommunity';
 import { useCommunityMembers } from '@/hooks/useCommunityMembers';
 import { MembersManagementModal } from './MembersManagementModal';
 import { ApproveChallengesModal } from './ApproveChallengesModal';
 import { MembersListModal } from './MembersListModal';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { useNavigate } from 'react-router-dom';
 
 interface CommunityHeaderProps {
   communityId: string | undefined;
@@ -19,7 +30,10 @@ export const CommunityHeader = ({ communityId }: CommunityHeaderProps) => {
   const [showMembersModal, setShowMembersModal] = useState(false);
   const [showApprovalsModal, setShowApprovalsModal] = useState(false);
   const [showMembersListModal, setShowMembersListModal] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { userRole } = useCommunityMembers(communityId);
+  const { deleteCommunity } = useCommunity();
+  const navigate = useNavigate();
 
   const { data: community } = useQuery({
     queryKey: ['community', communityId],
@@ -99,6 +113,14 @@ export const CommunityHeader = ({ communityId }: CommunityHeaderProps) => {
                   <UserPlus className="w-4 h-4 mr-2" />
                   Gerenciar Membros
                 </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setShowDeleteDialog(true)}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Excluir Comunidade
+                </Button>
               </>
             )}
           </div>
@@ -122,6 +144,32 @@ export const CommunityHeader = ({ communityId }: CommunityHeaderProps) => {
         onOpenChange={setShowApprovalsModal}
         communityId={communityId}
       />
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir Comunidade</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir esta comunidade? Esta ação não pode ser desfeita.
+              Todos os membros, desafios e mensagens serão permanentemente removidos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (communityId) {
+                  deleteCommunity(communityId);
+                  navigate('/community');
+                }
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };

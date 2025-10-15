@@ -156,6 +156,32 @@ export const useCommunity = () => {
     },
   });
 
+  const deleteCommunityMutation = useMutation({
+    mutationFn: async (communityId: string) => {
+      const { error } = await supabase
+        .from('communities')
+        .delete()
+        .eq('id', communityId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-communities'] });
+      queryClient.invalidateQueries({ queryKey: ['all-communities'] });
+      toast({
+        title: 'Comunidade excluída',
+        description: 'A comunidade foi excluída com sucesso.',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Erro ao excluir comunidade',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
   return {
     userCommunities,
     allCommunities,
@@ -163,5 +189,6 @@ export const useCommunity = () => {
     createCommunity: createCommunityMutation.mutate,
     joinCommunity: joinCommunityMutation.mutate,
     leaveCommunity: leaveCommunityMutation.mutate,
+    deleteCommunity: deleteCommunityMutation.mutate,
   };
 };
