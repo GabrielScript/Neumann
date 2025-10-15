@@ -24,8 +24,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       async (event, session) => {
         console.log('Auth state changed:', event);
         
-        // Handle signed out or expired token
-        if (event === 'SIGNED_OUT' || !session) {
+        // Handle signed out
+        if (event === 'SIGNED_OUT') {
           setSession(null);
           setUser(null);
           setLoading(false);
@@ -33,11 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           return;
         }
 
-        // Handle token refresh
-        if (event === 'TOKEN_REFRESHED') {
-          console.log('Token refreshed successfully');
-        }
-
+        // For all other events, just update the session and user state
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
@@ -57,7 +53,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     );
 
-    // Check for existing session and validate token
+    // Check for existing session and validate token on initial load
     const checkSession = async () => {
       const { data: { session }, error } = await supabase.auth.getSession();
       
@@ -65,7 +61,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(null);
         setUser(null);
         setLoading(false);
-        if (window.location.pathname !== '/' && window.location.pathname !== '/auth' && window.location.pathname !== '/reset-password') {
+        // Only redirect if on a protected page
+        const publicPaths = ['/', '/auth', '/reset-password'];
+        if (!publicPaths.includes(window.location.pathname)) {
           navigate('/');
         }
         return;
