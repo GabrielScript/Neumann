@@ -101,8 +101,8 @@ const Index = () => {
               <p>Transforme objetivos em realizações. Cada meta concluída é um troféu permanente.</p>
             </div>
             <div>
-              <h4 className="font-semibold text-foreground mb-2">⚡ Interface Intuitiva</h4>
-              <p>Design claro e direto. Foco na ação, sem complexidade desnecessária.</p>
+              <h4 className="font-semibold text-foreground mb-2">🎯 Missão</h4>
+              <p>Acreditamos que com o comprometimento e consistência na conquista dos desafios, objetivos e hábitos, que o usuário do app consiga desbloquear seu máximo potencial, alta-performance e de suas capacidades.</p>
             </div>
           </div>
         </div>
