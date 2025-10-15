@@ -200,14 +200,14 @@ export default function Subscriptions() {
                 <CardHeader>
                   <CardTitle className="text-2xl font-display">{plan.name}</CardTitle>
                   <CardDescription>
-                    <div className="mt-2">
-                      <span className="text-4xl font-bold text-primary">{plan.price}</span>
-                      {plan.period && <span className="text-muted-foreground">{plan.period}</span>}
-                    </div>
+                    <span className="text-4xl font-bold text-primary">{plan.price}</span>
+                    {plan.period && <span className="text-muted-foreground">{plan.period}</span>}
                     {plan.discount && (
-                      <Badge variant="outline" className="mt-2 text-success">
-                        {plan.discount}
-                      </Badge>
+                      <span className="block mt-2">
+                        <Badge variant="outline" className="text-success">
+                          {plan.discount}
+                        </Badge>
+                      </span>
                     )}
                   </CardDescription>
                 </CardHeader>

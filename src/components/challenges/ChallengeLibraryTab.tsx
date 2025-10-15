@@ -15,6 +15,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Pencil, Save, X } from "lucide-react";
 
 interface ChallengeLibraryTabProps {
   onChallengeStarted: () => void;
@@ -24,10 +27,14 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { checkDailyChallengeLimit } = useSubscription();
+  const { checkDailyChallengeLimit, subscription } = useSubscription();
   
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedItems, setEditedItems] = useState<any[]>([]);
+  
+  const isPlusUser = subscription?.tier === 'plus_monthly' || subscription?.tier === 'plus_annual';
 
   const { data: templates, isLoading } = useQuery({
     queryKey: ["challenge-templates"],
@@ -129,9 +136,61 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
     },
   });
 
+  const saveItemsMutation = useMutation({
+    mutationFn: async (items: any[]) => {
+      const updates = items.map((item) => 
+        supabase
+          .from("challenge_items")
+          .update({
+            title: item.title,
+            description: item.description,
+          })
+          .eq("id", item.id)
+      );
+      
+      await Promise.all(updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["template-items"] });
+      toast({
+        title: "✅ Alterações salvas",
+        description: "O template foi atualizado com sucesso!",
+      });
+      setIsEditing(false);
+    },
+    onError: () => {
+      toast({
+        title: "Erro ao salvar",
+        description: "Não foi possível salvar as alterações.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleViewDetails = (template: any) => {
     setSelectedTemplate(template);
     setDetailsOpen(true);
+    setIsEditing(false);
+  };
+  
+  const handleStartEdit = () => {
+    setEditedItems(templateItems || []);
+    setIsEditing(true);
+  };
+  
+  const handleSaveEdit = () => {
+    saveItemsMutation.mutate(editedItems);
+  };
+  
+  const handleCancelEdit = () => {
+    setIsEditing(false);
+    setEditedItems([]);
+  };
+  
+  const handleItemChange = (index: number, field: string, value: string) => {
+    const updated = [...editedItems];
+    updated[index] = { ...updated[index], [field]: value };
+    setEditedItems(updated);
   };
 
   const handleStartChallenge = async (template: any) => {
@@ -189,7 +248,42 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
             </div>
 
             <div>
-              <h3 className="font-semibold mb-3">Hábitos do Desafio:</h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold">Hábitos do Desafio:</h3>
+                {isPlusUser && !isEditing && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={handleStartEdit}
+                    className="gap-2"
+                  >
+                    <Pencil className="w-4 h-4" />
+                    Editar
+                  </Button>
+                )}
+                {isEditing && (
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={handleCancelEdit}
+                      className="gap-2"
+                    >
+                      <X className="w-4 h-4" />
+                      Cancelar
+                    </Button>
+                    <Button 
+                      size="sm"
+                      onClick={handleSaveEdit}
+                      disabled={saveItemsMutation.isPending}
+                      className="gap-2"
+                    >
+                      <Save className="w-4 h-4" />
+                      Salvar
+                    </Button>
+                  </div>
+                )}
+              </div>
               {itemsLoading ? (
                 <div className="space-y-2">
                   <Skeleton className="h-16" />
@@ -198,33 +292,57 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {templateItems?.map((item, index) => (
+                  {(isEditing ? editedItems : templateItems)?.map((item, index) => (
                     <div key={item.id} className="p-3 border rounded-lg">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <p className="font-medium">
-                            {index + 1}. {item.title}
-                          </p>
-                          {item.description && (
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {item.description}
-                            </p>
-                          )}
+                      {isEditing ? (
+                        <div className="space-y-2">
+                          <div>
+                            <label className="text-sm font-medium">Título:</label>
+                            <Input
+                              value={item.title}
+                              onChange={(e) => handleItemChange(index, 'title', e.target.value)}
+                              className="mt-1"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-sm font-medium">Descrição:</label>
+                            <Textarea
+                              value={item.description || ''}
+                              onChange={(e) => handleItemChange(index, 'description', e.target.value)}
+                              className="mt-1"
+                              rows={2}
+                            />
+                          </div>
                         </div>
-                      </div>
+                      ) : (
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <p className="font-medium">
+                              {index + 1}. {item.title}
+                            </p>
+                            {item.description && (
+                              <p className="text-sm text-muted-foreground mt-1">
+                                {item.description}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            <Button
-              onClick={() => handleStartChallenge(selectedTemplate)}
-              className="w-full"
-              size="lg"
-            >
-              Iniciar Desafio
-            </Button>
+            {!isEditing && (
+              <Button
+                onClick={() => handleStartChallenge(selectedTemplate)}
+                className="w-full"
+                size="lg"
+              >
+                Iniciar Desafio
+              </Button>
+            )}
           </div>
         </DialogContent>
       </Dialog>
