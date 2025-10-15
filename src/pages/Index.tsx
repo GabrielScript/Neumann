@@ -57,7 +57,7 @@ const Index = () => {
           </div>
 
           <div className="bg-card p-8 rounded-2xl shadow-card hover:shadow-primary transition-all duration-300 animate-fade-in">
-            <Trophy className="w-12 h-12 text-yellow-500 mb-4" />
+            <Sparkles className="w-12 h-12 text-yellow-500 mb-4" />
             <h3 className="text-2xl font-bold mb-3">Objetivos de Vida</h3>
             <p className="text-muted-foreground">
               Defina e conquiste suas metas mais importantes. Celebre cada objetivo alcançado com trofeus especiais.
