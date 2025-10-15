@@ -37,10 +37,6 @@ export const habitSchema = z.object({
   reminder_time: z.string()
     .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Horário inválido (use formato HH:MM)')
     .optional(),
-  happiness_level: z.number()
-    .int('Nível de felicidade deve ser um número inteiro')
-    .min(1, 'Nível mínimo é 1')
-    .max(10, 'Nível máximo é 10'),
 });
 
 export const challengeItemSchema = z.object({

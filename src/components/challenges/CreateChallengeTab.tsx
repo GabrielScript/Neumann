@@ -27,7 +27,6 @@ interface Habit {
   priority: string;
   facilitators: string;
   reminder_time: string;
-  happiness_level: string;
 }
 
 interface CreateChallengeTabProps {
@@ -58,7 +57,6 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
         priority: "importante",
         facilitators: "",
         reminder_time: "",
-        happiness_level: "5",
       },
     ]);
   };
@@ -113,7 +111,6 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
           priority: habit.priority,
           facilitators: habit.facilitators,
           reminder_time: habit.reminder_time || undefined,
-          happiness_level: parseInt(habit.happiness_level),
         });
       }
     } catch (error) {
@@ -173,7 +170,6 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
         priority: habit.priority as "imprescindivel" | "importante" | "acessorio",
         facilitators: habit.facilitators || null,
         reminder_time: habit.reminder_time || null,
-        happiness_level: habit.happiness_level ? parseInt(habit.happiness_level) : null,
         position: index,
       }));
 
@@ -352,18 +348,6 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
                         />
                         <span className="text-sm text-muted-foreground">Formato: 24 horas (HH:MM)</span>
                       </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-foreground font-medium">Nível de felicidade *</Label>
-                      <Input
-                        type="number"
-                        min="1"
-                        max="10"
-                        value={habit.happiness_level}
-                        onChange={(e) => updateHabit(habit.id, "happiness_level", e.target.value)}
-                        placeholder="De 1 a 10"
-                      />
                     </div>
 
                     <div className="space-y-2">
