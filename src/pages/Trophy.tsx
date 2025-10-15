@@ -13,6 +13,7 @@ import trophyEstadual from '@/assets/trophies/trophy-estadual.png';
 import trophyRegional from '@/assets/trophies/trophy-regional.png';
 import trophyNacional from '@/assets/trophies/trophy-nacional.png';
 import trophyInternacional from '@/assets/trophies/trophy-internacional.png';
+import trophyLifeGoal from '@/assets/trophies/trophy-life-goal.png';
 
 interface UserStats {
   xp: number;
@@ -202,7 +203,7 @@ const TrophyPage = () => {
             <CardContent>
               <div className="text-center py-8">
                 <img 
-                  src={trophyNacional} 
+                  src={trophyLifeGoal} 
                   alt="Troféu Especial"
                   className="w-24 h-24 object-contain mx-auto mb-4"
                 />

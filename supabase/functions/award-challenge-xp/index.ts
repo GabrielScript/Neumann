@@ -298,6 +298,20 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Update streak for any item completion (not just day complete)
+    if (completed && (!existing || !existing.completed)) {
+      const { error: streakError } = await supabase.functions.invoke('update-user-streak', {
+        body: { date },
+        headers: {
+          Authorization: authHeader,
+        },
+      });
+
+      if (streakError) {
+        console.error('Error updating streak:', streakError);
+      }
+    }
+
     console.log('Award XP result:', result);
 
     return new Response(JSON.stringify(result), {
