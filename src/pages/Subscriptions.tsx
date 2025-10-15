@@ -90,7 +90,6 @@ export default function Subscriptions() {
         'Apenas 1 desafio ativo por dia',
         '1 objetivo por mês',
         'Limite de nível 25',
-        'Sem medalhas',
         'Sem acesso à comunidade',
       ],
     },
@@ -119,7 +118,6 @@ export default function Subscriptions() {
       features: [
         'Desafios ativos simultâneos ilimitados',
         'Objetivos de vida ilimitados',
-        'Medalhas desbloqueadas',
         'Criação de novos desafios na comunidade',
         'Todos os benefícios do Plus Mensal',
       ],
