@@ -11,7 +11,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Target, Trophy, Award, Users, Settings, Sparkles, CreditCard, BarChart3, MessageSquare } from 'lucide-react';
+import { Target, Trophy, Award, Users, Settings, Sparkles, CreditCard, Medal, MessageSquare } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import logo from '@/assets/logo.png';
 
@@ -21,7 +21,7 @@ const navItems = [
   { title: 'Objetivos de Vida', url: '/goals', icon: Sparkles },
   { title: 'Meus Troféus', url: '/trophy', icon: Trophy },
   { title: 'Comunidades (Beta)', url: '/community', icon: Users },
-  { title: 'Rankings', url: '/rankings', icon: BarChart3 },
+  { title: 'Rankings', url: '/rankings', icon: Medal },
   { title: 'Assinaturas', url: '/subscriptions', icon: CreditCard },
   { title: 'Configurações', url: '/settings', icon: Settings },
   { title: 'Feedback', url: '/feedback', icon: MessageSquare },
