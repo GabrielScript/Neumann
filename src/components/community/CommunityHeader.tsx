@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Settings, CheckCircle, UserPlus, Users, Trash2 } from 'lucide-react';
+import { Settings, CheckCircle, UserPlus, Users, Trash2, Edit } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Community, useCommunity } from '@/hooks/useCommunity';
@@ -10,6 +10,7 @@ import { useCommunityMembers } from '@/hooks/useCommunityMembers';
 import { MembersManagementModal } from './MembersManagementModal';
 import { ApproveChallengesModal } from './ApproveChallengesModal';
 import { MembersListModal } from './MembersListModal';
+import { EditCommunityModal } from './EditCommunityModal';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,8 +32,9 @@ export const CommunityHeader = ({ communityId }: CommunityHeaderProps) => {
   const [showApprovalsModal, setShowApprovalsModal] = useState(false);
   const [showMembersListModal, setShowMembersListModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const { userRole } = useCommunityMembers(communityId);
-  const { deleteCommunity } = useCommunity();
+  const { deleteCommunity, updateCommunity } = useCommunity();
   const navigate = useNavigate();
 
   const { data: community } = useQuery({
@@ -78,11 +80,23 @@ export const CommunityHeader = ({ communityId }: CommunityHeaderProps) => {
               <h1 className="text-2xl font-bold">{community.name}</h1>
               {getRoleBadge()}
             </div>
-            {community.description && (
-              <p className="text-muted-foreground mt-3 leading-relaxed whitespace-pre-wrap">
-                {community.description}
-              </p>
-            )}
+            <div className="flex items-start gap-2 mt-3">
+              {community.description && (
+                <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap flex-1">
+                  {community.description}
+                </p>
+              )}
+              {(userRole === 'challenger_leader' || userRole === 'champion') && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowEditModal(true)}
+                  className="flex-shrink-0"
+                >
+                  <Edit className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
           </div>
 
           <div className="flex gap-2 flex-shrink-0">
@@ -143,6 +157,17 @@ export const CommunityHeader = ({ communityId }: CommunityHeaderProps) => {
         open={showApprovalsModal}
         onOpenChange={setShowApprovalsModal}
         communityId={communityId}
+      />
+
+      <EditCommunityModal
+        open={showEditModal}
+        onOpenChange={setShowEditModal}
+        currentDescription={community.description}
+        onSave={(description) => {
+          if (communityId) {
+            updateCommunity({ communityId, description });
+          }
+        }}
       />
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>

@@ -182,6 +182,32 @@ export const useCommunity = () => {
     },
   });
 
+  const updateCommunityMutation = useMutation({
+    mutationFn: async ({ communityId, description }: { communityId: string; description: string }) => {
+      const { error } = await supabase
+        .from('communities')
+        .update({ description })
+        .eq('id', communityId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['community'] });
+      queryClient.invalidateQueries({ queryKey: ['user-communities'] });
+      toast({
+        title: 'Descrição atualizada',
+        description: 'A descrição da comunidade foi atualizada com sucesso.',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Erro ao atualizar descrição',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
   return {
     userCommunities,
     allCommunities,
@@ -190,5 +216,6 @@ export const useCommunity = () => {
     joinCommunity: joinCommunityMutation.mutate,
     leaveCommunity: leaveCommunityMutation.mutate,
     deleteCommunity: deleteCommunityMutation.mutate,
+    updateCommunity: updateCommunityMutation.mutate,
   };
 };
