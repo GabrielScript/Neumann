@@ -20,7 +20,7 @@ const navItems = [
   { title: 'Desafios', url: '/challenges', icon: Target },
   { title: 'Objetivos de Vida', url: '/goals', icon: Sparkles },
   { title: 'Meus Troféus', url: '/trophy', icon: Trophy },
-  { title: 'Comunidade (Beta)', url: '/community', icon: Users },
+  { title: 'Comunidades (Beta)', url: '/community', icon: Users },
   { title: 'Rankings', url: '/rankings', icon: BarChart3 },
   { title: 'Assinaturas', url: '/subscriptions', icon: CreditCard },
   { title: 'Configurações', url: '/settings', icon: Settings },
