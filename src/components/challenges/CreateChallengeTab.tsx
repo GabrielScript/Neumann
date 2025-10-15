@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { Plus, Trash2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -40,6 +41,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [alignmentScore, setAlignmentScore] = useState(5);
   const [difficulty, setDifficulty] = useState("3");
   const [duration, setDuration] = useState("21");
   const [customDuration, setCustomDuration] = useState("");
@@ -67,6 +69,12 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
     setHabits(habits.map((h) => (h.id === id ? { ...h, [field]: value } : h)));
   };
 
+  const getEmoji = (level: number) => {
+    if (level <= 3) return "😐";
+    if (level <= 6) return "😊";
+    return "🤩";
+  };
+
   const handleCreate = async () => {
     if (!user?.id) return;
 
@@ -82,6 +90,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
       challengeSchema.parse({
         name,
         description,
+        alignment_score: alignmentScore,
         duration_days: durationDays,
         difficulty: parseInt(difficulty),
       });
@@ -154,6 +163,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
           name,
           duration_days: durationDays,
           difficulty: parseInt(difficulty),
+          alignment_score: alignmentScore,
           start_date: startDate.toISOString().split("T")[0],
           end_date: endDate.toISOString().split("T")[0],
           is_active: true,
@@ -189,6 +199,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
       // Reset form
       setName("");
       setDescription("");
+      setAlignmentScore(5);
       setDifficulty("3");
       setDuration("21");
       setHabits([]);
@@ -231,6 +242,20 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
             placeholder="Explique o que é e como funciona seu desafio"
             rows={3}
             maxLength={1000}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>
+            O quanto esse desafio se relaciona com seus sonhos e objetivos de vida? {getEmoji(alignmentScore)} {alignmentScore}/10
+          </Label>
+          <Slider
+            value={[alignmentScore]}
+            onValueChange={([value]) => setAlignmentScore(value)}
+            min={1}
+            max={10}
+            step={1}
+            className="w-full"
           />
         </div>
 

@@ -10,6 +10,10 @@ export const challengeSchema = z.object({
     .trim()
     .min(1, 'Descrição é obrigatória')
     .max(1000, 'Descrição deve ter no máximo 1000 caracteres'),
+  alignment_score: z.number()
+    .int()
+    .min(1, 'O alinhamento deve ser no mínimo 1')
+    .max(10, 'O alinhamento deve ser no máximo 10'),
   duration_days: z.number()
     .int('Duração deve ser um número inteiro')
     .min(1, 'Duração deve ser pelo menos 1 dia')
