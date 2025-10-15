@@ -1,5 +1,6 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useUserProfile } from '@/hooks/useUserProfile';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -12,6 +13,7 @@ import { useNavigate } from 'react-router-dom';
 export default function Settings() {
   const { user, signOut } = useAuth();
   const { subscription } = useSubscription();
+  const { profile } = useUserProfile(user?.id || null);
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 
@@ -59,6 +61,11 @@ export default function Settings() {
             <CardDescription>Seus dados de perfil e assinatura</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div>
+              <Label className="text-muted-foreground">Nome</Label>
+              <p className="text-lg font-medium">{profile?.full_name || 'Carregando...'}</p>
+            </div>
+            
             <div>
               <Label className="text-muted-foreground">Email</Label>
               <p className="text-lg font-medium">{user?.email}</p>
