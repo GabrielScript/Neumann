@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Settings, CheckCircle, UserPlus, Users, Trash2, Edit } from 'lucide-react';
+import { Settings, CheckCircle, UserPlus, Users, Trash2, Edit, LogOut } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Community, useCommunity } from '@/hooks/useCommunity';
@@ -33,8 +33,9 @@ export const CommunityHeader = ({ communityId }: CommunityHeaderProps) => {
   const [showMembersListModal, setShowMembersListModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showLeaveDialog, setShowLeaveDialog] = useState(false);
   const { userRole } = useCommunityMembers(communityId);
-  const { deleteCommunity, updateCommunity } = useCommunity();
+  const { deleteCommunity, updateCommunity, leaveCommunity } = useCommunity();
   const navigate = useNavigate();
 
   const { data: community } = useQuery({
@@ -108,6 +109,18 @@ export const CommunityHeader = ({ communityId }: CommunityHeaderProps) => {
               <Users className="w-4 h-4 mr-2" />
               Ver Membros
             </Button>
+            
+            {userRole !== 'challenger_leader' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowLeaveDialog(true)}
+                className="text-destructive hover:text-destructive"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Sair da Comunidade
+              </Button>
+            )}
             
             {userRole === 'challenger_leader' && (
               <>
@@ -191,6 +204,31 @@ export const CommunityHeader = ({ communityId }: CommunityHeaderProps) => {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showLeaveDialog} onOpenChange={setShowLeaveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Sair da Comunidade</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja sair desta comunidade? Você perderá acesso aos desafios e conversas.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (communityId) {
+                  leaveCommunity(communityId);
+                  navigate('/community');
+                }
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Sair
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

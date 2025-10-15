@@ -16,9 +16,13 @@ export interface CommunityChallenge {
   challenge_templates?: {
     name: string;
     description: string;
+    duration_days: number;
   };
   profiles?: {
     full_name: string;
+  };
+  communities?: {
+    name: string;
   };
 }
 
@@ -26,12 +30,13 @@ export const useCommunityChallenges = (communityId: string | undefined) => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
+  // Desafios da comunidade atual ou globais
   const { data: challenges, isLoading } = useQuery({
     queryKey: ['community-challenges', communityId],
     queryFn: async () => {
       let query = supabase
         .from('community_challenges')
-        .select('*, challenge_templates(name, description)');
+        .select('*, challenge_templates(name, description, duration_days)');
 
       if (communityId) {
         query = query.eq('community_id', communityId);
@@ -66,12 +71,91 @@ export const useCommunityChallenges = (communityId: string | undefined) => {
     enabled: !!user?.id,
   });
 
+  // Desafios globais aprovados (para biblioteca)
+  const { data: globalChallenges } = useQuery({
+    queryKey: ['global-challenges'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('community_challenges')
+        .select('*, challenge_templates(name, description, duration_days)')
+        .eq('is_global', true)
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const challengesWithProfiles = await Promise.all(
+        data.map(async (challenge) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', challenge.created_by)
+            .single();
+
+          return {
+            ...challenge,
+            profiles: profile,
+          };
+        })
+      );
+
+      return challengesWithProfiles as CommunityChallenge[];
+    },
+    enabled: !!user?.id,
+  });
+
+  // Desafios das comunidades do usuário (para biblioteca)
+  const { data: userCommunityChallenges } = useQuery({
+    queryKey: ['user-community-challenges'],
+    queryFn: async () => {
+      // Buscar comunidades do usuário
+      const { data: memberships, error: memberError } = await supabase
+        .from('community_members')
+        .select('community_id')
+        .eq('user_id', user?.id);
+
+      if (memberError) throw memberError;
+
+      const communityIds = memberships.map(m => m.community_id);
+
+      if (communityIds.length === 0) return [];
+
+      // Buscar desafios aprovados dessas comunidades
+      const { data, error } = await supabase
+        .from('community_challenges')
+        .select('*, challenge_templates(name, description, duration_days), communities(name)')
+        .in('community_id', communityIds)
+        .eq('status', 'approved')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const challengesWithProfiles = await Promise.all(
+        data.map(async (challenge) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', challenge.created_by)
+            .single();
+
+          return {
+            ...challenge,
+            profiles: profile,
+          };
+        })
+      );
+
+      return challengesWithProfiles;
+    },
+    enabled: !!user?.id,
+  });
+
   const { data: pendingChallenges } = useQuery({
     queryKey: ['pending-challenges', communityId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('community_challenges')
-        .select('*, challenge_templates(name, description)')
+        .select('*, challenge_templates(name, description, duration_days)')
         .eq('community_id', communityId)
         .eq('status', 'pending')
         .order('created_at', { ascending: false });
@@ -196,6 +280,8 @@ export const useCommunityChallenges = (communityId: string | undefined) => {
   return {
     challenges,
     pendingChallenges,
+    globalChallenges,
+    userCommunityChallenges,
     isLoading,
     createChallenge: createChallengeMutation.mutate,
     approveChallenge: approveChallengeMutation.mutate,

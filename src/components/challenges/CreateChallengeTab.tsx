@@ -232,7 +232,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Descreva os objetivos do seu desafio..."
+            placeholder="Explique o que é e como funciona seu desafio"
             rows={3}
             maxLength={1000}
           />

@@ -42,6 +42,7 @@ export const CreateCommunityChallengeModal = ({
   const { subscription } = useSubscription();
 
   const canCreateGlobal = subscription?.tier === 'plus_annual';
+  const canCreate = userRole === 'champion' || userRole === 'challenger_leader';
   const needsApproval = userRole === 'champion';
 
   const { data: templates } = useQuery({
@@ -72,6 +73,10 @@ export const CreateCommunityChallengeModal = ({
     onOpenChange(false);
   };
 
+  if (!canCreate) {
+    return null;
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh]">
@@ -86,7 +91,7 @@ export const CreateCommunityChallengeModal = ({
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Como Champion, seus desafios precisam ser aprovados por um Challenger Leader.
+              Como Champion, seus desafios precisam ser aprovados por um Challenger.
             </AlertDescription>
           </Alert>
         )}

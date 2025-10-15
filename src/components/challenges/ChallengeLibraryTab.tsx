@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useCommunityChallenges } from "@/hooks/useCommunityChallenges";
 import { ChallengeCard } from "./ChallengeCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -17,7 +18,9 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Pencil, Save, X } from "lucide-react";
+import { Pencil, Save, X, Globe } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
 
 interface ChallengeLibraryTabProps {
   onChallengeStarted: () => void;
@@ -28,11 +31,13 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { checkDailyChallengeLimit, subscription } = useSubscription();
+  const { globalChallenges, userCommunityChallenges } = useCommunityChallenges(undefined);
   
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedItems, setEditedItems] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState("padrao");
   
   const isPlusUser = subscription?.tier === 'plus_monthly' || subscription?.tier === 'plus_annual';
 
@@ -42,7 +47,7 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
       const { data, error } = await supabase
         .from("challenge_templates")
         .select("*")
-        .or("is_public.eq.true,is_default.eq.true")
+        .or("is_default.eq.true")
         .order("is_default", { ascending: false });
 
       if (error) throw error;
@@ -68,16 +73,49 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
   });
 
   const startChallengeMutation = useMutation({
-    mutationFn: async (templateId: string) => {
+    mutationFn: async ({ templateId, isCommunity }: { templateId: string; isCommunity?: boolean }) => {
       if (!user?.id) throw new Error("User not authenticated");
 
-      const template = templates?.find((t) => t.id === templateId);
-      if (!template) throw new Error("Template not found");
+      let template;
+      let items;
+
+      if (isCommunity) {
+        // Buscar template do desafio comunitário
+        const communityChallenge = [...(globalChallenges || []), ...(userCommunityChallenges || [])].find(
+          (c) => c.template_id === templateId
+        );
+        
+        if (!communityChallenge) throw new Error("Challenge not found");
+
+        template = communityChallenge.challenge_templates;
+        
+        // Buscar items do template
+        const { data: templateItems, error: itemsError } = await supabase
+          .from("challenge_items")
+          .select("*")
+          .eq("template_id", templateId);
+
+        if (itemsError) throw itemsError;
+        items = templateItems;
+      } else {
+        // Template padrão
+        template = templates?.find((t) => t.id === templateId);
+        if (!template) throw new Error("Template not found");
+
+        // Buscar items do template
+        const { data: templateItems, error: itemsError } = await supabase
+          .from("challenge_items")
+          .select("*")
+          .eq("template_id", templateId);
+
+        if (itemsError) throw itemsError;
+        items = templateItems;
+      }
 
       // Create challenge
       const startDate = new Date();
       const endDate = new Date();
-      endDate.setDate(endDate.getDate() + template.duration_days);
+      endDate.setDate(endDate.getDate() + (template.duration_days || 21));
 
       const { data: newChallenge, error: challengeError } = await supabase
         .from("challenges")
@@ -85,7 +123,7 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
           user_id: user.id,
           template_id: templateId,
           name: template.name,
-          duration_days: template.duration_days,
+          duration_days: template.duration_days || 21,
           start_date: startDate.toISOString().split("T")[0],
           end_date: endDate.toISOString().split("T")[0],
           is_active: true,
@@ -96,13 +134,6 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
       if (challengeError) throw challengeError;
 
       // Clone items
-      const { data: items, error: itemsError } = await supabase
-        .from("challenge_items")
-        .select("*")
-        .eq("template_id", templateId);
-
-      if (itemsError) throw itemsError;
-
       if (items && items.length > 0) {
         const newItems = items.map((item) => ({
           challenge_id: newChallenge.id,
@@ -193,7 +224,7 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
     setEditedItems(updated);
   };
 
-  const handleStartChallenge = async (template: any) => {
+  const handleStartChallenge = async (template: any, isCommunity = false) => {
     // Verificar limite de desafios ativos
     const canCreate = await checkDailyChallengeLimit();
     
@@ -207,7 +238,10 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
     }
     
     // Se pode criar, inicia o desafio direto
-    startChallengeMutation.mutate(template.id);
+    startChallengeMutation.mutate({ 
+      templateId: isCommunity ? template.template_id : template.id, 
+      isCommunity 
+    });
   };
 
   if (isLoading) {
@@ -222,15 +256,106 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
 
   return (
     <>
-      <div className="grid gap-6 md:grid-cols-2">
-        {templates?.map((template) => (
-          <ChallengeCard
-            key={template.id}
-            template={template}
-            onViewDetails={() => handleViewDetails(template)}
-          />
-        ))}
-      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="padrao">Padrão</TabsTrigger>
+          <TabsTrigger value="globais">Globais</TabsTrigger>
+          <TabsTrigger value="comunidades">Minhas Comunidades</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="padrao" className="mt-6">
+          {isLoading ? (
+            <div className="grid gap-6 md:grid-cols-2">
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} className="h-48" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2">
+              {templates?.map((template) => (
+                <ChallengeCard
+                  key={template.id}
+                  template={template}
+                  onViewDetails={() => handleViewDetails(template)}
+                />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="globais" className="mt-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            {globalChallenges && globalChallenges.length > 0 ? (
+              globalChallenges.map((challenge) => (
+                <Card key={challenge.id} className="p-6 cursor-pointer hover:border-primary/50 transition-all"
+                  onClick={() => handleViewDetails({ 
+                    ...challenge.challenge_templates, 
+                    id: challenge.template_id,
+                    isCommunity: true 
+                  })}>
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-semibold text-lg">{challenge.challenge_templates?.name}</h3>
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      <Globe className="w-3 h-3" />
+                      Global
+                    </Badge>
+                  </div>
+                  {challenge.challenge_templates?.description && (
+                    <p className="text-sm text-muted-foreground mb-3">
+                      {challenge.challenge_templates.description}
+                    </p>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <Badge>{challenge.challenge_templates?.duration_days} dias</Badge>
+                    <p className="text-xs text-muted-foreground">
+                      Por: {challenge.profiles?.full_name || 'Usuário'}
+                    </p>
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-2 flex items-center justify-center py-12">
+                <p className="text-muted-foreground">Nenhum desafio global disponível ainda.</p>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="comunidades" className="mt-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            {userCommunityChallenges && userCommunityChallenges.length > 0 ? (
+              userCommunityChallenges.map((challenge: any) => (
+                <Card key={challenge.id} className="p-6 cursor-pointer hover:border-primary/50 transition-all"
+                  onClick={() => handleViewDetails({ 
+                    ...challenge.challenge_templates, 
+                    id: challenge.template_id,
+                    isCommunity: true 
+                  })}>
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-semibold text-lg">{challenge.challenge_templates?.name}</h3>
+                    <Badge>{challenge.communities?.name}</Badge>
+                  </div>
+                  {challenge.challenge_templates?.description && (
+                    <p className="text-sm text-muted-foreground mb-3">
+                      {challenge.challenge_templates.description}
+                    </p>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <Badge variant="secondary">{challenge.challenge_templates?.duration_days} dias</Badge>
+                    <p className="text-xs text-muted-foreground">
+                      Por: {challenge.profiles?.full_name || 'Usuário'}
+                    </p>
+                  </div>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-2 flex items-center justify-center py-12">
+                <p className="text-muted-foreground">Você ainda não possui desafios nas suas comunidades.</p>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
 
       <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -336,7 +461,7 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
 
             {!isEditing && (
               <Button
-                onClick={() => handleStartChallenge(selectedTemplate)}
+                onClick={() => handleStartChallenge(selectedTemplate, selectedTemplate?.isCommunity)}
                 className="w-full"
                 size="lg"
               >
