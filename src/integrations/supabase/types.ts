@@ -174,6 +174,7 @@ export type Database = {
           start_date: string
           template_id: string | null
           user_id: string
+          alignment_score: number | null
         }
         Insert: {
           completed_at?: string | null
@@ -188,6 +189,7 @@ export type Database = {
           start_date?: string
           template_id?: string | null
           user_id: string
+          alignment_score?: number | null
         }
         Update: {
           completed_at?: string | null
@@ -202,6 +204,7 @@ export type Database = {
           start_date?: string
           template_id?: string | null
           user_id?: string
+          alignment_score?: number | null
         }
         Relationships: [
           {
