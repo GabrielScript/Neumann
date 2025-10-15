@@ -8,6 +8,19 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-hero">
+      {/* Developer Credit */}
+      <div className="absolute top-4 right-4 text-right text-sm text-muted-foreground">
+        <p className="font-medium">Developed by Gabriel Estrela Lopes</p>
+        <a 
+          href="https://www.linkedin.com/in/gabrielestrela8/" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-primary hover:underline"
+        >
+          Contact
+        </a>
+      </div>
+
       {/* Hero Section */}
       <div className="container mx-auto px-4 py-16">
         <div className="flex flex-col items-center text-center max-w-4xl mx-auto space-y-8">
