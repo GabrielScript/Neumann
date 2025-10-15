@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setSession(null);
           setUser(null);
           setLoading(false);
-          navigate('/auth');
+          navigate('/');
           return;
         }
 
@@ -65,8 +65,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(null);
         setUser(null);
         setLoading(false);
-        if (window.location.pathname !== '/auth') {
-          navigate('/auth');
+        if (window.location.pathname !== '/' && window.location.pathname !== '/auth' && window.location.pathname !== '/reset-password') {
+          navigate('/');
         }
         return;
       }
@@ -83,7 +83,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           console.error('Failed to refresh token:', refreshError);
           setSession(null);
           setUser(null);
-          navigate('/auth');
+          navigate('/');
           return;
         }
         setSession(data.session);
@@ -109,7 +109,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    navigate('/auth');
+    navigate('/');
   };
 
   return (
