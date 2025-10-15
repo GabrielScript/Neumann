@@ -12,6 +12,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
 import { Search, Users } from 'lucide-react';
 import { useCommunity } from '@/hooks/useCommunity';
+import { useSubscription } from '@/hooks/useSubscription';
+import { toast } from 'sonner';
 
 interface JoinCommunityModalProps {
   open: boolean;
@@ -21,6 +23,7 @@ interface JoinCommunityModalProps {
 export const JoinCommunityModal = ({ open, onOpenChange }: JoinCommunityModalProps) => {
   const [search, setSearch] = useState('');
   const { allCommunities, userCommunities, joinCommunity } = useCommunity();
+  const { checkCommunityMemberLimit } = useSubscription();
 
   const availableCommunities = allCommunities?.filter(
     (community) =>
@@ -28,9 +31,18 @@ export const JoinCommunityModal = ({ open, onOpenChange }: JoinCommunityModalPro
       community.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleJoin = (communityId: string) => {
-    joinCommunity(communityId);
-    onOpenChange(false);
+  const handleJoin = async (communityId: string) => {
+    try {
+      const canJoin = await checkCommunityMemberLimit();
+      if (!canJoin) {
+        toast.error('Você atingiu o limite de comunidades do seu plano');
+        return;
+      }
+      joinCommunity(communityId);
+      onOpenChange(false);
+    } catch (error) {
+      toast.error('Erro ao verificar limite de comunidades');
+    }
   };
 
   return (

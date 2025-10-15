@@ -104,6 +104,7 @@ export default function Subscriptions() {
         '5 objetivos por mês',
         'Nível XP ilimitado',
         'Acesso à comunidade',
+        'Limite de 5 comunidades',
         'Ajuste dos desafios padrão',
       ],
       popular: true,
@@ -118,6 +119,8 @@ export default function Subscriptions() {
       features: [
         'Desafios ativos simultâneos ilimitados',
         'Objetivos de vida ilimitados',
+        'Limite de 10 comunidades',
+        'Liderar até 5 comunidades',
         'Criação de comunidades e de novos desafios globais',
         'Todos os benefícios do Plus Mensal',
       ],

@@ -26,11 +26,11 @@ export const CreateCommunityModal = ({ open, onOpenChange }: CreateCommunityModa
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const { createCommunity } = useCommunity();
-  const { subscription } = useSubscription();
+  const { subscription, checkCommunityLeaderLimit } = useSubscription();
 
   const canCreate = subscription?.tier === 'plus_annual';
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Validate community data
     try {
       communitySchema.parse({
@@ -42,6 +42,18 @@ export const CreateCommunityModal = ({ open, onOpenChange }: CreateCommunityModa
         toast.error(error.errors[0].message);
         return;
       }
+    }
+
+    // Verificar limite de liderança
+    try {
+      const canLead = await checkCommunityLeaderLimit();
+      if (!canLead) {
+        toast.error('Você atingiu o limite de 5 comunidades lideradas');
+        return;
+      }
+    } catch (error) {
+      toast.error('Erro ao verificar limite de liderança');
+      return;
     }
     
     createCommunity({ name, description });

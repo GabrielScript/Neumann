@@ -657,6 +657,14 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: boolean
       }
+      check_community_leader_limit: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
+      check_community_member_limit: {
+        Args: { p_user_id: string }
+        Returns: boolean
+      }
       check_daily_challenge_limit: {
         Args: { p_user_id: string }
         Returns: boolean

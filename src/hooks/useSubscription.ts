@@ -73,6 +73,22 @@ export const useSubscription = () => {
     return data;
   };
 
+  const checkCommunityMemberLimit = async (): Promise<boolean> => {
+    const { data, error } = await supabase.rpc('check_community_member_limit', {
+      p_user_id: user?.id,
+    });
+    if (error) throw error;
+    return data;
+  };
+
+  const checkCommunityLeaderLimit = async (): Promise<boolean> => {
+    const { data, error } = await supabase.rpc('check_community_leader_limit', {
+      p_user_id: user?.id,
+    });
+    if (error) throw error;
+    return data;
+  };
+
   const canAccessCommunity = () => {
     return subscription?.tier !== 'free';
   };
@@ -103,6 +119,8 @@ export const useSubscription = () => {
           maxLevel: 25,
           hasMedals: false,
           hasCommunity: false,
+          maxCommunities: 0,
+          maxLeaderCommunities: 0,
           canAdjustChallenges: false,
           canCreateChallenges: false,
           canCreateGlobalChallenges: false,
@@ -115,6 +133,8 @@ export const useSubscription = () => {
           maxLevel: Infinity,
           hasMedals: false,
           hasCommunity: true,
+          maxCommunities: 5,
+          maxLeaderCommunities: 0,
           canAdjustChallenges: true,
           canCreateChallenges: false,
           canCreateGlobalChallenges: false,
@@ -126,7 +146,9 @@ export const useSubscription = () => {
           monthlyGoals: Infinity,
           maxLevel: Infinity,
           hasMedals: true,
-          hasCommunity: false,
+          hasCommunity: true,
+          maxCommunities: 10,
+          maxLeaderCommunities: 5,
           canAdjustChallenges: true,
           canCreateChallenges: true,
           canCreateGlobalChallenges: true,
@@ -155,6 +177,8 @@ export const useSubscription = () => {
     checkDailyChallengeLimit,
     checkMonthlyGoalLimit,
     checkLevelLimit,
+    checkCommunityMemberLimit,
+    checkCommunityLeaderLimit,
     canAccessCommunity,
     canAccessMedals,
     getFeatures,
