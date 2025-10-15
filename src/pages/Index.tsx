@@ -93,16 +93,12 @@ const Index = () => {
               <p>Um desafio por vez. Concentre sua energia no que realmente importa.</p>
             </div>
             <div>
-              <h4 className="font-semibold text-foreground mb-2">📈 Progresso Visível</h4>
-              <p>Acompanhe cada vitória. Medalhas, trofeus e níveis que mostram sua evolução.</p>
+              <h4 className="font-semibold text-foreground mb-2">📈 Progresso Visível e Gamificada</h4>
+              <p>Acompanhe cada vitória. Conquista de troféus e níveis que mostram sua evolução.</p>
             </div>
             <div>
               <h4 className="font-semibold text-foreground mb-2">🏆 Conquistas Reais</h4>
               <p>Transforme objetivos em realizações. Cada meta concluída é um troféu permanente.</p>
-            </div>
-            <div>
-              <h4 className="font-semibold text-foreground mb-2">🎮 Abordagem Gamificada</h4>
-              <p>Sistema de XP, níveis e rankings que tornam seu crescimento pessoal envolvente e motivador.</p>
             </div>
             <div>
               <h4 className="font-semibold text-foreground mb-2">🎯 Missão</h4>
