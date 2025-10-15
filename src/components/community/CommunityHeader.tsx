@@ -199,7 +199,7 @@ export const CommunityHeader = ({ communityId }: CommunityHeaderProps) => {
               {community.description}
             </p>
           </div>
-          {(userRole === 'challenger_leader' || userRole === 'champion') && (
+          {userRole === 'challenger_leader' && (
             <div className="flex justify-end">
               <Button
                 variant="outline"
