@@ -118,7 +118,7 @@ export default function Subscriptions() {
       features: [
         'Desafios ativos simultâneos ilimitados',
         'Objetivos de vida ilimitados',
-        'Criação de novos desafios na comunidade',
+        'Criação de comunidades e de novos desafios globais',
         'Todos os benefícios do Plus Mensal',
       ],
       badge: 'Melhor Valor',
