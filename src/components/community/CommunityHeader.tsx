@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Settings, CheckCircle, UserPlus, Users, Trash2, Edit, LogOut } from 'lucide-react';
+import { Settings, CheckCircle, UserPlus, Users, Trash2, Edit, LogOut, FileText } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Community, useCommunity } from '@/hooks/useCommunity';
@@ -21,6 +21,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { useNavigate } from 'react-router-dom';
 
 interface CommunityHeaderProps {
@@ -34,6 +41,7 @@ export const CommunityHeader = ({ communityId }: CommunityHeaderProps) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showLeaveDialog, setShowLeaveDialog] = useState(false);
+  const [showDescriptionModal, setShowDescriptionModal] = useState(false);
   const { userRole } = useCommunityMembers(communityId);
   const { deleteCommunity, updateCommunity, leaveCommunity } = useCommunity();
   const navigate = useNavigate();
@@ -81,23 +89,18 @@ export const CommunityHeader = ({ communityId }: CommunityHeaderProps) => {
               <h1 className="text-2xl font-bold">{community.name}</h1>
               {getRoleBadge()}
             </div>
-            <div className="flex items-start gap-2 mt-3">
-              {community.description && (
-                <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap flex-1">
-                  {community.description}
-                </p>
-              )}
-              {(userRole === 'challenger_leader' || userRole === 'champion') && (
+            {community.description && (
+              <div className="mt-3">
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
-                  onClick={() => setShowEditModal(true)}
-                  className="flex-shrink-0"
+                  onClick={() => setShowDescriptionModal(true)}
                 >
-                  <Edit className="w-4 h-4" />
+                  <FileText className="w-4 h-4 mr-2" />
+                  Ver Descrição
                 </Button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           <div className="flex gap-2 flex-shrink-0">
@@ -182,6 +185,37 @@ export const CommunityHeader = ({ communityId }: CommunityHeaderProps) => {
           }
         }}
       />
+
+      <Dialog open={showDescriptionModal} onOpenChange={setShowDescriptionModal}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Descrição da Comunidade</DialogTitle>
+            <DialogDescription>
+              {community.name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-foreground leading-relaxed whitespace-pre-wrap">
+              {community.description}
+            </p>
+          </div>
+          {(userRole === 'challenger_leader' || userRole === 'champion') && (
+            <div className="flex justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setShowDescriptionModal(false);
+                  setShowEditModal(true);
+                }}
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Editar Descrição
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>

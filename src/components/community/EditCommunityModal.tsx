@@ -54,7 +54,11 @@ export const EditCommunityModal = ({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Descreva o propósito e objetivos da comunidade..."
               className="min-h-[200px]"
+              maxLength={1000}
             />
+            <p className="text-sm text-muted-foreground text-right">
+              {description.length}/1000 caracteres
+            </p>
           </div>
         </div>
 
