@@ -7,8 +7,9 @@ export const challengeSchema = z.object({
     .min(1, 'Nome do desafio é obrigatório')
     .max(100, 'Nome deve ter no máximo 100 caracteres'),
   description: z.string()
-    .max(1000, 'Descrição deve ter no máximo 1000 caracteres')
-    .optional(),
+    .trim()
+    .min(1, 'Descrição é obrigatória')
+    .max(1000, 'Descrição deve ter no máximo 1000 caracteres'),
   duration_days: z.number()
     .int('Duração deve ser um número inteiro')
     .min(1, 'Duração deve ser pelo menos 1 dia')
@@ -16,8 +17,7 @@ export const challengeSchema = z.object({
   difficulty: z.number()
     .int('Dificuldade deve ser um número inteiro')
     .min(1, 'Dificuldade mínima é 1')
-    .max(5, 'Dificuldade máxima é 5')
-    .optional(),
+    .max(5, 'Dificuldade máxima é 5'),
 });
 
 export const habitSchema = z.object({
@@ -31,16 +31,16 @@ export const habitSchema = z.object({
     .max(500, 'Descrição deve ter no máximo 500 caracteres'),
   priority: z.enum(['imprescindivel', 'importante', 'acessorio']),
   facilitators: z.string()
-    .max(500, 'Facilitadores devem ter no máximo 500 caracteres')
-    .optional(),
+    .trim()
+    .min(1, 'Facilitadores são obrigatórios')
+    .max(500, 'Facilitadores devem ter no máximo 500 caracteres'),
   reminder_time: z.string()
     .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Horário inválido (use formato HH:MM)')
     .optional(),
   happiness_level: z.number()
     .int('Nível de felicidade deve ser um número inteiro')
     .min(1, 'Nível mínimo é 1')
-    .max(10, 'Nível máximo é 10')
-    .optional(),
+    .max(10, 'Nível máximo é 10'),
 });
 
 export const challengeItemSchema = z.object({

@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { useChallengeProgress } from "@/hooks/useChallengeProgress";
 import { useChallengeStats } from "@/hooks/useChallengeStats";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Trash2, CheckCircle, Calendar } from "lucide-react";
+import { Plus, Trash2, CheckCircle, Calendar, Save } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -45,17 +46,77 @@ const priorityLabels = {
 };
 
 export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
+  const { user } = useAuth();
   const today = new Date().toISOString().split("T")[0];
   const { items, progress, isLoading, toggleItem, completedToday, totalItems, progressPercentage } =
     useChallengeProgress(challenge.id, today);
   const { stats, isLoading: statsLoading } = useChallengeStats(challenge.id);
   
   const [abandonDialogOpen, setAbandonDialogOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const isItemCompleted = (itemId: string) => {
     return progress?.some((p) => p.item_id === itemId && p.completed) || false;
+  };
+
+  const handleSaveAsTemplate = async () => {
+    if (!user?.id) return;
+    
+    setIsSaving(true);
+    
+    try {
+      // Create template from active challenge
+      const { data: template, error: templateError } = await supabase
+        .from("challenge_templates")
+        .insert({
+          name: challenge.name,
+          description: `Template criado a partir do desafio ativo`,
+          duration_days: challenge.duration_days,
+          created_by: user.id,
+          is_public: false,
+        })
+        .select()
+        .single();
+
+      if (templateError) throw templateError;
+
+      // Copy all items to the template
+      if (items && items.length > 0) {
+        const templateItems = items.map((item, index) => ({
+          template_id: template.id,
+          title: item.title,
+          description: item.description,
+          priority: item.priority,
+          facilitators: item.facilitators,
+          reminder_time: item.reminder_time,
+          happiness_level: item.happiness_level,
+          position: index,
+        }));
+
+        const { error: itemsError } = await supabase
+          .from("challenge_items")
+          .insert(templateItems);
+
+        if (itemsError) throw itemsError;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ["challenge-templates"] });
+      
+      toast({
+        title: "✅ Desafio salvo!",
+        description: "O desafio foi salvo na sua biblioteca com sucesso.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Erro",
+        description: error.message || "Não foi possível salvar o desafio.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleAbandonChallenge = async () => {
@@ -107,6 +168,14 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
                 <Calendar className="w-3 h-3" />
                 Dias Restantes: {stats?.remainingDays || 0}
               </Badge>
+              <Button 
+                variant="outline" 
+                onClick={handleSaveAsTemplate}
+                disabled={isSaving}
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {isSaving ? "Salvando..." : "Salvar Desafio"}
+              </Button>
               <Button variant="destructive" onClick={() => setAbandonDialogOpen(true)}>
                 Abandonar Desafio
               </Button>

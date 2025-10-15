@@ -80,7 +80,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
       
       challengeSchema.parse({
         name,
-        description: description || undefined,
+        description,
         duration_days: durationDays,
         difficulty: parseInt(difficulty),
       });
@@ -111,9 +111,9 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
           title: habit.title,
           description: habit.description,
           priority: habit.priority,
-          facilitators: habit.facilitators || undefined,
+          facilitators: habit.facilitators,
           reminder_time: habit.reminder_time || undefined,
-          happiness_level: habit.happiness_level ? parseInt(habit.happiness_level) : undefined,
+          happiness_level: parseInt(habit.happiness_level),
         });
       }
     } catch (error) {
@@ -227,7 +227,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="description">Descrição (opcional)</Label>
+          <Label htmlFor="description">Descrição *</Label>
           <Textarea
             id="description"
             value={description}
@@ -239,7 +239,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="difficulty">Nível de Dificuldade (1-5)</Label>
+          <Label htmlFor="difficulty">Nível de Dificuldade *</Label>
           <Select value={difficulty} onValueChange={setDifficulty}>
             <SelectTrigger>
               <SelectValue />
@@ -297,7 +297,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
             <div className="space-y-4">
               {habits.map((habit, index) => (
                 <Card key={habit.id}>
-                  <CardContent className="pt-6 space-y-3">
+                  <CardContent className="pt-6 space-y-4">
                     <div className="flex justify-between items-start gap-2">
                       <h4 className="font-medium">Hábito {index + 1}</h4>
                       <Button
@@ -309,61 +309,79 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
                       </Button>
                     </div>
 
-                    <Input
-                      value={habit.title}
-                      onChange={(e) => updateHabit(habit.id, "title", e.target.value)}
-                      placeholder="Nome do hábito *"
-                      maxLength={100}
-                    />
-
-                    <Textarea
-                      value={habit.description}
-                      onChange={(e) => updateHabit(habit.id, "description", e.target.value)}
-                      placeholder="Descrição *"
-                      rows={2}
-                      maxLength={500}
-                    />
-
-                    <Textarea
-                      value={habit.facilitators}
-                      onChange={(e) => updateHabit(habit.id, "facilitators", e.target.value)}
-                      placeholder="O que você tem que fazer para tornar o hábito mais acessível possível (opcional)"
-                      rows={2}
-                      maxLength={500}
-                    />
-
-                    <Input
-                      type="time"
-                      value={habit.reminder_time}
-                      onChange={(e) => updateHabit(habit.id, "reminder_time", e.target.value)}
-                      placeholder="Horário (opcional)"
-                    />
+                    <div className="space-y-2">
+                      <Label className="text-foreground font-medium">Nome do hábito *</Label>
+                      <Input
+                        value={habit.title}
+                        onChange={(e) => updateHabit(habit.id, "title", e.target.value)}
+                        placeholder="Ex: Beber 2L de água"
+                        maxLength={100}
+                      />
+                    </div>
 
                     <div className="space-y-2">
-                      <Label>Nível de felicidade ao cumpri-lo (1-10)</Label>
+                      <Label className="text-foreground font-medium">Descrição *</Label>
+                      <Textarea
+                        value={habit.description}
+                        onChange={(e) => updateHabit(habit.id, "description", e.target.value)}
+                        placeholder="Descreva o hábito em detalhes"
+                        rows={2}
+                        maxLength={500}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-foreground font-medium">Facilitadores *</Label>
+                      <Textarea
+                        value={habit.facilitators}
+                        onChange={(e) => updateHabit(habit.id, "facilitators", e.target.value)}
+                        placeholder="O que você pode fazer para tornar este hábito mais fácil?"
+                        rows={2}
+                        maxLength={500}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-foreground font-medium">Horário (opcional)</Label>
+                      <div className="flex gap-2 items-center">
+                        <Input
+                          type="time"
+                          value={habit.reminder_time}
+                          onChange={(e) => updateHabit(habit.id, "reminder_time", e.target.value)}
+                          className="max-w-[150px]"
+                        />
+                        <span className="text-sm text-muted-foreground">Formato: 24 horas (HH:MM)</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-foreground font-medium">Nível de felicidade *</Label>
                       <Input
                         type="number"
                         min="1"
                         max="10"
                         value={habit.happiness_level}
                         onChange={(e) => updateHabit(habit.id, "happiness_level", e.target.value)}
-                        placeholder="5"
+                        placeholder="De 1 a 10"
                       />
                     </div>
 
-                    <Select
-                      value={habit.priority}
-                      onValueChange={(value) => updateHabit(habit.id, "priority", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="imprescindivel">Imprescindível</SelectItem>
-                        <SelectItem value="importante">Importante</SelectItem>
-                        <SelectItem value="acessorio">Acessório</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <div className="space-y-2">
+                      <Label className="text-foreground font-medium">Nível de urgência *</Label>
+                      <Select
+                        value={habit.priority}
+                        onValueChange={(value) => updateHabit(habit.id, "priority", value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione o nível de urgência" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="imprescindivel">Imprescindível</SelectItem>
+                          <SelectItem value="importante">Importante</SelectItem>
+                          <SelectItem value="acessorio">Acessório</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
