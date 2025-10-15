@@ -24,7 +24,7 @@ export const JoinCommunityModal = ({ open, onOpenChange }: JoinCommunityModalPro
 
   const availableCommunities = allCommunities?.filter(
     (community) =>
-      !userCommunities?.some((uc) => uc.id === community.id) &&
+      !userCommunities?.some((uc) => uc && uc.id === community.id) &&
       community.name.toLowerCase().includes(search.toLowerCase())
   );
 

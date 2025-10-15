@@ -39,7 +39,7 @@ export const useCommunity = () => {
         .eq('user_id', user?.id);
 
       if (error) throw error;
-      return memberships?.map(m => m.communities) as Community[];
+      return memberships?.map(m => m.communities).filter((c): c is Community => c !== null) as Community[];
     },
     enabled: !!user?.id,
   });
