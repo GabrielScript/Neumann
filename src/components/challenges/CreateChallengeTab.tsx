@@ -70,10 +70,15 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
   const handleCreate = async () => {
     if (!user?.id) return;
 
+    const durationDays =
+      duration === "today"
+        ? 1
+        : duration === "custom"
+        ? parseInt(customDuration) || 0
+        : parseInt(duration);
+
     // Validate challenge data
     try {
-      const durationDays = duration === "custom" ? parseInt(customDuration) : parseInt(duration);
-      
       challengeSchema.parse({
         name,
         description,
@@ -135,12 +140,11 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
     setIsCreating(true);
 
     try {
-      const durationDays =
-        duration === "custom" ? parseInt(customDuration) : parseInt(duration);
-
       const startDate = new Date();
       const endDate = new Date();
-      endDate.setDate(endDate.getDate() + durationDays);
+      if (duration !== "today") {
+        endDate.setDate(endDate.getDate() + durationDays);
+      }
 
       // Create challenge
       const { data: newChallenge, error: challengeError } = await supabase
@@ -176,7 +180,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
       if (itemsError) throw itemsError;
 
       queryClient.invalidateQueries({ queryKey: ["active-challenges"] });
-      
+
       toast({
         title: "🚀 Desafio criado!",
         description: "Seu desafio personalizado foi iniciado com sucesso!",
@@ -188,7 +192,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
       setDifficulty("3");
       setDuration("21");
       setHabits([]);
-      
+
       onChallengeCreated();
     } catch (error: any) {
       toast({
@@ -253,6 +257,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="today">Até Hoje</SelectItem>
               <SelectItem value="1">1 dia</SelectItem>
               <SelectItem value="7">7 dias</SelectItem>
               <SelectItem value="21">21 dias</SelectItem>
