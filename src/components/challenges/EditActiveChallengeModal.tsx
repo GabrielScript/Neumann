@@ -26,7 +26,17 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { challengeSchema, habitSchema } from "@/lib/validation";
 import { z } from "zod";
 import { format } from "date-fns";
-import { Card, CardContent } from "@/components/ui/card"; // Adicionado Card e CardContent
+import { Card, CardContent } from "@/components/ui/card";
+import { Tables } from "@/integrations/supabase/types"; // Importar tipos do Supabase
+
+// Definir tipos para os itens do desafio e o desafio com itens
+type ChallengeItem = Tables<'challenge_items'>;
+// MODIFICADO: Adicionado explicitamente 'description' ao tipo Challenge
+type Challenge = Tables<'challenges'> & { description: string | null }; 
+
+interface ChallengeWithItems extends Challenge {
+  challenge_items: ChallengeItem[];
+}
 
 interface Habit {
   id: string;
@@ -61,7 +71,7 @@ export function EditActiveChallengeModal({
   const [habits, setHabits] = useState<Habit[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
-  const { data: challengeData, isLoading: challengeLoading } = useQuery({
+  const { data: challengeData, isLoading: challengeLoading } = useQuery<ChallengeWithItems>({
     queryKey: ["challenge-to-edit", challengeId],
     queryFn: async () => {
       const { data: challenge, error: challengeError } = await supabase
@@ -71,7 +81,7 @@ export function EditActiveChallengeModal({
         .single();
 
       if (challengeError) throw challengeError;
-      return challenge;
+      return challenge as ChallengeWithItems; // Cast para o tipo definido
     },
     enabled: open && !!challengeId,
   });
@@ -104,7 +114,7 @@ export function EditActiveChallengeModal({
         id: crypto.randomUUID(), // New habits get a temporary ID
         title: "",
         description: "",
-        priority: "importante",
+        priority: "imprescindivel", // Default priority
         facilitators: "",
         position: habits.length,
       },
