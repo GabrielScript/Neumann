@@ -138,6 +138,7 @@ export const useSubscription = () => {
           canAdjustChallenges: true,
           canCreateChallenges: false,
           canCreateGlobalChallenges: false,
+          turboXP: 1.5,
         };
       case 'plus_annual':
         return {
@@ -152,6 +153,7 @@ export const useSubscription = () => {
           canAdjustChallenges: true,
           canCreateChallenges: true,
           canCreateGlobalChallenges: true,
+          turboXP: 2.5,
         };
       default:
         return null;
