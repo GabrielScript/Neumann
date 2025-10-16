@@ -116,9 +116,9 @@ export default function Settings() {
           </CardHeader>
           <CardContent>
             <Button
-              variant="destructive"
+              variant="outline"
               onClick={handleSignOut}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 border-foreground text-foreground hover:bg-foreground hover:text-background"
             >
               <LogOut className="h-5 w-5" />
               Sair da Conta
