@@ -170,7 +170,7 @@ export function UserProfileDropdown() {
           
           <DropdownMenuSeparator />
           
-          <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
+          <DropdownMenuItem onClick={handleSignOut}>
             <LogOut className="mr-2 h-4 w-4" />
             Sair
           </DropdownMenuItem>
