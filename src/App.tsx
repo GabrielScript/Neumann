@@ -18,6 +18,7 @@ import Community from "./pages/Community";
 import Rankings from "./pages/Rankings";
 import Settings from "./pages/Settings";
 import Feedback from "./pages/Feedback";
+import Achievements from "./pages/Achievements";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,7 @@ const App = () => (
               <Route path="/rankings" element={<Rankings />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/feedback" element={<Feedback />} />
+              <Route path="/achievements" element={<Achievements />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

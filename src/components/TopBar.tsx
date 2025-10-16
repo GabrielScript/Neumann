@@ -1,6 +1,4 @@
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { TrendingUp, Trophy, CreditCard } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -8,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getTrophyStage } from '@/lib/xp';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useNavigate } from 'react-router-dom';
+import { UserProfileDropdown } from '@/components/UserProfileDropdown';
 
 interface UserStats {
   level: number;
@@ -103,6 +102,8 @@ export const TopBar = () => {
                 </div>
               </div>
             </div>
+
+            <UserProfileDropdown />
           </>
         )}
       </div>
