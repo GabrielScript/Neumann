@@ -26,14 +26,7 @@ const Index = () => {
         <div className="flex flex-col items-center text-center max-w-4xl mx-auto space-y-8">
           {/* Logo */}
           <div className="p-6 bg-primary/10 rounded-3xl shadow-glow animate-scale-in">
-            <img 
-              src={logo} 
-              alt="Neumann Logo" 
-              className="w-20 h-20" 
-              width="80" 
-              height="80"
-              loading="eager"
-            />
+            <img src={logo} alt="Neumann Logo" className="w-20 h-20" />
           </div>
 
           {/* Title & Description */}
