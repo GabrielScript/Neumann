@@ -1,3 +1,4 @@
+import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -42,6 +43,9 @@ export function useChallengeProgress(challengeId: string | undefined, date: stri
     enabled: !!challengeId,
   });
 
+  // Track total XP earned today
+  const [todayXP, setTodayXP] = React.useState(0);
+
   const toggleItemMutation = useMutation({
     mutationFn: async ({ itemId, completed }: { itemId: string; completed: boolean }) => {
       if (!challengeId || !user?.id) throw new Error("Missing data");
@@ -61,6 +65,11 @@ export function useChallengeProgress(challengeId: string | undefined, date: stri
       return data;
     },
     onSuccess: (data) => {
+      // Accumulate XP for today
+      if (data?.xpAwarded > 0) {
+        setTodayXP(prev => prev + data.xpAwarded);
+      }
+
       if (data?.leveledUp) {
         toast({
           title: "🎉 Level Up!",
@@ -97,5 +106,6 @@ export function useChallengeProgress(challengeId: string | undefined, date: stri
     completedToday,
     totalItems,
     progressPercentage,
+    todayXP,
   };
 }

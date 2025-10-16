@@ -66,7 +66,7 @@ const difficultyLabels: { [key: number]: string } = {
 export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
   const { user } = useAuth();
   const today = new Date().toISOString().split("T")[0];
-  const { items, progress, isLoading, toggleItem, completedToday, totalItems, progressPercentage } =
+  const { items, progress, isLoading, toggleItem, completedToday, totalItems, progressPercentage, todayXP } =
     useChallengeProgress(challenge.id, today);
   const { stats, isLoading: statsLoading } = useChallengeStats(challenge.id);
   
@@ -233,23 +233,49 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
         <CardContent>
           <div className="space-y-4">
             <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="font-semibold">Progresso Total</span>
-                <span className="font-semibold text-primary">
-                  {stats?.completedDays || 0}/{stats?.totalDays || 0} dias
-                </span>
-              </div>
-              <Progress value={stats?.progressPercentage || 0} className="h-3" />
+              {stats?.completedDays === stats?.totalDays && stats?.totalDays > 0 ? (
+                <div className="p-4 bg-gradient-to-r from-green-500/10 to-green-500/5 border border-green-500/20 rounded-lg text-center space-y-2">
+                  <div className="flex items-center justify-center gap-2">
+                    <CheckCircle className="w-6 h-6 text-green-600" />
+                    <span className="font-bold text-xl">🏆 Desafio Completo!</span>
+                  </div>
+                  <p className="text-sm font-semibold">Você completou todos os {stats.totalDays} dias do desafio!</p>
+                  <p className="text-xs text-muted-foreground">Continue mantendo seus hábitos!</p>
+                </div>
+              ) : (
+                <>
+                  <div className="flex justify-between text-sm">
+                    <span className="font-semibold">Progresso Total</span>
+                    <span className="font-semibold text-primary">
+                      {stats?.completedDays || 0}/{stats?.totalDays || 0} dias
+                    </span>
+                  </div>
+                  <Progress value={stats?.progressPercentage || 0} className="h-3" />
+                </>
+              )}
             </div>
             
             <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Progresso de Hoje</span>
-                <span className="font-semibold">
-                  {completedToday}/{totalItems} itens
-                </span>
-              </div>
-              <Progress value={progressPercentage} />
+              {completedToday === totalItems && totalItems > 0 ? (
+                <div className="p-4 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg text-center space-y-2">
+                  <div className="flex items-center justify-center gap-2">
+                    <CheckCircle className="w-5 h-5 text-primary" />
+                    <span className="font-semibold text-lg">🎉 Parabéns!</span>
+                  </div>
+                  <p className="text-sm">Você completou todos os hábitos de hoje!</p>
+                  <p className="font-bold text-primary text-lg">+{todayXP} XP conquistados hoje</p>
+                </div>
+              ) : (
+                <>
+                  <div className="flex justify-between text-sm">
+                    <span>Progresso de Hoje</span>
+                    <span className="font-semibold">
+                      {completedToday}/{totalItems} itens
+                    </span>
+                  </div>
+                  <Progress value={progressPercentage} />
+                </>
+              )}
             </div>
           </div>
         </CardContent>
