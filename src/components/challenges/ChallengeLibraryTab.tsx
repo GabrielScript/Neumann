@@ -156,11 +156,24 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
 
       return newChallenge;
     },
-    onSuccess: () => {
+    onSuccess: async (newChallenge) => {
+      // Award XP for challenge creation
+      const { data: xpData, error: xpError } = await supabase.functions.invoke('award-creation-xp', {
+        body: {
+          type: 'challenge',
+          item_id: newChallenge.id,
+        },
+      });
+
+      if (xpError) {
+        console.error('Error awarding challenge creation XP:', xpError);
+      }
+
       queryClient.invalidateQueries({ queryKey: ["active-challenges"] });
+      queryClient.invalidateQueries({ queryKey: ["user-stats"] });
       toast({
         title: "🚀 Desafio iniciado!",
-        description: "Boa sorte na sua jornada!",
+        description: `Boa sorte na sua jornada! +${xpData?.xpAwarded || 0} XP`,
       });
       setDetailsOpen(false);
       onChallengeStarted();

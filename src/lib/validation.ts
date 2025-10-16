@@ -61,7 +61,7 @@ export const lifeGoalSchema = z.object({
     .trim()
     .min(1, 'Título do objetivo é obrigatório')
     .max(100, 'Título deve ter no máximo 100 caracteres'),
-  deadline: z.string().optional(),
+  deadline: z.string().min(1, 'Prazo é obrigatório'),
   happiness_level: z.number()
     .int('Nível de felicidade deve ser um número inteiro')
     .min(1, 'Nível mínimo é 1')

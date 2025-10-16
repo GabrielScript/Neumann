@@ -189,10 +189,23 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
 
       if (itemsError) throw itemsError;
 
+      // Award XP for challenge creation
+      const { data: xpData, error: xpError } = await supabase.functions.invoke('award-creation-xp', {
+        body: {
+          type: 'challenge',
+          item_id: newChallenge.id,
+        },
+      });
+
+      if (xpError) {
+        console.error('Error awarding challenge creation XP:', xpError);
+      }
+
       queryClient.invalidateQueries({ queryKey: ["active-challenges"] });
+      queryClient.invalidateQueries({ queryKey: ["user-stats"] });
       toast({
         title: "🚀 Desafio criado!",
-        description: "Seu desafio personalizado foi iniciado com sucesso!",
+        description: `Seu desafio personalizado foi iniciado com sucesso! +${xpData?.xpAwarded || 0} XP`,
       });
 
       // Reset form

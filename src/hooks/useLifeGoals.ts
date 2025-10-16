@@ -28,7 +28,7 @@ export function useLifeGoals() {
   const createGoalMutation = useMutation({
     mutationFn: async (goal: {
       title: string;
-      deadline?: string;
+      deadline: string;
       happiness_level?: number;
       motivation?: string;
       action_plan?: string;
@@ -45,13 +45,27 @@ export function useLifeGoals() {
         .single();
 
       if (error) throw error;
-      return data;
+
+      // Award XP for goal creation
+      const { data: xpData, error: xpError } = await supabase.functions.invoke('award-creation-xp', {
+        body: {
+          type: 'goal',
+          item_id: data.id,
+        },
+      });
+
+      if (xpError) {
+        console.error('Error awarding goal creation XP:', xpError);
+      }
+
+      return { goal: data, xpAwarded: xpData?.xpAwarded || 0 };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["life-goals"] });
+      queryClient.invalidateQueries({ queryKey: ["user-stats"] });
       toast({
         title: "✅ Objetivo criado!",
-        description: "Seu novo objetivo foi adicionado com sucesso.",
+        description: `Seu novo objetivo foi adicionado com sucesso. +${result.xpAwarded} XP`,
       });
     },
   });

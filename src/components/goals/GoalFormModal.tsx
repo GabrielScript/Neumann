@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { CalendarIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -10,16 +13,23 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { lifeGoalSchema } from "@/lib/validation";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
 interface GoalFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (goal: {
     title: string;
-    deadline?: string;
+    deadline: string;
     happiness_level: number;
     motivation: string;
     action_plan: string;
@@ -40,7 +50,9 @@ export function GoalFormModal({
   initialData,
 }: GoalFormModalProps) {
   const [title, setTitle] = useState(initialData?.title || "");
-  const [deadline, setDeadline] = useState(initialData?.deadline || "");
+  const [deadline, setDeadline] = useState<Date | undefined>(
+    initialData?.deadline ? new Date(initialData.deadline) : undefined
+  );
   const [happinessLevel, setHappinessLevel] = useState(
     initialData?.happiness_level || 5
   );
@@ -52,7 +64,7 @@ export function GoalFormModal({
   useEffect(() => {
     if (open) {
       setTitle(initialData?.title || "");
-      setDeadline(initialData?.deadline || "");
+      setDeadline(initialData?.deadline ? new Date(initialData.deadline) : undefined);
       setHappinessLevel(initialData?.happiness_level || 5);
       setMotivation(initialData?.motivation || "");
       setActionPlan(initialData?.action_plan || "");
@@ -62,11 +74,22 @@ export function GoalFormModal({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!deadline) {
+      toast({
+        title: "Erro de validação",
+        description: "O prazo é obrigatório",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const deadlineString = format(deadline, 'yyyy-MM-dd');
+    
     // Validate goal data
     try {
       lifeGoalSchema.parse({
         title,
-        deadline: deadline || undefined,
+        deadline: deadlineString,
         happiness_level: happinessLevel,
         motivation,
         action_plan: actionPlan,
@@ -84,7 +107,7 @@ export function GoalFormModal({
     
     onSubmit({
       title,
-      deadline: deadline || undefined,
+      deadline: deadlineString,
       happiness_level: happinessLevel,
       motivation,
       action_plan: actionPlan,
@@ -92,7 +115,7 @@ export function GoalFormModal({
 
     // Reset form
     setTitle("");
-    setDeadline("");
+    setDeadline(undefined);
     setHappinessLevel(5);
     setMotivation("");
     setActionPlan("");
@@ -127,13 +150,36 @@ export function GoalFormModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="deadline">Prazo (opcional)</Label>
-            <Input
-              id="deadline"
-              type="date"
-              value={deadline}
-              onChange={(e) => setDeadline(e.target.value)}
-            />
+            <Label htmlFor="deadline">Prazo *</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !deadline && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {deadline ? (
+                    format(deadline, "PPP", { locale: ptBR })
+                  ) : (
+                    <span>Selecione uma data</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={deadline}
+                  onSelect={setDeadline}
+                  disabled={(date) => date < new Date()}
+                  initialFocus
+                  locale={ptBR}
+                  className={cn("p-3 pointer-events-auto")}
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="space-y-2">
