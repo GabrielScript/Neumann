@@ -9,18 +9,7 @@ interface CompleteGoalRequest {
   goal_id: string;
 }
 
-// XP calculation logic
-function calculateLevel(xp: number): number {
-  return Math.floor(xp / 100) + 1;
-}
-
-function getTrophyStage(level: number): string {
-  if (level <= 10) return 'municipal';
-  if (level <= 25) return 'estadual';
-  if (level <= 45) return 'regional';
-  if (level <= 70) return 'nacional';
-  return 'internacional';
-}
+// Removed local XP calculation - now handled by award_xp RPC
 
 Deno.serve(async (req) => {
   // Handle CORS preflight
@@ -29,9 +18,12 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabase = createClient(
+    const requestId = crypto.randomUUID();
+    
+    const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      { auth: { persistSession: false } }
     );
 
     // Get user from auth header
@@ -41,7 +33,7 @@ Deno.serve(async (req) => {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
 
     if (authError || !user) {
       throw new Error('Unauthorized');
@@ -49,10 +41,10 @@ Deno.serve(async (req) => {
 
     const { goal_id }: CompleteGoalRequest = await req.json();
 
-    console.log(`Complete life goal request - User: ${user.id}, Goal: ${goal_id}`);
+    console.log(`[${requestId}] Life goal completion started`);
 
     // 1. Verify goal ownership and not already completed
-    const { data: goal, error: goalError } = await supabase
+    const { data: goal, error: goalError } = await supabaseAdmin
       .from('life_goals')
       .select('*')
       .eq('id', goal_id)
@@ -67,8 +59,23 @@ Deno.serve(async (req) => {
       throw new Error('Goal already completed');
     }
 
+    console.log(`[${requestId}] Goal ownership verified`);
+
+    // 1b. Rate limit goal completions (max 5 per hour)
+    const { data: recentGoals } = await supabaseAdmin
+      .from('life_goals')
+      .select('completed_at')
+      .eq('user_id', user.id)
+      .eq('is_completed', true)
+      .gte('completed_at', new Date(Date.now() - 3600000).toISOString())
+      .limit(10);
+
+    if (recentGoals && recentGoals.length >= 5) {
+      throw new Error('Life goal completion rate limit: max 5 per hour');
+    }
+
     // 2. Mark goal as completed
-    const { error: updateGoalError } = await supabase
+    const { error: updateGoalError } = await supabaseAdmin
       .from('life_goals')
       .update({
         is_completed: true,
@@ -78,70 +85,70 @@ Deno.serve(async (req) => {
 
     if (updateGoalError) throw updateGoalError;
 
-    // 3. Get current stats
-    const { data: stats, error: statsError } = await supabase
+    // 3. Get current stats (for level comparison)
+    const { data: statsBefore, error: statsError } = await supabaseAdmin
       .from('user_stats')
-      .select('*')
+      .select('level, life_goal_trophies')
       .eq('user_id', user.id)
       .single();
 
     if (statsError) throw statsError;
 
-    // 4. Award 500 XP for life goal completion
+    const oldLevel = statsBefore.level;
+
+    // 4. Award 500 XP via secure award_xp RPC
     const xpAmount = 500;
-    const oldLevel = stats.level;
-    const newXP = stats.xp + xpAmount;
-    const newLevel = calculateLevel(newXP);
-    const newTrophyStage = getTrophyStage(newLevel);
-    const leveledUp = newLevel > oldLevel;
+    console.log(`[${requestId}] Awarding ${xpAmount} XP via award_xp RPC`);
 
-    // Check level limit
-    const { data: subscription } = await supabase
-      .from('user_subscriptions')
-      .select('tier')
-      .eq('user_id', user.id)
-      .single();
+    const { error: xpError } = await supabaseAdmin.rpc('award_xp', {
+      _user_id: user.id,
+      _amount: xpAmount,
+      _reason: 'life_goal_completed',
+      _metadata: { 
+        goal_id, 
+        goal_title: goal.title,
+        awarded_trophy: true,
+        request_id: requestId
+      },
+      _caller_function: 'complete-life-goal'
+    });
 
-    const tier = subscription?.tier || 'free';
-    const blocked = tier === 'free' && newLevel > 25;
+    if (xpError) {
+      // Check if it's a tier limit error
+      if (xpError.message?.includes('limit')) {
+        console.log(`[${requestId}] XP limit reached for user's tier`);
 
-    if (blocked) {
-      // Still mark goal as complete but don't award XP/trophy
-      return new Response(
-        JSON.stringify({
-          success: true,
-          blocked: true,
-          message: 'Level limit reached for free tier',
-        }),
-        {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 200,
-        }
-      );
+        return new Response(
+          JSON.stringify({
+            success: true,
+            blocked: true,
+            message: 'Level limit reached for tier',
+          }),
+          {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 200,
+          }
+        );
+      }
+      throw xpError;
     }
 
-    // 5. Update user stats with XP and special trophy
-    const { error: updateStatsError } = await supabase
+    // 5. Update life goal trophy count
+    const { data: updatedStats, error: updateStatsError } = await supabaseAdmin
       .from('user_stats')
-      .update({
-        xp: newXP,
-        level: newLevel,
-        tree_stage: newTrophyStage,
-        life_goal_trophies: (stats.life_goal_trophies || 0) + 1,
+      .update({ 
+        life_goal_trophies: (statsBefore.life_goal_trophies || 0) + 1 
       })
-      .eq('user_id', user.id);
+      .eq('user_id', user.id)
+      .select('level, xp')
+      .single();
 
     if (updateStatsError) throw updateStatsError;
 
-    // 6. Log XP award in audit table (important for high-value awards)
-    await supabase.from('xp_audit_log').insert({
-      user_id: user.id,
-      amount: xpAmount,
-      reason: 'life_goal_completed',
-      metadata: { goal_id, goal_title: goal.title },
-    });
+    const newLevel = updatedStats.level;
+    const leveledUp = newLevel > oldLevel;
 
-    console.log(`Life goal completed - Awarded ${xpAmount} XP, Level ${oldLevel} -> ${newLevel}`);
+    console.log(`[${requestId}] Life goal completed - Awarded ${xpAmount} XP, Level ${oldLevel} -> ${newLevel}`);
 
     return new Response(
       JSON.stringify({

@@ -16,9 +16,12 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabase = createClient(
+    const requestId = crypto.randomUUID();
+    
+    const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      { auth: { persistSession: false } }
     );
 
     // Get user from auth header
@@ -28,7 +31,7 @@ Deno.serve(async (req) => {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
 
     if (authError || !user) {
       throw new Error('Unauthorized');
@@ -37,10 +40,10 @@ Deno.serve(async (req) => {
     const body: UpdateStreakRequest = await req.json().catch(() => ({}));
     const activityDate = body.date || new Date().toISOString().split('T')[0];
 
-    console.log(`Update streak request - User: ${user.id}, Date: ${activityDate}`);
+    console.log(`[${requestId}] Streak update started`);
 
     // Get current stats
-    const { data: stats, error: statsError } = await supabase
+    const { data: stats, error: statsError } = await supabaseAdmin
       .from('user_stats')
       .select('*')
       .eq('user_id', user.id)
@@ -77,8 +80,8 @@ Deno.serve(async (req) => {
 
     const newBestStreak = Math.max(bestStreak, newStreak);
 
-    // Update stats
-    const { error: updateError } = await supabase
+    // Update user_stats with new streak
+    const { error: updateError } = await supabaseAdmin
       .from('user_stats')
       .update({
         current_streak: newStreak,
@@ -88,8 +91,8 @@ Deno.serve(async (req) => {
       .eq('user_id', user.id);
 
     if (updateError) throw updateError;
-
-    console.log(`Streak updated - Current: ${newStreak}, Best: ${newBestStreak}`);
+    
+    console.log(`[${requestId}] Streak updated - Current: ${newStreak}, Best: ${newBestStreak}`);
 
     return new Response(
       JSON.stringify({
