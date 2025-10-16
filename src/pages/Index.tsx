@@ -1,10 +1,26 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Target, Trophy, Medal, TrendingUp, Users } from 'lucide-react';
 import logo from '@/assets/logo.png';
+import { useAuth } from '@/contexts/AuthContext';
+import { useOnboarding } from '@/hooks/useOnboarding';
 
 const Index = () => {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+  const { onboardingStatus, isLoading: isLoadingOnboarding } = useOnboarding();
+
+  useEffect(() => {
+    // Se o usuário está autenticado, verificar o status do onboarding
+    if (user && !authLoading && !isLoadingOnboarding) {
+      if (!onboardingStatus || !onboardingStatus.completed) {
+        navigate('/onboarding');
+      } else {
+        navigate('/dashboard');
+      }
+    }
+  }, [user, authLoading, onboardingStatus, isLoadingOnboarding, navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-hero">

@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Target, Trophy, TrendingUp, Flame, Sparkles, Zap, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useOnboarding } from '@/hooks/useOnboarding';
 
 interface UserStats {
   xp: number;
@@ -39,6 +40,7 @@ interface Profile {
 
 const Dashboard = () => {
   const { user, loading: authLoading } = useAuth();
+  const { onboardingStatus, isLoading: isLoadingOnboarding } = useOnboarding();
   const navigate = useNavigate();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [activeChallenges, setActiveChallenges] = useState<Challenge[]>([]);
@@ -52,10 +54,16 @@ const Dashboard = () => {
       navigate('/auth');
       return;
     }
-    if (user) {
+    
+    // Verificar se o onboarding foi completado
+    if (user && !isLoadingOnboarding) {
+      if (!onboardingStatus || !onboardingStatus.completed) {
+        navigate('/onboarding');
+        return;
+      }
       loadDashboardData();
     }
-  }, [user, authLoading, navigate]);
+  }, [user, authLoading, onboardingStatus, isLoadingOnboarding, navigate]);
 
   const loadDashboardData = async () => {
     try {
@@ -119,7 +127,7 @@ const Dashboard = () => {
     }
   };
 
-  if (loading) {
+  if (loading || isLoadingOnboarding) {
     return (
       <Layout>
         <div className="flex items-center justify-center h-full">
