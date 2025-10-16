@@ -89,8 +89,9 @@ export default function Subscriptions() {
       features: [
         'Apenas 1 desafio ativo por dia',
         '1 objetivo por mês',
-        'Limite de nível 25',
-        'Sem acesso à comunidade',
+        'Limite de nível 50',
+        'Acesso à comunidade no nível 25',
+        'Limite de 1 comunidade',
       ],
     },
     {
