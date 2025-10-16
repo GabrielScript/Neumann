@@ -10,9 +10,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Trophy, KeyRound, Loader2 } from 'lucide-react';
+import { KeyRound, Loader2 } from 'lucide-react';
 import { signUpSchema, signInSchema, forgotPasswordSchema } from '@/lib/validation';
 import { z } from 'zod';
+import logo from '@/assets/logo.png';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -156,7 +157,7 @@ const Auth = () => {
         <CardHeader className="text-center space-y-2">
           <div className="flex justify-center mb-4">
             <div className="p-3 bg-primary/10 rounded-2xl">
-              <Trophy className="w-12 h-12 text-primary" />
+              <img src={logo} alt="Neumann Logo" className="w-12 h-12" />
             </div>
           </div>
           <CardTitle className="text-3xl font-bold font-display">Neumann</CardTitle>
