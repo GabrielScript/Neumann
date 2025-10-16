@@ -15,6 +15,7 @@ import { CommunityRole } from '@/hooks/useCommunity';
 import { useState } from 'react';
 import { DirectChatModal } from './DirectChatModal';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserPresence } from '@/hooks/useUserPresence';
 
 interface MembersListModalProps {
   open: boolean;
@@ -29,6 +30,7 @@ export const MembersListModal = ({
 }: MembersListModalProps) => {
   const { members } = useCommunityMembers(communityId);
   const { user } = useAuth();
+  const { isUserOnline } = useUserPresence(communityId || null);
   const [selectedMember, setSelectedMember] = useState<{ id: string; name: string } | null>(null);
 
   const getRoleBadge = (role: CommunityRole) => {
@@ -75,6 +77,14 @@ export const MembersListModal = ({
                   <Card key={member.id} className="p-4 hover:bg-accent/50 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3 flex-1">
+                        <div className="relative">
+                          <div 
+                            className={`w-3 h-3 rounded-full ${
+                              isUserOnline(member.user_id) ? 'bg-green-500' : 'bg-red-500'
+                            }`}
+                            title={isUserOnline(member.user_id) ? 'Online' : 'Offline'}
+                          />
+                        </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
                             <h3 className="font-semibold">
