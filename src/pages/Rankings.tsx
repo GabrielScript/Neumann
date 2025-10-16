@@ -5,11 +5,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCommunityRankings } from "@/hooks/useCommunityRankings";
 import { RankingList } from "@/components/community/RankingList";
 import { UserProfileModal } from "@/components/community/UserProfileModal";
+import { DirectChatModal } from "@/components/community/DirectChatModal";
+import { useAuth } from "@/contexts/AuthContext";
 import { Trophy, Flame, TrendingUp, Target, Sparkles } from "lucide-react";
 
 const Rankings = () => {
+  const { user } = useAuth();
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [selectedChatUser, setSelectedChatUser] = useState<{ id: string; name: string } | null>(null);
 
   const {
     levelRanking,
@@ -23,6 +27,10 @@ const Rankings = () => {
   const handleViewProfile = (userId: string) => {
     setSelectedUserId(userId);
     setIsProfileModalOpen(true);
+  };
+
+  const handleStartChat = (userId: string, userName: string) => {
+    setSelectedChatUser({ id: userId, name: userName });
   };
 
   return (
@@ -74,6 +82,8 @@ const Rankings = () => {
                     data={levelRanking} 
                     type="level" 
                     onViewProfile={handleViewProfile}
+                    onStartChat={handleStartChat}
+                    currentUserId={user?.id}
                   />
                 </TabsContent>
 
@@ -82,6 +92,8 @@ const Rankings = () => {
                     data={currentStreakRanking} 
                     type="current_streak" 
                     onViewProfile={handleViewProfile}
+                    onStartChat={handleStartChat}
+                    currentUserId={user?.id}
                   />
                 </TabsContent>
 
@@ -90,6 +102,8 @@ const Rankings = () => {
                     data={bestStreakRanking} 
                     type="best_streak" 
                     onViewProfile={handleViewProfile}
+                    onStartChat={handleStartChat}
+                    currentUserId={user?.id}
                   />
                 </TabsContent>
 
@@ -98,6 +112,8 @@ const Rankings = () => {
                     data={lifeGoalTrophiesRanking} 
                     type="life_goals" 
                     onViewProfile={handleViewProfile}
+                    onStartChat={handleStartChat}
+                    currentUserId={user?.id}
                   />
                 </TabsContent>
 
@@ -106,6 +122,8 @@ const Rankings = () => {
                     data={challengesCompletedRanking} 
                     type="challenges" 
                     onViewProfile={handleViewProfile}
+                    onStartChat={handleStartChat}
+                    currentUserId={user?.id}
                   />
                 </TabsContent>
               </Tabs>
@@ -119,6 +137,16 @@ const Rankings = () => {
         open={isProfileModalOpen}
         onOpenChange={setIsProfileModalOpen}
       />
+
+      {selectedChatUser && (
+        <DirectChatModal
+          open={!!selectedChatUser}
+          onOpenChange={(open) => !open && setSelectedChatUser(null)}
+          communityId={undefined}
+          otherUserId={selectedChatUser.id}
+          otherUserName={selectedChatUser.name}
+        />
+      )}
     </Layout>
   );
 };

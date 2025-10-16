@@ -1,7 +1,7 @@
 import { RankingEntry } from "@/hooks/useCommunityRankings";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Crown, Eye } from "lucide-react";
+import { Crown, Eye, MessageCircle } from "lucide-react";
 import { getTrophyStageName } from "@/lib/xp";
 import { cn } from "@/lib/utils";
 
@@ -9,6 +9,8 @@ interface RankingListProps {
   data: RankingEntry[];
   type: 'level' | 'current_streak' | 'best_streak' | 'life_goals' | 'challenges';
   onViewProfile: (userId: string) => void;
+  onStartChat?: (userId: string, userName: string) => void;
+  currentUserId?: string;
 }
 
 const getValueLabel = (type: RankingListProps['type'], value: number) => {
@@ -26,7 +28,7 @@ const getValueLabel = (type: RankingListProps['type'], value: number) => {
   }
 };
 
-export const RankingList = ({ data, type, onViewProfile }: RankingListProps) => {
+export const RankingList = ({ data, type, onViewProfile, onStartChat, currentUserId }: RankingListProps) => {
   if (data.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
@@ -96,16 +98,28 @@ export const RankingList = ({ data, type, onViewProfile }: RankingListProps) => 
                 </div>
               </div>
 
-              {/* View Profile Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onViewProfile(entry.userId)}
-                className="shrink-0"
-              >
-                <Eye className="w-4 h-4 mr-2" />
-                Ver Perfil
-              </Button>
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onViewProfile(entry.userId)}
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  Ver Perfil
+                </Button>
+                
+                {onStartChat && currentUserId && entry.userId !== currentUserId && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onStartChat(entry.userId, entry.userName)}
+                  >
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Chat
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         );
