@@ -106,6 +106,7 @@ export default function Subscriptions() {
         'Nível XP ilimitado',
         'Turbo XP de 1,5%',
         'Acesso à comunidade',
+        'Criação de comunidades no nivel 25',
         'Limite de 5 comunidades',
         'Ajuste dos desafios padrão',
       ],
