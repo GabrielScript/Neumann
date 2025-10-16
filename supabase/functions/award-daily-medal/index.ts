@@ -38,7 +38,8 @@ Deno.serve(async (req) => {
 
     const { date, challenges_completed, total_challenges }: AwardMedalRequest = await req.json();
 
-    console.log(`Award daily medal - User: ${user.id}, Date: ${date}, Completed: ${challenges_completed}/${total_challenges}`);
+    const requestId = crypto.randomUUID();
+    console.log(`[${requestId}] Processing - Date: ${date}, Completed: ${challenges_completed}/${total_challenges}`);
 
     // Calculate medal type based on completion percentage
     let medalType: 'gold' | 'silver' | 'bronze' | null = null;
@@ -133,7 +134,7 @@ Deno.serve(async (req) => {
 
     if (updateError) throw updateError;
 
-    console.log(`Medal awarded - Type: ${medalType}, Total: ${currentCount + 1}`);
+    console.log(`[${requestId}] Medal awarded - Type: ${medalType}, Total: ${currentCount + 1}`);
 
     return new Response(
       JSON.stringify({
@@ -147,7 +148,8 @@ Deno.serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error in award-daily-medal:', error);
+    const requestId = crypto.randomUUID();
+    console.error(`[${requestId}] ERROR in award-daily-medal:`, error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
       JSON.stringify({ error: errorMessage }),

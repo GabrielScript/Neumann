@@ -17,10 +17,6 @@ function calculateLevel(xp: number): number {
   return Math.floor(xp / 100) + 1;
 }
 
-function getXPForNextLevel(level: number): number {
-  return level * 100;
-}
-
 function getTrophyStage(level: number): string {
   if (level <= 10) return 'municipal';
   if (level <= 25) return 'estadual';
@@ -35,8 +31,11 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const requestId = crypto.randomUUID();
+
   try {
-    const supabase = createClient(
+    // Admin client for secure database operations
+    const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
@@ -48,7 +47,7 @@ Deno.serve(async (req) => {
     }
 
     const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
 
     if (authError || !user) {
       throw new Error('Unauthorized');
@@ -56,12 +55,12 @@ Deno.serve(async (req) => {
 
     const { challenge_id, item_id, date, completed }: AwardXPRequest = await req.json();
 
-    console.log(`Award XP request - User: ${user.id}, Challenge: ${challenge_id}, Item: ${item_id}, Completed: ${completed}`);
+    console.log(`[${requestId}] Processing - Challenge: ${challenge_id}, Item: ${item_id}, Completed: ${completed}`);
 
     // 1. Verify challenge ownership
-    const { data: challenge, error: challengeError } = await supabase
+    const { data: challenge, error: challengeError } = await supabaseAdmin
       .from('challenges')
-      .select('user_id')
+      .select('user_id, completed_days, duration_days')
       .eq('id', challenge_id)
       .eq('user_id', user.id)
       .single();
@@ -71,7 +70,7 @@ Deno.serve(async (req) => {
     }
 
     // 2. Verify item belongs to challenge
-    const { data: item, error: itemError } = await supabase
+    const { data: item, error: itemError } = await supabaseAdmin
       .from('challenge_items')
       .select('id')
       .eq('id', item_id)
@@ -83,7 +82,7 @@ Deno.serve(async (req) => {
     }
 
     // 3. Check if progress already exists
-    const { data: existing, error: fetchError } = await supabase
+    const { data: existing, error: fetchError } = await supabaseAdmin
       .from('challenge_progress')
       .select('*')
       .eq('challenge_id', challenge_id)
@@ -95,14 +94,14 @@ Deno.serve(async (req) => {
 
     // 4. Update or insert progress
     if (existing) {
-      const { error: updateError } = await supabase
+      const { error: updateError } = await supabaseAdmin
         .from('challenge_progress')
         .update({ completed })
         .eq('id', existing.id);
 
       if (updateError) throw updateError;
     } else {
-      const { error: insertError } = await supabase
+      const { error: insertError } = await supabaseAdmin
         .from('challenge_progress')
         .insert({
           challenge_id,
@@ -126,64 +125,59 @@ Deno.serve(async (req) => {
     if (completed && (!existing || !existing.completed)) {
       const xpAmount = 10;
 
-      // Get current stats
-      const { data: stats, error: statsError } = await supabase
-        .from('user_stats')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+      console.log(`[${requestId}] Awarding ${xpAmount} XP for item completion...`);
 
-      if (statsError) throw statsError;
-
-      const oldLevel = stats.level;
-      const newXP = stats.xp + xpAmount;
-      const newLevel = calculateLevel(newXP);
-      const newTrophyStage = getTrophyStage(newLevel);
-      const leveledUp = newLevel > oldLevel;
-
-      // Check level limit based on subscription
-      const { data: subscription } = await supabase
-        .from('user_subscriptions')
-        .select('tier')
-        .eq('user_id', user.id)
-        .single();
-
-      const tier = subscription?.tier || 'free';
-      const blocked = tier === 'free' && newLevel > 25;
-
-      if (!blocked) {
-        // Update user stats
-        const { error: updateStatsError } = await supabase
-          .from('user_stats')
-          .update({
-            xp: newXP,
-            level: newLevel,
-            tree_stage: newTrophyStage,
-          })
-          .eq('user_id', user.id);
-
-        if (updateStatsError) throw updateStatsError;
-
-        // Log XP award in audit table
-        await supabase.from('xp_audit_log').insert({
-          user_id: user.id,
-          amount: xpAmount,
-          reason: 'challenge_item_completed',
-          metadata: { challenge_id, item_id, date },
+      try {
+        // Use secure award_xp function
+        const { error: awardError } = await supabaseAdmin.rpc('award_xp', {
+          _user_id: user.id,
+          _amount: xpAmount,
+          _reason: 'challenge_item_completed',
+          _metadata: { challenge_id, item_id, date },
+          _caller_function: 'award-challenge-xp'
         });
 
+        if (awardError) {
+          // Check if it's a limit error
+          if (awardError.message?.includes('limit')) {
+            console.log(`[${requestId}] XP limit reached: ${awardError.message}`);
+            return new Response(
+              JSON.stringify({
+                success: false,
+                message: awardError.message,
+                xpAwarded: 0,
+              }),
+              { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+            );
+          }
+          throw awardError;
+        }
+
         result.xpAwarded = xpAmount;
-        result.leveledUp = leveledUp;
-        result.newLevel = newLevel;
+
+        // Get updated stats
+        const { data: stats } = await supabaseAdmin
+          .from('user_stats')
+          .select('xp, level')
+          .eq('user_id', user.id)
+          .single();
+
+        if (stats) {
+          result.newLevel = stats.level;
+          result.leveledUp = true;
+        }
+      } catch (error) {
+        console.error(`[${requestId}] Error awarding XP:`, error);
+        throw error;
       }
 
       // 6. Check if all items for the day are complete
-      const { data: allItems } = await supabase
+      const { data: allItems } = await supabaseAdmin
         .from('challenge_items')
         .select('id')
         .eq('challenge_id', challenge_id);
 
-      const { data: allProgress } = await supabase
+      const { data: allProgress } = await supabaseAdmin
         .from('challenge_progress')
         .select('*')
         .eq('challenge_id', challenge_id)
@@ -192,63 +186,49 @@ Deno.serve(async (req) => {
       const totalItems = allItems?.length || 0;
       const completedItems = allProgress?.filter((p) => p.completed).length || 0;
 
-      if (totalItems > 0 && completedItems === totalItems && !blocked) {
+      if (totalItems > 0 && completedItems === totalItems) {
+        console.log(`[${requestId}] Day complete! Awarding bonus...`);
+        
         // Day complete bonus - award 50 XP
         const bonusAmount = 50;
-        const bonusXP = newXP + bonusAmount;
-        const bonusLevel = calculateLevel(bonusXP);
-        const bonusTrophyStage = getTrophyStage(bonusLevel);
 
-        await supabase
-          .from('user_stats')
-          .update({
-            xp: bonusXP,
-            level: bonusLevel,
-            tree_stage: bonusTrophyStage,
-          })
-          .eq('user_id', user.id);
+        try {
+          await supabaseAdmin.rpc('award_xp', {
+            _user_id: user.id,
+            _amount: bonusAmount,
+            _reason: 'day_complete_bonus',
+            _metadata: { challenge_id, date, total_items: totalItems },
+            _caller_function: 'award-challenge-xp'
+          });
 
-        // Log bonus in audit
-        await supabase.from('xp_audit_log').insert({
-          user_id: user.id,
-          amount: bonusAmount,
-          reason: 'day_complete_bonus',
-          metadata: { challenge_id, date, total_items: totalItems },
-        });
-
-        result.dayComplete = true;
-        result.xpAwarded += bonusAmount;
-        result.newLevel = bonusLevel;
-        result.leveledUp = bonusLevel > oldLevel;
-
-        // Check if this day was already completed before (to track completed days)
-        const { data: challengeData } = await supabase
-          .from('challenges')
-          .select('completed_days, duration_days')
-          .eq('id', challenge_id)
-          .single();
+          result.dayComplete = true;
+          result.xpAwarded += bonusAmount;
+        } catch (error) {
+          console.error(`[${requestId}] Error awarding day bonus:`, error);
+        }
 
         // Count unique completed days
-        const { data: completedDays } = await supabase
+        const { data: completedDays } = await supabaseAdmin
           .from('challenge_progress')
           .select('date')
           .eq('challenge_id', challenge_id)
           .eq('completed', true);
 
-        // Group by date to get unique days
         const uniqueDays = new Set(completedDays?.map(d => d.date));
         const newCompletedDays = uniqueDays.size;
 
-        if (challengeData && newCompletedDays !== challengeData.completed_days) {
+        if (newCompletedDays !== challenge.completed_days) {
           // Update completed_days count
-          await supabase
+          await supabaseAdmin
             .from('challenges')
             .update({ completed_days: newCompletedDays })
             .eq('id', challenge_id);
 
           // Check if challenge is now complete (all days done)
-          if (newCompletedDays >= challengeData.duration_days) {
-            await supabase
+          if (newCompletedDays >= challenge.duration_days) {
+            console.log(`[${requestId}] Challenge complete! Awarding completion bonus...`);
+            
+            await supabaseAdmin
               .from('challenges')
               .update({ 
                 is_active: false, 
@@ -258,68 +238,59 @@ Deno.serve(async (req) => {
             
             // Award challenge completion bonus - 200 XP
             const challengeBonus = 200;
-            const challengeBonusXP = bonusXP + challengeBonus;
-            const challengeBonusLevel = calculateLevel(challengeBonusXP);
-            const challengeBonusTrophyStage = getTrophyStage(challengeBonusLevel);
 
-            await supabase
-              .from('user_stats')
-              .update({
-                xp: challengeBonusXP,
-                level: challengeBonusLevel,
-                tree_stage: challengeBonusTrophyStage,
-              })
-              .eq('user_id', user.id);
+            try {
+              await supabaseAdmin.rpc('award_xp', {
+                _user_id: user.id,
+                _amount: challengeBonus,
+                _reason: 'challenge_completed',
+                _metadata: { challenge_id, completed_days: newCompletedDays },
+                _caller_function: 'award-challenge-xp'
+              });
 
-            await supabase.from('xp_audit_log').insert({
-              user_id: user.id,
-              amount: challengeBonus,
-              reason: 'challenge_completed',
-              metadata: { challenge_id, completed_days: newCompletedDays },
-            });
-
-            result.xpAwarded += challengeBonus;
-            result.newLevel = challengeBonusLevel;
-            result.leveledUp = challengeBonusLevel > oldLevel;
+              result.xpAwarded += challengeBonus;
+            } catch (error) {
+              console.error(`[${requestId}] Error awarding challenge bonus:`, error);
+            }
           }
         }
 
-        // Update streak (call the streak function)
-        const { error: streakError } = await supabase.functions.invoke('update-user-streak', {
-          body: { date },
-          headers: {
-            Authorization: authHeader,
-          },
-        });
-
-        if (streakError) {
-          console.error('Error updating streak:', streakError);
+        // Update streak
+        try {
+          await supabaseAdmin.functions.invoke('update-user-streak', {
+            body: { date },
+            headers: {
+              Authorization: authHeader,
+            },
+          });
+        } catch (streakError) {
+          console.error(`[${requestId}] Error updating streak:`, streakError);
         }
       }
     }
 
     // Update streak for any item completion (not just day complete)
     if (completed && (!existing || !existing.completed)) {
-      const { error: streakError } = await supabase.functions.invoke('update-user-streak', {
-        body: { date },
-        headers: {
-          Authorization: authHeader,
-        },
-      });
-
-      if (streakError) {
-        console.error('Error updating streak:', streakError);
+      try {
+        await supabaseAdmin.functions.invoke('update-user-streak', {
+          body: { date },
+          headers: {
+            Authorization: authHeader,
+          },
+        });
+      } catch (streakError) {
+        console.error(`[${requestId}] Error updating streak:`, streakError);
       }
     }
 
-    console.log('Award XP result:', result);
+    console.log(`[${requestId}] Success - Awarded ${result.xpAwarded} XP`);
 
     return new Response(JSON.stringify(result), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
   } catch (error) {
-    console.error('Error in award-challenge-xp:', error);
+    console.error(`[${requestId}] ERROR:`, error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
       JSON.stringify({ error: errorMessage }),

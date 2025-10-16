@@ -697,6 +697,7 @@ export type Database = {
       award_xp: {
         Args: {
           _amount: number
+          _caller_function?: string
           _metadata?: Json
           _reason: string
           _user_id: string
