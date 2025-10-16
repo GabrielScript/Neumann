@@ -59,12 +59,13 @@ const Onboarding = () => {
     }
   };
 
-  const handleComplete = () => {
-    completeOnboarding(undefined, {
-      onSuccess: () => {
-        navigate('/dashboard');
-      },
-    });
+  const handleComplete = async () => {
+    try {
+      await completeOnboarding();
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error completing onboarding:', error);
+    }
   };
 
   const handleSkip = () => {

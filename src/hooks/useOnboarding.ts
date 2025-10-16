@@ -56,7 +56,7 @@ export const useOnboarding = () => {
   return {
     onboardingStatus,
     isLoading,
-    completeOnboarding: completeOnboarding.mutate,
+    completeOnboarding: completeOnboarding.mutateAsync,
     isCompleting: completeOnboarding.isPending,
   };
 };
