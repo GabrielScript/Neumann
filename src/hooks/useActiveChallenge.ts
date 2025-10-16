@@ -12,7 +12,7 @@ export function useActiveChallenge() {
 
       const { data, error } = await supabase
         .from("challenges")
-        .select("*, difficulty, alignment_score") // Adicionado difficulty e alignment_score
+        .select("*")
         .eq("user_id", user.id)
         .eq("is_active", true)
         .order("created_at", { ascending: false });
