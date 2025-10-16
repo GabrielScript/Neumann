@@ -162,6 +162,7 @@ export type Database = {
       }
       challenges: {
         Row: {
+          alignment_score: number | null
           completed_at: string | null
           completed_days: number
           created_at: string
@@ -174,9 +175,9 @@ export type Database = {
           start_date: string
           template_id: string | null
           user_id: string
-          alignment_score: number | null
         }
         Insert: {
+          alignment_score?: number | null
           completed_at?: string | null
           completed_days?: number
           created_at?: string
@@ -189,9 +190,9 @@ export type Database = {
           start_date?: string
           template_id?: string | null
           user_id: string
-          alignment_score?: number | null
         }
         Update: {
+          alignment_score?: number | null
           completed_at?: string | null
           completed_days?: number
           created_at?: string
@@ -204,7 +205,6 @@ export type Database = {
           start_date?: string
           template_id?: string | null
           user_id?: string
-          alignment_score?: number | null
         }
         Relationships: [
           {
