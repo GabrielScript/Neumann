@@ -31,13 +31,22 @@ const Auth = () => {
     if (user && !isLoadingOnboarding) {
       // Se não há registro de onboarding ou não foi completado -> onboarding
       if (!onboardingStatus || !onboardingStatus.completed) {
-        navigate('/onboarding');
+        navigate('/onboarding', { replace: true });
       } else {
         // Se já completou -> dashboard
-        navigate('/dashboard');
+        navigate('/dashboard', { replace: true });
       }
     }
   }, [user, onboardingStatus, isLoadingOnboarding, navigate]);
+
+  // Mostrar loading enquanto verifica autenticação
+  if (isLoadingOnboarding) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-hero">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
