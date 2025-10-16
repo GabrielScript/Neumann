@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { NavLink, useLocation } from 'react-router-dom';
+=======
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+>>>>>>> Master
 import {
   Sidebar,
   SidebarContent,
@@ -32,6 +36,10 @@ export const AppSidebar = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const isCollapsed = state === 'collapsed';
+<<<<<<< HEAD
+=======
+  const navigate = useNavigate();
+>>>>>>> Master
 
   const handleNavClick = () => {
     if (isMobile) {
@@ -47,7 +55,15 @@ export const AppSidebar = () => {
       collapsible="icon"
     >
       <SidebarContent className="p-4">
+<<<<<<< HEAD
         <div className="mb-8 px-2">
+=======
+        <div 
+          className="mb-8 px-2 cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={() => navigate('/onboarding')}
+          title="Rever apresentação"
+        >
+>>>>>>> Master
           <div className="flex items-center gap-3">
             {!isCollapsed && (
               <>
@@ -110,4 +126,8 @@ export const AppSidebar = () => {
       </SidebarContent>
     </Sidebar>
   );
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> Master

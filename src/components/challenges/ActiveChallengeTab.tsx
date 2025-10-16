@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { useChallengeProgress } from "@/hooks/useChallengeProgress";
 import { useChallengeStats } from "@/hooks/useChallengeStats";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Trash2, CheckCircle, Calendar, Save } from "lucide-react";
+import { Plus, Trash2, CheckCircle, Calendar, Save, Pencil } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   AlertDialog,
@@ -22,6 +22,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { EditActiveChallengeModal } from "./EditActiveChallengeModal"; // Importar o novo modal
 
 interface ActiveChallengeTabProps {
   challenge: {
@@ -30,6 +31,8 @@ interface ActiveChallengeTabProps {
     start_date: string;
     end_date: string;
     duration_days: number;
+    difficulty?: number | null; // Adicionado difficulty
+    alignment_score?: number | null; // Adicionado alignment_score
   };
 }
 
@@ -45,6 +48,14 @@ const priorityLabels = {
   acessorio: "Acessório",
 };
 
+const difficultyLabels: { [key: number]: string } = {
+  1: "Muito Fácil",
+  2: "Fácil",
+  3: "Médio",
+  4: "Difícil",
+  5: "Muito Difícil",
+};
+
 export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
   const { user } = useAuth();
   const today = new Date().toISOString().split("T")[0];
@@ -54,6 +65,7 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
   
   const [abandonDialogOpen, setAbandonDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false); // Estado para o modal de edição
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -162,12 +174,31 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
                 {new Date(challenge.start_date).toLocaleDateString()} até{" "}
                 {new Date(challenge.end_date).toLocaleDateString()}
               </CardDescription>
+              <div className="flex items-center gap-2 mt-2">
+                {challenge.difficulty && (
+                  <Badge variant="outline">
+                    Dificuldade: {difficultyLabels[challenge.difficulty]}
+                  </Badge>
+                )}
+                {challenge.alignment_score && (
+                  <Badge variant="outline">
+                    Alinhamento: {challenge.alignment_score}/10
+                  </Badge>
+                )}
+              </div>
             </div>
             <div className="flex gap-2 items-center">
               <Badge variant="secondary" className="flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
                 Dias Restantes: {stats?.remainingDays || 0}
               </Badge>
+              <Button 
+                variant="outline" 
+                onClick={() => setEditModalOpen(true)} // Botão para abrir o modal de edição
+              >
+                <Pencil className="w-4 h-4 mr-2" />
+                Editar Desafio
+              </Button>
               <Button 
                 variant="outline" 
                 onClick={handleSaveAsTemplate}
@@ -236,7 +267,9 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
                       </Badge>
                     </div>
                     {item.description && (
-                      <p className="text-sm text-muted-foreground">{item.description}</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {item.description}
+                      </p>
                     )}
                     {item.reminder_time && (
                       <p className="text-xs text-muted-foreground">
@@ -272,6 +305,13 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Modal de Edição do Desafio Ativo */}
+      <EditActiveChallengeModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        challengeId={challenge.id}
+      />
     </div>
   );
 }

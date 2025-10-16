@@ -15,3 +15,4 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     autoRefreshToken: true,
   }
 });
+// Forçando recompilação para atualizar o cache do esquema.

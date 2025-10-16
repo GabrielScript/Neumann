@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { Plus, Trash2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -26,8 +27,6 @@ interface Habit {
   description: string;
   priority: string;
   facilitators: string;
-  reminder_time: string;
-  happiness_level: string;
 }
 
 interface CreateChallengeTabProps {
@@ -42,6 +41,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [alignmentScore, setAlignmentScore] = useState(5);
   const [difficulty, setDifficulty] = useState("3");
   const [duration, setDuration] = useState("21");
   const [customDuration, setCustomDuration] = useState("");
@@ -57,8 +57,6 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
         description: "",
         priority: "importante",
         facilitators: "",
-        reminder_time: "",
-        happiness_level: "5",
       },
     ]);
   };
@@ -71,16 +69,28 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
     setHabits(habits.map((h) => (h.id === id ? { ...h, [field]: value } : h)));
   };
 
+  const getEmoji = (level: number) => {
+    if (level <= 3) return "😐";
+    if (level <= 6) return "😊";
+    return "🤩";
+  };
+
   const handleCreate = async () => {
     if (!user?.id) return;
 
+    const durationDays =
+      duration === "today"
+        ? 1
+        : duration === "custom"
+        ? parseInt(customDuration) || 0
+        : parseInt(duration);
+
     // Validate challenge data
     try {
-      const durationDays = duration === "custom" ? parseInt(customDuration) : parseInt(duration);
-      
       challengeSchema.parse({
         name,
         description,
+        alignment_score: alignmentScore,
         duration_days: durationDays,
         difficulty: parseInt(difficulty),
       });
@@ -112,8 +122,6 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
           description: habit.description,
           priority: habit.priority,
           facilitators: habit.facilitators,
-          reminder_time: habit.reminder_time || undefined,
-          happiness_level: parseInt(habit.happiness_level),
         });
       }
     } catch (error) {
@@ -141,12 +149,11 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
     setIsCreating(true);
 
     try {
-      const durationDays =
-        duration === "custom" ? parseInt(customDuration) : parseInt(duration);
-
       const startDate = new Date();
       const endDate = new Date();
-      endDate.setDate(endDate.getDate() + durationDays);
+      if (duration !== "today") {
+        endDate.setDate(endDate.getDate() + durationDays);
+      }
 
       // Create challenge
       const { data: newChallenge, error: challengeError } = await supabase
@@ -156,6 +163,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
           name,
           duration_days: durationDays,
           difficulty: parseInt(difficulty),
+          alignment_score: alignmentScore,
           start_date: startDate.toISOString().split("T")[0],
           end_date: endDate.toISOString().split("T")[0],
           is_active: true,
@@ -172,8 +180,6 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
         description: habit.description,
         priority: habit.priority as "imprescindivel" | "importante" | "acessorio",
         facilitators: habit.facilitators || null,
-        reminder_time: habit.reminder_time || null,
-        happiness_level: habit.happiness_level ? parseInt(habit.happiness_level) : null,
         position: index,
       }));
 
@@ -184,7 +190,6 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
       if (itemsError) throw itemsError;
 
       queryClient.invalidateQueries({ queryKey: ["active-challenges"] });
-      
       toast({
         title: "🚀 Desafio criado!",
         description: "Seu desafio personalizado foi iniciado com sucesso!",
@@ -193,10 +198,11 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
       // Reset form
       setName("");
       setDescription("");
+      setAlignmentScore(5);
       setDifficulty("3");
       setDuration("21");
       setHabits([]);
-      
+
       onChallengeCreated();
     } catch (error: any) {
       toast({
@@ -239,6 +245,20 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
         </div>
 
         <div className="space-y-2">
+          <Label>
+            O quanto esse desafio se relaciona com seus sonhos e objetivos de vida? {getEmoji(alignmentScore)} {alignmentScore}/10
+          </Label>
+          <Slider
+            value={[alignmentScore]}
+            onValueChange={([value]) => setAlignmentScore(value)}
+            min={1}
+            max={10}
+            step={1}
+            className="w-full"
+          />
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="difficulty">Nível de Dificuldade *</Label>
           <Select value={difficulty} onValueChange={setDifficulty}>
             <SelectTrigger>
@@ -261,6 +281,7 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="today">Até Hoje</SelectItem>
               <SelectItem value="1">1 dia</SelectItem>
               <SelectItem value="7">7 dias</SelectItem>
               <SelectItem value="21">21 dias</SelectItem>
@@ -338,31 +359,6 @@ export function CreateChallengeTab({ onChallengeCreated }: CreateChallengeTabPro
                         placeholder="O que você pode fazer para tornar este hábito mais fácil?"
                         rows={2}
                         maxLength={500}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-foreground font-medium">Horário (opcional)</Label>
-                      <div className="flex gap-2 items-center">
-                        <Input
-                          type="time"
-                          value={habit.reminder_time}
-                          onChange={(e) => updateHabit(habit.id, "reminder_time", e.target.value)}
-                          className="max-w-[150px]"
-                        />
-                        <span className="text-sm text-muted-foreground">Formato: 24 horas (HH:MM)</span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-foreground font-medium">Nível de felicidade *</Label>
-                      <Input
-                        type="number"
-                        min="1"
-                        max="10"
-                        value={habit.happiness_level}
-                        onChange={(e) => updateHabit(habit.id, "happiness_level", e.target.value)}
-                        placeholder="De 1 a 10"
                       />
                     </div>
 
