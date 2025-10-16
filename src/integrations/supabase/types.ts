@@ -526,6 +526,41 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          community_id: string | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          community_id?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          community_id?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_stats: {
         Row: {
           best_streak: number
@@ -659,6 +694,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      award_xp: {
+        Args: {
+          _amount: number
+          _metadata?: Json
+          _reason: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       can_create_community: {
         Args: { p_user_id: string }
         Returns: boolean
@@ -691,6 +735,14 @@ export type Database = {
         Args: { p_community_id: string; p_user_id: string }
         Returns: Database["public"]["Enums"]["community_role"]
       }
+      has_community_role: {
+        Args: {
+          _community_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_plus_subscription: {
         Args: { p_user_id: string }
         Returns: boolean
@@ -701,6 +753,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "community_admin" | "community_moderator" | "community_member"
       community_role: "challenger_leader" | "champion" | "novice"
       priority_level: "imprescindivel" | "importante" | "acessorio"
       subscription_tier: "free" | "plus_monthly" | "plus_annual"
@@ -831,6 +884,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["community_admin", "community_moderator", "community_member"],
       community_role: ["challenger_leader", "champion", "novice"],
       priority_level: ["imprescindivel", "importante", "acessorio"],
       subscription_tier: ["free", "plus_monthly", "plus_annual"],

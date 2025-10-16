@@ -141,11 +141,21 @@ export const communitySchema = z.object({
     .optional(),
 });
 
+// Sanitize chat messages to prevent XSS attacks
+// Even though React JSX escapes by default, this adds an extra security layer
 export const chatMessageSchema = z.object({
   message: z.string()
     .trim()
     .min(1, 'Mensagem não pode estar vazia')
-    .max(1000, 'Mensagem deve ter no máximo 1000 caracteres'),
+    .max(1000, 'Mensagem deve ter no máximo 1000 caracteres')
+    .transform(val => {
+      // Remove any HTML tags and script content
+      return val
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        .replace(/<[^>]+>/g, '')
+        .replace(/javascript:/gi, '')
+        .replace(/on\w+\s*=/gi, '');
+    }),
 });
 
 // Profile validation schema

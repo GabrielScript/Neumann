@@ -41,7 +41,8 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
     if (userError) throw new Error(`Authentication error: ${userError.message}`);
     if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    // Log without exposing PII
+    logStep("User authenticated");
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
@@ -70,7 +71,7 @@ serve(async (req) => {
     }
 
     const customerId = customers.data[0].id;
-    logStep("Found Stripe customer", { customerId });
+    logStep("Found Stripe customer");
 
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
@@ -113,7 +114,7 @@ serve(async (req) => {
       
       productId = subscription.items.data[0].price.product as string;
       const priceId = subscription.items.data[0].price.id;
-      logStep("Subscription details", { productId, priceId });
+      logStep("Subscription details retrieved");
 
       // Map product to tier based on price ID
       if (priceId === 'price_1QkxdMAi9dCfWAipC3MaIc6a' || priceId === 'price_1SIBXMPzwST7RaKh5ePjbrBw') {

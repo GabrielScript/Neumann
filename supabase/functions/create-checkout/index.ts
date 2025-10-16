@@ -28,7 +28,8 @@ serve(async (req) => {
     const { priceId } = await req.json();
     if (!priceId) throw new Error("Price ID is required");
 
-    console.log(`Creating checkout session for user ${user.email} with price ${priceId}`);
+    // Log without sensitive user data
+    console.log(`[CREATE-CHECKOUT] Creating session for price ${priceId}`);
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
@@ -38,7 +39,7 @@ serve(async (req) => {
     let customerId;
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
-      console.log(`Found existing customer: ${customerId}`);
+      console.log(`[CREATE-CHECKOUT] Found existing customer`);
     } else {
       console.log(`No existing customer found for ${user.email}`);
     }
@@ -57,7 +58,7 @@ serve(async (req) => {
       cancel_url: `${req.headers.get("origin")}/subscriptions?canceled=true`,
     });
 
-    console.log(`Checkout session created: ${session.id}`);
+    console.log(`[CREATE-CHECKOUT] Session created successfully`);
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
