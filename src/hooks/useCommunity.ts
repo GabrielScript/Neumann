@@ -213,6 +213,7 @@ export const useCommunity = () => {
     allCommunities,
     isLoading,
     createCommunity: createCommunityMutation.mutate,
+    createCommunityAsync: createCommunityMutation.mutateAsync,
     joinCommunity: joinCommunityMutation.mutate,
     leaveCommunity: leaveCommunityMutation.mutate,
     deleteCommunity: deleteCommunityMutation.mutate,

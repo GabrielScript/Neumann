@@ -16,6 +16,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { communitySchema } from '@/lib/validation';
 import { z } from 'zod';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CreateCommunityModalProps {
   open: boolean;
@@ -25,7 +26,7 @@ interface CreateCommunityModalProps {
 export const CreateCommunityModal = ({ open, onOpenChange }: CreateCommunityModalProps) => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const { createCommunity } = useCommunity();
+  const { createCommunityAsync } = useCommunity();
   const { subscription, checkCommunityLeaderLimit } = useSubscription();
 
   const canCreate = subscription?.tier === 'plus_annual';
@@ -56,10 +57,27 @@ export const CreateCommunityModal = ({ open, onOpenChange }: CreateCommunityModa
       return;
     }
     
-    createCommunity({ name, description });
-    setName('');
-    setDescription('');
-    onOpenChange(false);
+    // Create community and award XP
+    try {
+      const newCommunity = await createCommunityAsync({ name, description });
+      
+      // Award XP for community creation
+      const { data: xpData, error: xpError } = await supabase.functions.invoke('award-community-creation-xp', {
+        body: {
+          community_id: newCommunity.id,
+        },
+      });
+
+      if (!xpError && xpData?.xpAwarded) {
+        toast.success(`Comunidade criada! +${xpData.xpAwarded} XP`);
+      }
+
+      setName('');
+      setDescription('');
+      onOpenChange(false);
+    } catch (error) {
+      toast.error('Erro ao criar comunidade.');
+    }
   };
 
   return (

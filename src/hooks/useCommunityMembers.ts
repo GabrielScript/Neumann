@@ -57,19 +57,50 @@ export const useCommunityMembers = (communityId: string | undefined) => {
   });
 
   const updateMemberRoleMutation = useMutation({
-    mutationFn: async ({ memberId, newRole }: { memberId: string; newRole: CommunityRole }) => {
+    mutationFn: async ({ memberId, newRole, userId }: { memberId: string; newRole: CommunityRole; userId: string }) => {
       const { error } = await supabase
         .from('community_members')
         .update({ role: newRole })
         .eq('id', memberId);
 
       if (error) throw error;
+
+      // Award XP for promotion if champion or leader
+      if (newRole === 'champion' || newRole === 'challenger_leader') {
+        const { error: xpError } = await supabase.functions.invoke('award-role-xp', {
+          body: {
+            user_id: userId,
+            role: newRole,
+            community_id: communityId,
+          },
+        });
+
+        if (xpError) {
+          console.error('Error awarding role XP:', xpError);
+        }
+      }
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['community-members'] });
+      queryClient.invalidateQueries({ queryKey: ['user-stats'] });
+      
+      const roleNames = {
+        novice: 'Novato',
+        explorer: 'Explorador',
+        champion: 'Campeão',
+        challenger_leader: 'Líder Challenger',
+      };
+      
+      const xpMessages = {
+        champion: '+100 XP pela promoção a Campeão!',
+        challenger_leader: '+200 XP pela promoção a Líder!',
+      };
+
       toast({
         title: 'Role atualizado!',
-        description: 'O role do membro foi atualizado com sucesso.',
+        description: variables.newRole === 'champion' || variables.newRole === 'challenger_leader' 
+          ? `${roleNames[variables.newRole]}! ${xpMessages[variables.newRole]}`
+          : `O role do membro foi atualizado para ${roleNames[variables.newRole]}.`,
       });
     },
     onError: (error) => {
@@ -121,7 +152,8 @@ export const useCommunityMembers = (communityId: string | undefined) => {
     members,
     userRole,
     isLoading,
-    updateMemberRole: updateMemberRoleMutation.mutate,
+    updateMemberRole: (params: { memberId: string; newRole: CommunityRole; userId: string }) => 
+      updateMemberRoleMutation.mutate(params),
     removeMember: removeMemberMutation.mutate,
     canPromoteToLeader,
   };

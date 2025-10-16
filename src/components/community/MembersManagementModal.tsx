@@ -57,13 +57,13 @@ export const MembersManagementModal = ({
     );
   };
 
-  const handlePromote = async (memberId: string, currentRole: CommunityRole) => {
+  const handlePromote = async (memberId: string, userId: string, currentRole: CommunityRole) => {
     if (currentRole === 'novice') {
-      updateMemberRole({ memberId, newRole: 'champion' });
+      updateMemberRole({ memberId, newRole: 'champion', userId });
     } else if (currentRole === 'champion') {
       const canPromote = await canPromoteToLeader();
       if (canPromote) {
-        updateMemberRole({ memberId, newRole: 'challenger_leader' });
+        updateMemberRole({ memberId, newRole: 'challenger_leader', userId });
       } else {
         toast({
           title: 'Limite atingido',
@@ -74,11 +74,11 @@ export const MembersManagementModal = ({
     }
   };
 
-  const handleDemote = (memberId: string, currentRole: CommunityRole) => {
+  const handleDemote = (memberId: string, userId: string, currentRole: CommunityRole) => {
     if (currentRole === 'challenger_leader') {
-      updateMemberRole({ memberId, newRole: 'champion' });
+      updateMemberRole({ memberId, newRole: 'champion', userId });
     } else if (currentRole === 'champion') {
-      updateMemberRole({ memberId, newRole: 'novice' });
+      updateMemberRole({ memberId, newRole: 'novice', userId });
     }
   };
 
@@ -116,7 +116,7 @@ export const MembersManagementModal = ({
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handlePromote(member.id, member.role)}
+                          onClick={() => handlePromote(member.id, member.user_id, member.role)}
                         >
                           <ArrowUp className="w-4 h-4 mr-1" />
                           Promover
@@ -127,7 +127,7 @@ export const MembersManagementModal = ({
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleDemote(member.id, member.role)}
+                          onClick={() => handleDemote(member.id, member.user_id, member.role)}
                         >
                           <ArrowDown className="w-4 h-4 mr-1" />
                           Rebaixar

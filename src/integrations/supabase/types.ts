@@ -760,6 +760,10 @@ export type Database = {
         Args: { p_community_id: string; p_user_id: string }
         Returns: Database["public"]["Enums"]["community_role"]
       }
+      get_xp_multiplier: {
+        Args: { _user_id: string }
+        Returns: number
+      }
       has_community_role: {
         Args: {
           _community_id: string
