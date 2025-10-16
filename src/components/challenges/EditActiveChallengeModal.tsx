@@ -23,7 +23,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { challengeSchema, habitSchema } from "@/lib/validation";
+import { challengeSchema, challengeItemSchema } from "@/lib/validation";
 import { z } from "zod";
 import { format } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
@@ -173,11 +173,10 @@ export function EditActiveChallengeModal({
 
     try {
       for (const habit of habits) {
-        habitSchema.parse({
+        challengeItemSchema.parse({
           title: habit.title,
-          description: habit.description,
-          priority: habit.priority,
-          facilitators: habit.facilitators,
+          description: habit.description || null,
+          facilitators: habit.facilitators || null,
         });
       }
     } catch (error) {

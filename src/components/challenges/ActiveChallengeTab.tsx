@@ -23,6 +23,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { EditActiveChallengeModal } from "./EditActiveChallengeModal"; // Importar o novo modal
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 interface ActiveChallengeTabProps {
   challenge: {
@@ -66,6 +73,7 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
   const [abandonDialogOpen, setAbandonDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false); // Estado para o modal de edição
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false); // Estado para o modal de detalhes
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -187,28 +195,37 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
                 )}
               </div>
             </div>
-            <div className="flex gap-2 items-center">
+            <div className="flex gap-2 items-center flex-wrap">
               <Badge variant="secondary" className="flex items-center gap-1">
                 <Calendar className="w-3 h-3" />
                 Dias Restantes: {stats?.remainingDays || 0}
               </Badge>
               <Button 
                 variant="outline" 
-                onClick={() => setEditModalOpen(true)} // Botão para abrir o modal de edição
+                size="sm"
+                onClick={() => setDetailsModalOpen(true)}
               >
-                <Pencil className="w-4 h-4 mr-2" />
-                Editar Desafio
+                Ver Detalhes
               </Button>
               <Button 
                 variant="outline" 
+                size="sm"
+                onClick={() => setEditModalOpen(true)} // Botão para abrir o modal de edição
+              >
+                <Pencil className="w-4 h-4 mr-2" />
+                Editar
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
                 onClick={handleSaveAsTemplate}
                 disabled={isSaving}
               >
                 <Save className="w-4 h-4 mr-2" />
-                {isSaving ? "Salvando..." : "Salvar Desafio"}
+                {isSaving ? "Salvando..." : "Salvar"}
               </Button>
-              <Button variant="destructive" onClick={() => setAbandonDialogOpen(true)}>
-                Abandonar Desafio
+              <Button size="sm" variant="destructive" onClick={() => setAbandonDialogOpen(true)}>
+                Abandonar
               </Button>
             </div>
           </div>
@@ -312,6 +329,109 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
         onOpenChange={setEditModalOpen}
         challengeId={challenge.id}
       />
+
+      {/* Modal de Detalhes do Desafio */}
+      <Dialog open={detailsModalOpen} onOpenChange={setDetailsModalOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">{challenge.name}</DialogTitle>
+            <DialogDescription>
+              {new Date(challenge.start_date).toLocaleDateString()} até{" "}
+              {new Date(challenge.end_date).toLocaleDateString()}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            {/* Informações do Desafio */}
+            <div className="space-y-3">
+              <h3 className="font-semibold text-lg">Informações do Desafio</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Duração</p>
+                  <p className="font-medium">{challenge.duration_days} dias</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Dias Completados</p>
+                  <p className="font-medium">{stats?.completedDays || 0} dias</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Dias Restantes</p>
+                  <p className="font-medium">{stats?.remainingDays || 0} dias</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Progresso</p>
+                  <p className="font-medium">{Math.round(stats?.progressPercentage || 0)}%</p>
+                </div>
+                {challenge.difficulty && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Dificuldade</p>
+                    <p className="font-medium">{difficultyLabels[challenge.difficulty]}</p>
+                  </div>
+                )}
+                {challenge.alignment_score && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Alinhamento</p>
+                    <p className="font-medium">{challenge.alignment_score}/10</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Hábitos do Desafio */}
+            <div className="space-y-3">
+              <h3 className="font-semibold text-lg">Hábitos do Desafio ({items?.length || 0})</h3>
+              <div className="space-y-3">
+                {items && items.length > 0 ? (
+                  items.map((item, index) => (
+                    <div key={item.id} className="p-4 border rounded-lg space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <h4 className="font-medium">
+                          {index + 1}. {item.title}
+                        </h4>
+                        <Badge variant={priorityColors[item.priority as keyof typeof priorityColors]}>
+                          {priorityLabels[item.priority as keyof typeof priorityLabels]}
+                        </Badge>
+                      </div>
+                      {item.description && (
+                        <div>
+                          <p className="text-xs text-muted-foreground font-medium">Descrição:</p>
+                          <p className="text-sm text-muted-foreground">{item.description}</p>
+                        </div>
+                      )}
+                      {item.facilitators && (
+                        <div>
+                          <p className="text-xs text-muted-foreground font-medium">Facilitadores:</p>
+                          <p className="text-sm text-muted-foreground">{item.facilitators}</p>
+                        </div>
+                      )}
+                      {item.reminder_time && (
+                        <p className="text-xs text-muted-foreground">
+                          🕐 Lembrete: {item.reminder_time}
+                        </p>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-center text-muted-foreground py-4">
+                    Nenhum hábito cadastrado ainda.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <Button 
+              onClick={() => {
+                setDetailsModalOpen(false);
+                setEditModalOpen(true);
+              }} 
+              className="w-full"
+            >
+              <Pencil className="w-4 h-4 mr-2" />
+              Editar Desafio
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
