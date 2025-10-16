@@ -31,8 +31,7 @@ import { Tables } from "@/integrations/supabase/types"; // Importar tipos do Sup
 
 // Definir tipos para os itens do desafio e o desafio com itens
 type ChallengeItem = Tables<'challenge_items'>;
-// MODIFICADO: Adicionado explicitamente 'description' ao tipo Challenge
-type Challenge = Tables<'challenges'> & { description: string | null }; 
+type Challenge = Tables<'challenges'>;
 
 interface ChallengeWithItems extends Challenge {
   challenge_items: ChallengeItem[];
@@ -63,7 +62,6 @@ export function EditActiveChallengeModal({
   const queryClient = useQueryClient();
 
   const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
   const [alignmentScore, setAlignmentScore] = useState(5);
   const [difficulty, setDifficulty] = useState("3");
   const [duration, setDuration] = useState("21");
@@ -89,7 +87,6 @@ export function EditActiveChallengeModal({
   useEffect(() => {
     if (challengeData) {
       setName(challengeData.name);
-      setDescription(challengeData.description || ""); 
       setAlignmentScore(challengeData.alignment_score || 5);
       setDifficulty(String(challengeData.difficulty || 3));
       setDuration(String(challengeData.duration_days));
@@ -141,15 +138,37 @@ export function EditActiveChallengeModal({
     const durationDays =
       duration === "custom" ? parseInt(customDuration) || 0 : parseInt(duration);
 
-    // Validate challenge data
-    try {
-      challengeSchema.parse({
-        name,
-        description,
-        alignment_score: alignmentScore,
-        duration_days: durationDays,
-        difficulty: parseInt(difficulty),
+    // Validate only required fields
+    if (!name || name.trim().length === 0) {
+      toast({
+        title: "Erro de validação",
+        description: "Nome do desafio é obrigatório",
+        variant: "destructive",
       });
+      return;
+    }
+
+    if (name.length > 100) {
+      toast({
+        title: "Erro de validação",
+        description: "Nome deve ter no máximo 100 caracteres",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate optional numeric fields
+    try {
+      if (alignmentScore < 1 || alignmentScore > 10) {
+        throw new Error("Alinhamento deve estar entre 1 e 10");
+      }
+      if (durationDays < 1 || durationDays > 365) {
+        throw new Error("Duração deve estar entre 1 e 365 dias");
+      }
+      const diff = parseInt(difficulty);
+      if (diff < 1 || diff > 5) {
+        throw new Error("Dificuldade deve estar entre 1 e 5");
+      }
     } catch (error) {
       if (error instanceof z.ZodError) {
         toast({
@@ -171,19 +190,20 @@ export function EditActiveChallengeModal({
       return;
     }
 
-    try {
-      for (const habit of habits) {
-        challengeItemSchema.parse({
-          title: habit.title,
-          description: habit.description || null,
-          facilitators: habit.facilitators || null,
-        });
-      }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
+    // Validate habits - only title is required
+    for (const habit of habits) {
+      if (!habit.title || habit.title.trim().length === 0) {
         toast({
           title: "Erro de validação nos hábitos",
-          description: error.errors[0].message,
+          description: "Todos os hábitos devem ter um título",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (habit.title.length > 100) {
+        toast({
+          title: "Erro de validação nos hábitos",
+          description: "Título do hábito deve ter no máximo 100 caracteres",
           variant: "destructive",
         });
         return;
@@ -202,7 +222,6 @@ export function EditActiveChallengeModal({
         .from("challenges")
         .update({
           name,
-          description,
           duration_days: durationDays,
           difficulty: parseInt(difficulty),
           alignment_score: alignmentScore,
@@ -317,18 +336,6 @@ export function EditActiveChallengeModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Descrição *</Label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Explique o que é e como funciona seu desafio"
-              rows={3}
-              maxLength={1000}
-            />
-          </div>
-
-          <div className="space-y-2">
             <Label>
               O quanto esse desafio se relaciona com seus sonhos e objetivos de vida? {getEmoji(alignmentScore)} {alignmentScore}/10
             </Label>
@@ -410,7 +417,7 @@ export function EditActiveChallengeModal({
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-foreground font-medium">Descrição *</Label>
+                        <Label className="text-foreground font-medium">Descrição (opcional)</Label>
                         <Textarea
                           value={habit.description}
                           onChange={(e) => updateHabit(habit.id, "description", e.target.value)}
@@ -421,7 +428,7 @@ export function EditActiveChallengeModal({
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-foreground font-medium">Facilitadores *</Label>
+                        <Label className="text-foreground font-medium">Facilitadores (opcional)</Label>
                         <Textarea
                           value={habit.facilitators}
                           onChange={(e) => updateHabit(habit.id, "facilitators", e.target.value)}
@@ -432,7 +439,7 @@ export function EditActiveChallengeModal({
                       </div>
 
                       <div className="space-y-2">
-                        <Label className="text-foreground font-medium">Nível de urgência *</Label>
+                        <Label className="text-foreground font-medium">Nível de urgência (opcional)</Label>
                         <Select
                           value={habit.priority}
                           onValueChange={(value) => updateHabit(habit.id, "priority", value)}
