@@ -47,9 +47,14 @@ export const useOnboarding = () => {
 
         if (error) throw error;
       }
+      
+      // Return the completed status
+      return { completed: true };
     },
     onSuccess: () => {
+      // Invalidate and refetch immediately
       queryClient.invalidateQueries({ queryKey: ['onboarding', user?.id] });
+      queryClient.refetchQueries({ queryKey: ['onboarding', user?.id] });
     },
   });
 

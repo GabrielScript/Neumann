@@ -62,7 +62,10 @@ const Onboarding = () => {
   const handleComplete = async () => {
     try {
       await completeOnboarding();
-      navigate('/dashboard');
+      // Wait a bit for the query to update
+      setTimeout(() => {
+        navigate('/dashboard', { replace: true });
+      }, 100);
     } catch (error) {
       console.error('Error completing onboarding:', error);
     }
