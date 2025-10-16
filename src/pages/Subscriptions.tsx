@@ -104,6 +104,7 @@ export default function Subscriptions() {
         '5 desafios por dia',
         '5 objetivos por mês',
         'Nível XP ilimitado',
+        'Turbo XP de 1,5%',
         'Acesso à comunidade',
         'Limite de 5 comunidades',
         'Ajuste dos desafios padrão',
@@ -120,6 +121,7 @@ export default function Subscriptions() {
       features: [
         'Desafios ativos simultâneos ilimitados',
         'Objetivos de vida ilimitados',
+        'Turbo XP de 2,5%',
         'Limite de 10 comunidades',
         'Liderar até 5 comunidades',
         'Criação de comunidades e de novos desafios globais',
