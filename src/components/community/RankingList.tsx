@@ -1,9 +1,10 @@
 import { RankingEntry } from "@/hooks/useCommunityRankings";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Crown, Eye, MessageCircle } from "lucide-react";
+import { Crown, Eye, MessageCircle, Zap } from "lucide-react";
 import { getTrophyStageName } from "@/lib/xp";
 import { cn } from "@/lib/utils";
+import { useSubscription } from "@/hooks/useSubscription";
 
 interface RankingListProps {
   data: RankingEntry[];
@@ -29,6 +30,24 @@ const getValueLabel = (type: RankingListProps['type'], value: number) => {
 };
 
 export const RankingList = ({ data, type, onViewProfile, onStartChat, currentUserId }: RankingListProps) => {
+  
+  // Calcular turbo XP baseado na posição e assinatura
+  const getTurboXP = (position: number, isPlus: boolean, tier?: string) => {
+    let turbo = 0;
+    
+    // Multiplicador base por tier
+    if (tier === 'plus_monthly') turbo += 1.5;
+    else if (tier === 'plus_annual') turbo += 2.5;
+    
+    // Multiplicador por posição
+    if (position === 1) turbo += 10;
+    else if (position === 2) turbo += 7.5;
+    else if (position === 3) turbo += 5;
+    else if (position >= 4 && position <= 10) turbo += 3;
+    
+    return turbo > 0 ? turbo : null;
+  };
+  
   if (data.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
@@ -91,6 +110,18 @@ export const RankingList = ({ data, type, onViewProfile, onStartChat, currentUse
                   <span className="font-body font-bold text-primary">
                     {getValueLabel(type, entry.value)}
                   </span>
+                  {(() => {
+                    const turbo = getTurboXP(entry.position, entry.isPlus);
+                    return turbo && (
+                      <>
+                        <span className="text-xs">•</span>
+                        <span className="flex items-center gap-1 text-xs font-bold text-green-500">
+                          <Zap className="w-3 h-3" />
+                          +{turbo}% Turbo XP
+                        </span>
+                      </>
+                    );
+                  })()}
                   <span className="text-xs">•</span>
                   <span className="text-xs truncate">
                     {getTrophyStageName(entry.trophyStage as any)}

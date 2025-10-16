@@ -230,6 +230,7 @@ export type Database = {
           description: string | null
           id: string
           is_active: boolean
+          is_public: boolean
           name: string
           updated_at: string
         }
@@ -239,6 +240,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean
+          is_public?: boolean
           name: string
           updated_at?: string
         }
@@ -248,6 +250,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean
+          is_public?: boolean
           name?: string
           updated_at?: string
         }
@@ -329,6 +332,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "community_chat_messages_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_join_requests: {
+        Row: {
+          community_id: string
+          created_at: string
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          community_id: string
+          created_at?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          community_id?: string
+          created_at?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_join_requests_community_id_fkey"
             columns: ["community_id"]
             isOneToOne: false
             referencedRelation: "communities"

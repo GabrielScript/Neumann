@@ -10,10 +10,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
-import { Search, Users } from 'lucide-react';
+import { Search, Users, Lock } from 'lucide-react';
 import { useCommunity } from '@/hooks/useCommunity';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useJoinRequests } from '@/hooks/useJoinRequests';
 import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 
 interface JoinCommunityModalProps {
   open: boolean;
@@ -24,6 +26,7 @@ export const JoinCommunityModal = ({ open, onOpenChange }: JoinCommunityModalPro
   const [search, setSearch] = useState('');
   const { allCommunities, userCommunities, joinCommunity } = useCommunity();
   const { checkCommunityMemberLimit } = useSubscription();
+  const { createRequest } = useJoinRequests("");
 
   const availableCommunities = allCommunities?.filter(
     (community) =>
@@ -31,17 +34,22 @@ export const JoinCommunityModal = ({ open, onOpenChange }: JoinCommunityModalPro
       community.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleJoin = async (communityId: string) => {
+  const handleJoin = async (communityId: string, isPublic: boolean) => {
     try {
       const canJoin = await checkCommunityMemberLimit();
       if (!canJoin) {
         toast.error('Você atingiu o limite de comunidades do seu plano.');
         return;
       }
-      joinCommunity(communityId);
+      
+      if (isPublic) {
+        joinCommunity(communityId);
+      } else {
+        createRequest(communityId);
+      }
       onOpenChange(false);
     } catch (error) {
-      toast.error('Erro ao verificar limite de comunidades.');
+      toast.error('Erro ao processar solicitação.');
     }
   };
 
@@ -77,9 +85,17 @@ export const JoinCommunityModal = ({ open, onOpenChange }: JoinCommunityModalPro
             <div className="space-y-3">
               {availableCommunities.map((community) => (
                 <Card key={community.id} className="p-4">
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
-                      <h3 className="font-semibold mb-1">{community.name}</h3>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold">{community.name}</h3>
+                        {!community.is_public && (
+                          <Badge variant="outline" className="gap-1">
+                            <Lock className="w-3 h-3" />
+                            Privada
+                          </Badge>
+                        )}
+                      </div>
                       {community.description && (
                         <p className="text-sm text-muted-foreground">
                           {community.description}
@@ -87,11 +103,11 @@ export const JoinCommunityModal = ({ open, onOpenChange }: JoinCommunityModalPro
                       )}
                     </div>
                     <Button
-                      onClick={() => handleJoin(community.id)}
+                      onClick={() => handleJoin(community.id, community.is_public)}
                       size="sm"
                       className="ml-4"
                     >
-                      Entrar
+                      {community.is_public ? "Entrar" : "Solicitar"}
                     </Button>
                   </div>
                 </Card>

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
-import { ArrowUp, ArrowDown, Trash2, Crown } from 'lucide-react';
+import { ArrowUp, ArrowDown, Trash2, Crown, UserX } from 'lucide-react';
 import { useCommunityMembers } from '@/hooks/useCommunityMembers';
 import { CommunityRole } from '@/hooks/useCommunity';
 import { toast } from '@/hooks/use-toast';
@@ -82,6 +82,14 @@ export const MembersManagementModal = ({
     }
   };
 
+  const { userRole } = useCommunityMembers(communityId);
+
+  const canRemoveMember = (memberRole: CommunityRole) => {
+    if (userRole === 'challenger_leader') return true;
+    if (userRole === 'champion' && (memberRole === 'novice' || memberRole === 'champion')) return true;
+    return false;
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
@@ -134,28 +142,34 @@ export const MembersManagementModal = ({
                         </Button>
                       )}
 
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button size="sm" variant="destructive">
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Remover Membro</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Tem certeza que deseja remover{' '}
-                              {member.profiles?.full_name || 'este usuário'} da comunidade?
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => removeMember(member.id)}>
+                      {canRemoveMember(member.role) && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                            >
+                              <UserX className="w-4 h-4 mr-2" />
                               Remover
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Remover Membro</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tem certeza que deseja remover{' '}
+                                {member.profiles?.full_name || 'este usuário'} da comunidade?
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => removeMember(member.id)}>
+                                Remover
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
                     </div>
                   </div>
                 </Card>

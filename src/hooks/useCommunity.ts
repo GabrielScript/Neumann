@@ -13,6 +13,8 @@ export interface Community {
   created_at: string;
   updated_at: string;
   is_active: boolean;
+  is_public: boolean;
+  member_count?: number;
 }
 
 export interface CommunityMember {
