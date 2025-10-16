@@ -1,4 +1,3 @@
-import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -43,8 +42,30 @@ export function useChallengeProgress(challengeId: string | undefined, date: stri
     enabled: !!challengeId,
   });
 
-  // Track total XP earned today
-  const [todayXP, setTodayXP] = React.useState(0);
+  // Query to get today's XP for this challenge
+  const { data: todayXPData } = useQuery({
+    queryKey: ["today-xp", challengeId, date, user?.id],
+    queryFn: async () => {
+      if (!challengeId || !user?.id) return { totalXP: 0 };
+
+      const { data, error } = await supabase
+        .from("xp_audit_log")
+        .select("amount")
+        .eq("user_id", user.id)
+        .gte("created_at", `${date}T00:00:00`)
+        .lte("created_at", `${date}T23:59:59`)
+        .or(`metadata->>challenge_id.eq.${challengeId},reason.eq.day_complete_bonus,reason.eq.challenge_completed`);
+
+      if (error) {
+        console.error("Error fetching today's XP:", error);
+        return { totalXP: 0 };
+      }
+
+      const totalXP = data?.reduce((sum, log) => sum + log.amount, 0) || 0;
+      return { totalXP };
+    },
+    enabled: !!challengeId && !!user?.id,
+  });
 
   const toggleItemMutation = useMutation({
     mutationFn: async ({ itemId, completed }: { itemId: string; completed: boolean }) => {
@@ -65,11 +86,6 @@ export function useChallengeProgress(challengeId: string | undefined, date: stri
       return data;
     },
     onSuccess: (data) => {
-      // Accumulate XP for today
-      if (data?.xpAwarded > 0) {
-        setTodayXP(prev => prev + data.xpAwarded);
-      }
-
       if (data?.leveledUp) {
         toast({
           title: "🎉 Level Up!",
@@ -90,6 +106,7 @@ export function useChallengeProgress(challengeId: string | undefined, date: stri
       }
 
       queryClient.invalidateQueries({ queryKey: ["challenge-progress", challengeId, date] });
+      queryClient.invalidateQueries({ queryKey: ["today-xp", challengeId, date, user?.id] });
       queryClient.invalidateQueries({ queryKey: ["user-stats"] });
     },
   });
@@ -106,6 +123,6 @@ export function useChallengeProgress(challengeId: string | undefined, date: stri
     completedToday,
     totalItems,
     progressPercentage,
-    todayXP,
+    todayXP: todayXPData?.totalXP || 0,
   };
 }
