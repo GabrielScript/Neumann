@@ -75,7 +75,7 @@ export const DirectChatModal = ({
         <DialogHeader>
           <DialogTitle>Chat com {otherUserName}</DialogTitle>
           <DialogDescription>
-            Mensagens privadas dentro da comunidade
+            {communityId ? 'Mensagens privadas dentro da comunidade' : 'Mensagens privadas globais'}
           </DialogDescription>
         </DialogHeader>
 

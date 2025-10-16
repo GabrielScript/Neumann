@@ -400,7 +400,7 @@ export type Database = {
       }
       direct_messages: {
         Row: {
-          community_id: string
+          community_id: string | null
           created_at: string
           id: string
           message: string
@@ -409,7 +409,7 @@ export type Database = {
           sender_id: string
         }
         Insert: {
-          community_id: string
+          community_id?: string | null
           created_at?: string
           id?: string
           message: string
@@ -418,7 +418,7 @@ export type Database = {
           sender_id: string
         }
         Update: {
-          community_id?: string
+          community_id?: string | null
           created_at?: string
           id?: string
           message?: string

@@ -8,7 +8,7 @@ export interface DirectMessage {
   id: string;
   sender_id: string;
   receiver_id: string;
-  community_id: string;
+  community_id: string | null;
   message: string;
   created_at: string;
   read: boolean;
@@ -27,14 +27,22 @@ export const useDirectMessages = (communityId: string | undefined, otherUserId: 
   const { data: messages, isLoading } = useQuery({
     queryKey: ['direct-messages', communityId, otherUserId],
     queryFn: async () => {
-      if (!communityId || !otherUserId || !user?.id) return [];
+      if (!otherUserId || !user?.id) return [];
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('direct_messages')
         .select('*')
-        .eq('community_id', communityId)
         .or(`and(sender_id.eq.${user.id},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${user.id})`)
         .order('created_at', { ascending: true });
+
+      // Se communityId for undefined/null, busca mensagens globais
+      if (communityId) {
+        query = query.eq('community_id', communityId);
+      } else {
+        query = query.is('community_id', null);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
 
@@ -63,22 +71,25 @@ export const useDirectMessages = (communityId: string | undefined, otherUserId: 
 
       return messagesWithProfiles as DirectMessage[];
     },
-    enabled: !!communityId && !!otherUserId && !!user?.id,
+    enabled: !!otherUserId && !!user?.id,
   });
 
   // Subscribe to realtime updates
   useEffect(() => {
-    if (!communityId || !otherUserId || !user?.id) return;
+    if (!otherUserId || !user?.id) return;
+
+    const channelName = communityId 
+      ? `direct-messages-${communityId}-${otherUserId}`
+      : `direct-messages-global-${otherUserId}`;
 
     const channel = supabase
-      .channel(`direct-messages-${communityId}-${otherUserId}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'direct_messages',
-          filter: `community_id=eq.${communityId}`,
         },
         (payload) => {
           console.log('Direct message change:', payload);
@@ -94,7 +105,7 @@ export const useDirectMessages = (communityId: string | undefined, otherUserId: 
 
   const sendMessageMutation = useMutation({
     mutationFn: async (message: string) => {
-      if (!communityId || !otherUserId || !user?.id) {
+      if (!otherUserId || !user?.id) {
         throw new Error('Dados incompletos');
       }
 
@@ -103,7 +114,7 @@ export const useDirectMessages = (communityId: string | undefined, otherUserId: 
         .insert({
           sender_id: user.id,
           receiver_id: otherUserId,
-          community_id: communityId,
+          community_id: communityId || null,
           message,
         });
 
