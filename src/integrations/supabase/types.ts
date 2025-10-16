@@ -428,6 +428,30 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback_log: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       life_goals: {
         Row: {
           action_plan: string | null
