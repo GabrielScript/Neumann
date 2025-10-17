@@ -197,7 +197,7 @@ const TrophyPage = () => {
                 Objetivos Especiais
               </CardTitle>
               <CardDescription className="font-body">
-                Objetivos de vida conquistados
+                Objetivos conquistados
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -211,13 +211,13 @@ const TrophyPage = () => {
                   {stats?.life_goal_trophies || 0}
                 </p>
                 <p className="text-accent/70 font-body">
-                  Objetivos de Vida Concluídos
+                  Objetivos Concluídos
                 </p>
               </div>
               
               <div className="mt-4 p-3 rounded-lg bg-primary/10 border border-primary/30">
                 <p className="text-xs text-accent/70 font-body text-center">
-                  Cada objetivo de vida concluído te garante um troféu especial permanente
+                  Cada objetivo concluído te garante um troféu especial permanente
                 </p>
               </div>
             </CardContent>
