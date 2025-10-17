@@ -9,7 +9,58 @@ interface CompleteGoalRequest {
   goal_id: string;
 }
 
-// Removed local XP calculation - now handled by award_xp RPC
+// XP calculation logic
+function calculateLevel(xp: number): number {
+  return Math.max(1, Math.floor(Math.sqrt(xp / 100.0)) + 1);
+}
+
+// Direct XP award function
+async function awardXP(
+  supabaseAdmin: any,
+  userId: string,
+  amount: number,
+  reason: string,
+  metadata: any
+) {
+  // Get current stats
+  const { data: currentStats, error: statsError } = await supabaseAdmin
+    .from('user_stats')
+    .select('xp, level')
+    .eq('user_id', userId)
+    .single();
+
+  if (statsError) throw statsError;
+
+  const currentXP = currentStats?.xp || 0;
+  const newXP = Math.max(0, currentXP + amount);
+  const newLevel = calculateLevel(newXP);
+
+  // Update user stats
+  const { error: updateError } = await supabaseAdmin
+    .from('user_stats')
+    .update({
+      xp: newXP,
+      level: newLevel,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('user_id', userId);
+
+  if (updateError) throw updateError;
+
+  // Log XP award
+  const { error: logError } = await supabaseAdmin
+    .from('xp_audit_log')
+    .insert({
+      user_id: userId,
+      amount: amount,
+      reason: reason,
+      metadata: metadata,
+    });
+
+  if (logError) console.error('Failed to log XP:', logError);
+
+  return { newXP, newLevel, oldLevel: currentStats?.level || 1 };
+}
 
 Deno.serve(async (req) => {
   // Handle CORS preflight
@@ -85,7 +136,7 @@ Deno.serve(async (req) => {
 
     if (updateGoalError) throw updateGoalError;
 
-    // 3. Get current stats (for level comparison)
+    // 3. Get current stats (for level comparison and trophy count)
     const { data: statsBefore, error: statsError } = await supabaseAdmin
       .from('user_stats')
       .select('level, life_goal_trophies')
@@ -96,56 +147,36 @@ Deno.serve(async (req) => {
 
     const oldLevel = statsBefore.level;
 
-    // 4. Award 500 XP via secure award_xp RPC
+    // 4. Award 500 XP directly
     const xpAmount = 500;
-    console.log(`[${requestId}] Awarding ${xpAmount} XP via award_xp RPC`);
+    console.log(`[${requestId}] Awarding ${xpAmount} XP for life goal completion`);
 
-    const { error: xpError } = await supabaseAdmin.rpc('award_xp', {
-      _user_id: user.id,
-      _amount: xpAmount,
-      _reason: 'life_goal_completed',
-      _metadata: { 
+    const xpResult = await awardXP(
+      supabaseAdmin,
+      user.id,
+      xpAmount,
+      'life_goal_completed',
+      { 
         goal_id, 
         goal_title: goal.title,
         awarded_trophy: true,
         request_id: requestId
-      },
-      _caller_function: 'complete-life-goal'
-    });
-
-    if (xpError) {
-      // Check if it's a tier limit error
-      if (xpError.message?.includes('limit')) {
-        console.log(`[${requestId}] XP limit reached for user's tier`);
-
-        return new Response(
-          JSON.stringify({
-            success: true,
-            blocked: true,
-            message: 'Level limit reached for tier',
-          }),
-          {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-            status: 200,
-          }
-        );
       }
-      throw xpError;
-    }
+    );
+
+    console.log(`[${requestId}] XP awarded: ${xpAmount}, New level: ${xpResult.newLevel}`);
 
     // 5. Update life goal trophy count
-    const { data: updatedStats, error: updateStatsError } = await supabaseAdmin
+    const { error: updateStatsError } = await supabaseAdmin
       .from('user_stats')
       .update({ 
         life_goal_trophies: (statsBefore.life_goal_trophies || 0) + 1 
       })
-      .eq('user_id', user.id)
-      .select('level, xp')
-      .single();
+      .eq('user_id', user.id);
 
     if (updateStatsError) throw updateStatsError;
 
-    const newLevel = updatedStats.level;
+    const newLevel = xpResult.newLevel;
     const leveledUp = newLevel > oldLevel;
 
     console.log(`[${requestId}] Life goal completed - Awarded ${xpAmount} XP, Level ${oldLevel} -> ${newLevel}`);

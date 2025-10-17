@@ -6,6 +6,59 @@ interface AwardCreationXPRequest {
   item_id: string;
 }
 
+// XP calculation logic
+function calculateLevel(xp: number): number {
+  return Math.max(1, Math.floor(Math.sqrt(xp / 100.0)) + 1);
+}
+
+// Direct XP award function
+async function awardXP(
+  supabaseAdmin: any,
+  userId: string,
+  amount: number,
+  reason: string,
+  metadata: any
+) {
+  // Get current stats
+  const { data: currentStats, error: statsError } = await supabaseAdmin
+    .from('user_stats')
+    .select('xp, level')
+    .eq('user_id', userId)
+    .single();
+
+  if (statsError) throw statsError;
+
+  const currentXP = currentStats?.xp || 0;
+  const newXP = Math.max(0, currentXP + amount);
+  const newLevel = calculateLevel(newXP);
+
+  // Update user stats
+  const { error: updateError } = await supabaseAdmin
+    .from('user_stats')
+    .update({
+      xp: newXP,
+      level: newLevel,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('user_id', userId);
+
+  if (updateError) throw updateError;
+
+  // Log XP award
+  const { error: logError } = await supabaseAdmin
+    .from('xp_audit_log')
+    .insert({
+      user_id: userId,
+      amount: amount,
+      reason: reason,
+      metadata: metadata,
+    });
+
+  if (logError) console.error('Failed to log XP:', logError);
+
+  return { newXP, newLevel, oldLevel: currentStats?.level || 1 };
+}
+
 Deno.serve(async (req) => {
   const origin = req.headers.get('origin');
   const headers = getAllHeaders(origin);
@@ -76,33 +129,32 @@ Deno.serve(async (req) => {
     if (xpAmount > 0) {
       console.log(`[${requestId}] Awarding ${xpAmount} XP for ${type} creation...`);
 
-      await supabaseAdmin.rpc('award_xp', {
-        _user_id: user.id,
-        _amount: xpAmount,
-        _reason: reason,
-        _metadata: { item_id, type },
-        _caller_function: 'award-creation-xp'
-      });
+      try {
+        const xpResult = await awardXP(
+          supabaseAdmin,
+          user.id,
+          xpAmount,
+          reason,
+          { item_id, type }
+        );
 
-      // Get updated stats
-      const { data: stats } = await supabaseAdmin
-        .from('user_stats')
-        .select('xp, level')
-        .eq('user_id', user.id)
-        .single();
+        console.log(`[${requestId}] Success - Awarded ${xpAmount} XP, New level: ${xpResult.newLevel}`);
 
-      console.log(`[${requestId}] Success - Awarded ${xpAmount} XP`);
+        await logSecurityEvent(supabaseAdmin, user.id, 'creation_xp_awarded', type, item_id, ipAddress, userAgent, 'success', { xpAwarded: xpAmount });
 
-      await logSecurityEvent(supabaseAdmin, user.id, 'creation_xp_awarded', type, item_id, ipAddress, userAgent, 'success', { xpAwarded: xpAmount });
-
-      return new Response(
-        JSON.stringify({
-          success: true,
-          xpAwarded: xpAmount,
-          newLevel: stats?.level || 1,
-        }),
-        { headers, status: 200 }
-      );
+        return new Response(
+          JSON.stringify({
+            success: true,
+            xpAwarded: xpAmount,
+            newLevel: xpResult.newLevel,
+            leveledUp: xpResult.newLevel > xpResult.oldLevel,
+          }),
+          { headers, status: 200 }
+        );
+      } catch (error) {
+        console.error(`[${requestId}] Error awarding XP:`, error);
+        throw error;
+      }
     }
 
     return new Response(
