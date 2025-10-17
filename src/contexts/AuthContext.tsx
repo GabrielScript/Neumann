@@ -38,6 +38,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
         setLoading(false);
         
+        // Handle sign in redirect
+        if (event === 'SIGNED_IN' && session) {
+          // Check onboarding status and redirect accordingly
+          setTimeout(async () => {
+            try {
+              const { data: onboarding } = await supabase
+                .from('user_onboarding')
+                .select('completed')
+                .eq('user_id', session.user.id)
+                .maybeSingle();
+              
+              if (!onboarding || !onboarding.completed) {
+                navigate('/onboarding', { replace: true });
+              } else {
+                navigate('/dashboard', { replace: true });
+              }
+            } catch (error) {
+              console.error('Error checking onboarding:', error);
+              navigate('/dashboard', { replace: true });
+            }
+          }, 0);
+        }
+        
         // Check subscription status with Stripe (async, don't block)
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           setTimeout(async () => {
