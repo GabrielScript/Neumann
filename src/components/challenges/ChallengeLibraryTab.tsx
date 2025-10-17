@@ -262,6 +262,25 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
   };
 
   const handleStartChallenge = async (template: any, isCommunity = false) => {
+    const templateId = isCommunity ? template.template_id : template.id;
+    
+    // Verificar se já existe um desafio ativo com este template
+    const { data: existingChallenges } = await supabase
+      .from("challenges")
+      .select("id")
+      .eq("user_id", user?.id)
+      .eq("template_id", templateId)
+      .eq("is_active", true);
+    
+    if (existingChallenges && existingChallenges.length > 0) {
+      toast({
+        title: "Desafio já ativo",
+        description: "Você já possui este desafio ativo. Conclua-o antes de iniciar novamente.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Verificar limite de desafios ativos
     const canCreate = await checkDailyChallengeLimit();
     
@@ -276,7 +295,7 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
     
     // Se pode criar, inicia o desafio direto
     startChallengeMutation.mutate({ 
-      templateId: isCommunity ? template.template_id : template.id, 
+      templateId, 
       isCommunity 
     });
   };
