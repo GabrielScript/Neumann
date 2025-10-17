@@ -579,6 +579,53 @@ export type Database = {
         }
         Relationships: []
       }
+      gratitude_diary_entries: {
+        Row: {
+          challenge_id: string
+          created_at: string | null
+          date: string
+          day_number: number
+          gratitude_1: string | null
+          gratitude_2: string | null
+          gratitude_3: string | null
+          id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          created_at?: string | null
+          date?: string
+          day_number: number
+          gratitude_1?: string | null
+          gratitude_2?: string | null
+          gratitude_3?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          created_at?: string | null
+          date?: string
+          day_number?: number
+          gratitude_1?: string | null
+          gratitude_2?: string | null
+          gratitude_3?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gratitude_diary_entries_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       life_goals: {
         Row: {
           action_plan: string | null

@@ -24,6 +24,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { EditActiveChallengeModal } from "./EditActiveChallengeModal";
 import { DiaryEntryForm } from "./DiaryEntryForm";
+import { GratitudeDiaryForm } from "./GratitudeDiaryForm";
 import {
   Dialog,
   DialogContent,
@@ -78,8 +79,9 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   
-  // Detectar se é o desafio do diário de bordo
+  // Detectar se é o desafio do diário de bordo ou da gratidão
   const isDiaryChallenge = challenge.name === "Desafio do Diário de Bordo";
+  const isGratitudeChallenge = challenge.name === "Desafio do Diário da Gratidão";
 
   const isItemCompleted = (itemId: string) => {
     return progress?.some((p) => p.item_id === itemId && p.completed) || false;
@@ -277,9 +279,18 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
         </CardContent>
       </Card>
 
-      {/* Renderizar Diário de Bordo ou Checklist Normal */}
+      {/* Renderizar Diário de Bordo, Diário da Gratidão ou Checklist Normal */}
       {isDiaryChallenge ? (
-        <DiaryEntryForm challengeId={challenge.id} challengeStartDate={challenge.start_date} />
+        <DiaryEntryForm 
+          challengeId={challenge.id} 
+          challengeStartDate={challenge.start_date} 
+        />
+      ) : isGratitudeChallenge ? (
+        <GratitudeDiaryForm 
+          challengeId={challenge.id}
+          challengeName={challenge.name}
+          challengeStartDate={challenge.start_date}
+        />
       ) : (
         <Card>
           <CardHeader>
