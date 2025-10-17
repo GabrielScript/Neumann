@@ -1,11 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.75.0";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { getAllHeaders, checkRateLimit, logSecurityEvent, getIpAddress } from '../_shared/security.ts';
 
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
@@ -13,8 +9,13 @@ const logStep = (step: string, details?: any) => {
 };
 
 serve(async (req) => {
+  const origin = req.headers.get('origin');
+  const headers = getAllHeaders(origin);
+  const ipAddress = getIpAddress(req);
+  const userAgent = req.headers.get('user-agent');
+  
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers });
   }
 
   try {
@@ -37,12 +38,25 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    logStep("Authenticating user with token");
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
+    const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
+    if (userError) {
+      await logSecurityEvent(supabaseClient, null, 'check_subscription_failed', 'subscription', null, ipAddress, userAgent, 'blocked', { reason: 'invalid_auth' });
+      throw new Error(`Authentication error: ${userError.message}`);
+    }
     if (!user?.email) throw new Error("User not authenticated or email not available");
+    const user = userData.user;
     // Log without exposing PII
     logStep("User authenticated");
+
+    // Rate limiting: 10 requests per minute
+    const rateLimitCheck = await checkRateLimit(supabaseClient, user.id, ipAddress, 'check-subscription', 10, 1);
+    if (!rateLimitCheck.allowed) {
+      await logSecurityEvent(supabaseClient, user.id, 'rate_limit_exceeded', 'subscription', null, ipAddress, userAgent, 'blocked');
+      return new Response(
+        JSON.stringify({ error: rateLimitCheck.error }),
+        { headers, status: 429 }
+      );
+    }
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
@@ -64,10 +78,7 @@ serve(async (req) => {
       return new Response(JSON.stringify({ 
         subscribed: false, 
         tier: 'free' 
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
+      }), { headers, status: 200 });
     }
 
     const customerId = customers.data[0].id;

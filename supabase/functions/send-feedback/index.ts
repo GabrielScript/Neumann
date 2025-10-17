@@ -2,14 +2,9 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "https://esm.sh/resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+import { getAllHeaders, checkRateLimit, logSecurityEvent, getIpAddress, sanitizeString } from '../_shared/security.ts';
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-};
 
 // Validation schema
 const feedbackSchema = z.object({
@@ -43,171 +38,145 @@ const logStep = (step: string, details?: any) => {
 };
 
 const handler = async (req: Request): Promise<Response> => {
+  const origin = req.headers.get('origin');
+  const headers = getAllHeaders(origin);
+  const ipAddress = getIpAddress(req);
+  const userAgent = req.headers.get('user-agent');
+  
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers });
   }
 
+  const requestId = crypto.randomUUID();
+  logStep(`[${requestId}] Request received`);
+
   try {
-    logStep("Function started");
+    logStep(`[${requestId}] Function started`);
 
     // 1. Authentication check
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      logStep("ERROR: No authorization header");
+      logStep(`[${requestId}] ERROR: No authorization header`);
+      await logSecurityEvent(null as any, null, 'feedback_attempt', 'feedback', null, ipAddress, userAgent, 'blocked', { reason: 'missing_auth' });
       return new Response(
         JSON.stringify({ error: "Autenticação necessária" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 401, headers }
       );
     }
 
-    const supabase = createClient(
+    const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
       { auth: { persistSession: false } }
     );
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
     
     if (authError || !user) {
-      logStep("ERROR: Authentication failed", { error: authError?.message });
+      logStep(`[${requestId}] ERROR: Authentication failed`, { error: authError?.message });
+      await logSecurityEvent(supabaseAdmin, null, 'feedback_attempt', 'feedback', null, ipAddress, userAgent, 'blocked', { reason: 'invalid_auth' });
       return new Response(
         JSON.stringify({ error: "Não autorizado" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 401, headers }
       );
     }
 
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    logStep(`[${requestId}] User authenticated: ${user.email}`);
 
-    // 2. Input validation
+    // Rate limiting: 5 requests per hour
+    const rateLimitCheck = await checkRateLimit(supabaseAdmin, user.id, ipAddress, 'send-feedback', 5, 60);
+    if (!rateLimitCheck.allowed) {
+      await logSecurityEvent(supabaseAdmin, user.id, 'rate_limit_exceeded', 'feedback', null, ipAddress, userAgent, 'blocked');
+      return new Response(
+        JSON.stringify({ error: rateLimitCheck.error }),
+        { headers, status: 429 }
+      );
+    }
+
+    // 2. Parse and validate request body
     const body = await req.json();
-    const validationResult = feedbackSchema.safeParse(body);
+    logStep(`[${requestId}] Request body parsed`, { type: body.type });
     
-    if (!validationResult.success) {
-      logStep("ERROR: Validation failed", { errors: validationResult.error.errors });
+    const validation = feedbackSchema.safeParse(body);
+    if (!validation.success) {
+      logStep(`[${requestId}] Validation failed`, { errors: validation.error.errors });
       return new Response(
         JSON.stringify({ 
           error: "Dados inválidos", 
-          details: validationResult.error.errors.map(e => e.message) 
+          details: validation.error.errors.map(e => e.message) 
         }),
-        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        { status: 400, headers }
       );
     }
 
-    const { type, message } = validationResult.data;
+    const { type, message } = validation.data;
 
-    // 3. Rate limiting check
-    const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
-    const { data: recentFeedback, error: rateCheckError } = await supabase
-      .from("feedback_log")
-      .select("created_at")
-      .eq("user_id", user.id)
-      .gte("created_at", oneHourAgo);
+    // Sanitize inputs
+    const sanitizedMessage = sanitizeString(escapeHtml(type === 'bug' ? `${message} [BUG REPORT]` : message), 5000);
+    const sanitizedEmail = escapeHtml(user.email || 'unknown');
 
-    if (rateCheckError) {
-      logStep("ERROR: Rate limit check failed", { error: rateCheckError });
-    }
+    logStep(`[${requestId}] Input sanitized successfully`);
 
-    if (recentFeedback && recentFeedback.length >= 3) {
-      logStep("ERROR: Rate limit exceeded", { count: recentFeedback.length });
-      return new Response(
-        JSON.stringify({ 
-          error: "Limite de feedback excedido", 
-          message: "Você pode enviar no máximo 3 feedbacks por hora. Tente novamente mais tarde." 
-        }),
-        { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    // 4. Sanitize HTML
-    const sanitizedMessage = escapeHtml(message);
-    const sanitizedEmail = escapeHtml(user.email || "email não disponível");
-
-    logStep("Input sanitized and validated");
-
-    // 5. Log feedback to database
-    const { error: logError } = await supabase
-      .from("feedback_log")
+    // 4. Insert feedback into database
+    const { error: dbError } = await supabaseAdmin
+      .from('feedback_log')
       .insert({
         user_id: user.id,
         type,
         message: sanitizedMessage,
       });
 
-    if (logError) {
-      logStep("WARNING: Failed to log feedback", { error: logError });
-      // Continue anyway - logging failure shouldn't block email sending
+    if (dbError) {
+      logStep(`[${requestId}] Database error`, { error: dbError.message });
+      throw new Error('Erro ao salvar feedback no banco de dados');
     }
 
-    // 6. Send email
-    const typeEmoji = {
-      bug: "🐛",
-      feature: "✨",
-      improvement: "🚀",
-      other: "💬",
-    }[type] || "💬";
+    logStep(`[${requestId}] Feedback logged in database`);
 
-    const typeName = {
-      bug: "Bug",
-      feature: "Sugestão de Funcionalidade",
-      improvement: "Melhoria",
-      other: "Outro",
-    }[type] || "Outro";
+    // 5. Send email notification
+    try {
+      const { error: emailError } = await resend.emails.send({
+        from: 'Feedback <feedback@resend.dev>',
+        to: 'danilojuniordev@gmail.com',
+        subject: `[${type.toUpperCase()}] Novo Feedback - Challenger App`,
+        html: `
+          <h2>Novo Feedback Recebido</h2>
+          <p><strong>Tipo:</strong> ${type}</p>
+          <p><strong>Usuário:</strong> ${sanitizedEmail}</p>
+          <p><strong>Mensagem:</strong></p>
+          <p>${sanitizedMessage}</p>
+          <p><em>Enviado em: ${new Date().toLocaleString('pt-BR')}</em></p>
+        `,
+      });
 
-    const emailResponse = await resend.emails.send({
-      from: "Neumann Feedback <onboarding@resend.dev>",
-      to: ["gabrielestrela8@gmail.com"],
-      subject: `${typeEmoji} Novo Feedback: ${typeName}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #333; border-bottom: 2px solid #6366f1; padding-bottom: 10px;">
-            ${typeEmoji} Novo Feedback Recebido
-          </h1>
-          
-          <div style="background-color: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
-            <p style="margin: 5px 0;"><strong>Tipo:</strong> ${typeName}</p>
-            <p style="margin: 5px 0;"><strong>Email do usuário:</strong> ${sanitizedEmail}</p>
-            <p style="margin: 5px 0;"><strong>User ID:</strong> ${user.id}</p>
-          </div>
-          
-          <div style="background-color: #fff; border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h2 style="color: #333; margin-top: 0;">Mensagem:</h2>
-            <p style="color: #555; line-height: 1.6; white-space: pre-wrap;">${sanitizedMessage}</p>
-          </div>
-          
-          <p style="color: #888; font-size: 12px; text-align: center; margin-top: 30px;">
-            Este email foi enviado automaticamente pelo sistema Neumann
-          </p>
-        </div>
-      `,
-    });
+      if (emailError) {
+        logStep(`[${requestId}] Email sending failed (non-critical)`, { error: emailError });
+        // Não lançar erro para não bloquear a resposta ao usuário
+      } else {
+        logStep(`[${requestId}] Email sent successfully`);
+      }
+    } catch (emailError) {
+      logStep(`[${requestId}] Email sending exception (non-critical)`, { error: emailError });
+      // Continuar mesmo se o email falhar
+    }
 
-    logStep("Feedback email sent successfully");
+    logStep(`[${requestId}] Feedback sent successfully`);
+
+    // Log successful feedback submission
+    await logSecurityEvent(supabaseAdmin, user.id, 'feedback_submitted', 'feedback', null, ipAddress, userAgent, 'success', { type });
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: "Feedback enviado com sucesso" 
-      }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          ...corsHeaders,
-        },
-      }
+      JSON.stringify({ success: true, message: 'Feedback enviado com sucesso!' }),
+      { headers, status: 200 }
     );
-  } catch (error: any) {
-    logStep("ERROR: Unexpected error", { message: error.message });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+    logStep(`[${requestId}] ERROR: ${errorMessage}`);
+
     return new Response(
-      JSON.stringify({ 
-        error: "Erro ao enviar feedback", 
-        message: "Tente novamente mais tarde" 
-      }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
+      JSON.stringify({ error: errorMessage }),
+      { headers: getAllHeaders(req.headers.get('origin')), status: 400 }
     );
   }
 };

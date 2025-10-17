@@ -567,6 +567,69 @@ export type Database = {
         }
         Relationships: []
       }
+      rate_limit_log: {
+        Row: {
+          created_at: string | null
+          endpoint: string
+          id: string
+          ip_address: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          endpoint: string
+          id?: string
+          ip_address?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          endpoint?: string
+          id?: string
+          ip_address?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      security_audit_log: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          resource_id: string | null
+          resource_type: string | null
+          status: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type?: string | null
+          status: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type?: string | null
+          status?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_onboarding: {
         Row: {
           completed: boolean
@@ -797,6 +860,20 @@ export type Database = {
         Args: { p_user_id: string }
         Returns: boolean
       }
+      check_rate_limit: {
+        Args: {
+          _endpoint: string
+          _ip_address: string
+          _max_requests: number
+          _user_id: string
+          _window_minutes: number
+        }
+        Returns: boolean
+      }
+      cleanup_rate_limit_logs: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_user_community_role: {
         Args: { p_community_id: string; p_user_id: string }
         Returns: Database["public"]["Enums"]["community_role"]
@@ -820,6 +897,19 @@ export type Database = {
       is_community_member: {
         Args: { p_community_id: string; p_user_id: string }
         Returns: boolean
+      }
+      log_security_event: {
+        Args: {
+          _action: string
+          _ip_address: string
+          _metadata: Json
+          _resource_id: string
+          _resource_type: string
+          _status: string
+          _user_agent: string
+          _user_id: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

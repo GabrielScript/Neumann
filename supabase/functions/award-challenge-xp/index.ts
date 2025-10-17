@@ -1,9 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.75.0';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { getAllHeaders, checkRateLimit, logSecurityEvent, getIpAddress, isValidUUID } from '../_shared/security.ts';
 
 interface AwardXPRequest {
   challenge_id: string;
@@ -26,12 +22,17 @@ function getTrophyStage(level: number): string {
 }
 
 Deno.serve(async (req) => {
+  const origin = req.headers.get('origin');
+  const headers = getAllHeaders(origin);
+  
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers });
   }
 
   const requestId = crypto.randomUUID();
+  const ipAddress = getIpAddress(req);
+  const userAgent = req.headers.get('user-agent');
 
   try {
     // Admin client for secure database operations
@@ -43,6 +44,7 @@ Deno.serve(async (req) => {
     // Get user from auth header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
+      await logSecurityEvent(supabaseAdmin, null, 'award_xp_attempt', 'challenge', null, ipAddress, userAgent, 'blocked', { reason: 'missing_auth' });
       throw new Error('Missing authorization header');
     }
 
@@ -50,10 +52,27 @@ Deno.serve(async (req) => {
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
 
     if (authError || !user) {
+      await logSecurityEvent(supabaseAdmin, null, 'award_xp_attempt', 'challenge', null, ipAddress, userAgent, 'blocked', { reason: 'invalid_auth' });
       throw new Error('Unauthorized');
     }
 
+    // Rate limiting: 100 requests per minute
+    const rateLimitCheck = await checkRateLimit(supabaseAdmin, user.id, ipAddress, 'award-challenge-xp', 100, 1);
+    if (!rateLimitCheck.allowed) {
+      await logSecurityEvent(supabaseAdmin, user.id, 'rate_limit_exceeded', 'challenge', null, ipAddress, userAgent, 'blocked');
+      return new Response(
+        JSON.stringify({ error: rateLimitCheck.error }),
+        { headers, status: 429 }
+      );
+    }
+
     const { challenge_id, item_id, date, completed }: AwardXPRequest = await req.json();
+
+    // Validate UUIDs
+    if (!isValidUUID(challenge_id) || !isValidUUID(item_id)) {
+      await logSecurityEvent(supabaseAdmin, user.id, 'invalid_input', 'challenge', challenge_id, ipAddress, userAgent, 'blocked', { reason: 'invalid_uuid' });
+      throw new Error('Invalid challenge or item ID');
+    }
 
     console.log(`[${requestId}] Processing - Challenge: ${challenge_id}, Item: ${item_id}, Completed: ${completed}`);
 

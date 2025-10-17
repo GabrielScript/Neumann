@@ -1,15 +1,16 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.75.0";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { getAllHeaders, checkRateLimit, logSecurityEvent, getIpAddress } from '../_shared/security.ts';
 
 serve(async (req) => {
+  const origin = req.headers.get('origin');
+  const headers = getAllHeaders(origin);
+  const ipAddress = getIpAddress(req);
+  const userAgent = req.headers.get('user-agent');
+  
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers });
   }
 
   const supabaseClient = createClient(
@@ -21,9 +22,22 @@ serve(async (req) => {
     const authHeader = req.headers.get("Authorization")!;
     const token = authHeader.replace("Bearer ", "");
     const { data, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
+    if (userError) {
+      await logSecurityEvent(supabaseClient, null, 'checkout_attempt', 'subscription', null, ipAddress, userAgent, 'blocked', { reason: 'invalid_auth' });
+      throw new Error(`Authentication error: ${userError.message}`);
+    }
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
+
+    // Rate limiting: 5 checkout attempts per minute
+    const rateLimitCheck = await checkRateLimit(supabaseClient, user.id, ipAddress, 'create-checkout', 5, 1);
+    if (!rateLimitCheck.allowed) {
+      await logSecurityEvent(supabaseClient, user.id, 'rate_limit_exceeded', 'subscription', null, ipAddress, userAgent, 'blocked');
+      return new Response(
+        JSON.stringify({ error: rateLimitCheck.error }),
+        { headers, status: 429 }
+      );
+    }
 
     const { priceId } = await req.json();
     if (!priceId) throw new Error("Price ID is required");
@@ -60,16 +74,13 @@ serve(async (req) => {
 
     console.log(`[CREATE-CHECKOUT] Session created successfully`);
 
-    return new Response(JSON.stringify({ url: session.url }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
+    // Log successful checkout creation
+    await logSecurityEvent(supabaseClient, user.id, 'checkout_created', 'subscription', null, ipAddress, userAgent, 'success', { priceId });
+
+    return new Response(JSON.stringify({ url: session.url }), { headers, status: 200 });
   } catch (error) {
     console.error("Error in create-checkout:", error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
-    });
+    return new Response(JSON.stringify({ error: errorMessage }), { headers, status: 500 });
   }
 });
