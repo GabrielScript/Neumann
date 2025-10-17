@@ -81,7 +81,10 @@ export function useChallengeProgress(challengeId: string | undefined, date: stri
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error invoking award-challenge-xp:', error);
+        throw error;
+      }
 
       return data;
     },
@@ -108,6 +111,14 @@ export function useChallengeProgress(challengeId: string | undefined, date: stri
       queryClient.invalidateQueries({ queryKey: ["challenge-progress", challengeId, date] });
       queryClient.invalidateQueries({ queryKey: ["today-xp", challengeId, date, user?.id] });
       queryClient.invalidateQueries({ queryKey: ["user-stats"] });
+    },
+    onError: (error) => {
+      console.error('Error toggling challenge item:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o item. Tente novamente.",
+        variant: "destructive",
+      });
     },
   });
 
