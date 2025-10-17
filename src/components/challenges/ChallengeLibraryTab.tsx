@@ -37,6 +37,7 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedItems, setEditedItems] = useState<any[]>([]);
+  const [editedDays, setEditedDays] = useState<number>(0);
   const [activeTab, setActiveTab] = useState("padrao");
   
   const isPlusUser = subscription?.tier === 'plus_monthly' || subscription?.tier === 'plus_annual';
@@ -181,8 +182,9 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
   });
 
   const saveItemsMutation = useMutation({
-    mutationFn: async (items: any[]) => {
-      const updates = items.map((item) => 
+    mutationFn: async ({ items, days }: { items: any[], days: number }) => {
+      // Atualizar items
+      const itemUpdates = items.map((item) => 
         supabase
           .from("challenge_items")
           .update({
@@ -192,7 +194,17 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
           .eq("id", item.id)
       );
       
-      await Promise.all(updates);
+      await Promise.all(itemUpdates);
+      
+      // Atualizar duração do template se foi alterada
+      if (days !== selectedTemplate?.duration_days) {
+        const { error: templateError } = await supabase
+          .from("challenge_templates")
+          .update({ duration_days: days })
+          .eq("id", selectedTemplate.id);
+          
+        if (templateError) throw templateError;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["template-items"] });
@@ -219,16 +231,28 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
   
   const handleStartEdit = () => {
     setEditedItems(templateItems || []);
+    setEditedDays(selectedTemplate?.duration_days || 21);
     setIsEditing(true);
   };
   
   const handleSaveEdit = () => {
-    saveItemsMutation.mutate(editedItems);
+    // Validar que os dias só aumentaram
+    if (editedDays < (selectedTemplate?.duration_days || 0)) {
+      toast({
+        title: "Erro de validação",
+        description: "Você só pode aumentar o número de dias, não diminuir.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    saveItemsMutation.mutate({ items: editedItems, days: editedDays });
   };
   
   const handleCancelEdit = () => {
     setIsEditing(false);
     setEditedItems([]);
+    setEditedDays(0);
   };
   
   const handleItemChange = (index: number, field: string, value: string) => {
@@ -378,8 +402,22 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
           </DialogHeader>
 
           <div className="space-y-4">
-            <div className="flex gap-2">
-              <Badge>{selectedTemplate?.duration_days} dias</Badge>
+            <div className="flex gap-2 items-center">
+              {isEditing ? (
+                <div className="flex items-center gap-2">
+                  <label className="text-sm font-medium">Duração:</label>
+                  <Input
+                    type="number"
+                    value={editedDays}
+                    onChange={(e) => setEditedDays(parseInt(e.target.value) || 0)}
+                    min={selectedTemplate?.duration_days}
+                    className="w-24"
+                  />
+                  <span className="text-sm text-muted-foreground">dias (mínimo: {selectedTemplate?.duration_days})</span>
+                </div>
+              ) : (
+                <Badge>{selectedTemplate?.duration_days} dias</Badge>
+              )}
               <Badge variant={selectedTemplate?.is_default ? "default" : "secondary"}>
                 {selectedTemplate?.is_default ? "Padrão" : "Comunidade"}
               </Badge>
