@@ -16,7 +16,55 @@ const corsHeaders = {
 
 // XP calculation logic
 function calculateLevel(xp: number): number {
-  return Math.floor(xp / 100) + 1;
+  return Math.max(1, Math.floor(Math.sqrt(xp / 100.0)) + 1);
+}
+
+// Direct XP award function
+async function awardXP(
+  supabaseAdmin: any,
+  userId: string,
+  amount: number,
+  reason: string,
+  metadata: any
+) {
+  // Get current stats
+  const { data: currentStats, error: statsError } = await supabaseAdmin
+    .from('user_stats')
+    .select('xp, level')
+    .eq('user_id', userId)
+    .single();
+
+  if (statsError) throw statsError;
+
+  const currentXP = currentStats?.xp || 0;
+  const newXP = Math.max(0, currentXP + amount);
+  const newLevel = calculateLevel(newXP);
+
+  // Update user stats
+  const { error: updateError } = await supabaseAdmin
+    .from('user_stats')
+    .update({
+      xp: newXP,
+      level: newLevel,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('user_id', userId);
+
+  if (updateError) throw updateError;
+
+  // Log XP award
+  const { error: logError } = await supabaseAdmin
+    .from('xp_audit_log')
+    .insert({
+      user_id: userId,
+      amount: amount,
+      reason: reason,
+      metadata: metadata,
+    });
+
+  if (logError) console.error('Failed to log XP:', logError);
+
+  return { newXP, newLevel, oldLevel: currentStats?.level || 1 };
 }
 
 function isValidUUID(uuid: string): boolean {
@@ -108,55 +156,41 @@ Deno.serve(async (req) => {
       );
     }
 
-    // 3. Check if progress already exists
-    const { data: existing, error: fetchError } = await supabaseAdmin
+    // 3. Get existing progress state before UPSERT
+    const { data: existingProgress } = await supabaseAdmin
       .from('challenge_progress')
-      .select('*')
+      .select('completed')
       .eq('challenge_id', challenge_id)
       .eq('item_id', item_id)
       .eq('date', date)
       .maybeSingle();
 
-    if (fetchError) {
-      console.error(`[${requestId}] Fetch error:`, fetchError);
-      return new Response(
-        JSON.stringify({ error: 'Error fetching progress' }),
-        { headers: corsHeaders, status: 500 }
-      );
-    }
+    const wasAlreadyCompleted = existingProgress?.completed || false;
 
-    // 4. Update or insert progress
-    if (existing) {
-      const { error: updateError } = await supabaseAdmin
-        .from('challenge_progress')
-        .update({ completed })
-        .eq('id', existing.id);
-
-      if (updateError) {
-        console.error(`[${requestId}] Update error:`, updateError);
-        return new Response(
-          JSON.stringify({ error: 'Error updating progress' }),
-          { headers: corsHeaders, status: 500 }
-        );
-      }
-    } else {
-      const { error: insertError } = await supabaseAdmin
-        .from('challenge_progress')
-        .insert({
+    // 4. UPSERT progress (insert or update atomically)
+    const { error: upsertError } = await supabaseAdmin
+      .from('challenge_progress')
+      .upsert(
+        {
           challenge_id,
           item_id,
           date,
           completed,
-        });
+        },
+        {
+          onConflict: 'challenge_id,item_id,date',
+        }
+      );
 
-      if (insertError) {
-        console.error(`[${requestId}] Insert error:`, insertError);
-        return new Response(
-          JSON.stringify({ error: 'Error inserting progress' }),
-          { headers: corsHeaders, status: 500 }
-        );
-      }
+    if (upsertError) {
+      console.error(`[${requestId}] Upsert error:`, upsertError);
+      return new Response(
+        JSON.stringify({ error: 'Error updating progress' }),
+        { headers: corsHeaders, status: 500 }
+      );
     }
+
+    console.log(`[${requestId}] Progress updated successfully`)
 
     let result = {
       success: true,
@@ -167,51 +201,25 @@ Deno.serve(async (req) => {
     };
 
     // 5. Award XP if completing (not uncompleting)
-    if (completed && (!existing || !existing.completed)) {
+    if (completed && !wasAlreadyCompleted) {
       const xpAmount = 10;
 
       console.log(`[${requestId}] Awarding ${xpAmount} XP for item completion...`);
 
       try {
-        // Use secure award_xp function
-        const { error: awardError } = await supabaseAdmin.rpc('award_xp', {
-          _user_id: user.id,
-          _amount: xpAmount,
-          _reason: 'challenge_item_completed',
-          _metadata: { challenge_id, item_id, date },
-          _caller_function: 'award-challenge-xp'
-        });
-
-        if (awardError) {
-          console.error(`[${requestId}] Award XP error:`, awardError);
-          // Check if it's a limit error
-          if (awardError.message?.includes('limit')) {
-            console.log(`[${requestId}] XP limit reached: ${awardError.message}`);
-            return new Response(
-              JSON.stringify({
-                success: false,
-                message: awardError.message,
-                xpAwarded: 0,
-              }),
-              { headers: corsHeaders, status: 200 }
-            );
-          }
-          throw awardError;
-        }
+        const xpResult = await awardXP(
+          supabaseAdmin,
+          user.id,
+          xpAmount,
+          'challenge_item_completed',
+          { challenge_id, item_id, date }
+        );
 
         result.xpAwarded = xpAmount;
+        result.newLevel = xpResult.newLevel;
+        result.leveledUp = xpResult.newLevel > xpResult.oldLevel;
 
-        // Get updated stats
-        const { data: stats } = await supabaseAdmin
-          .from('user_stats')
-          .select('xp, level')
-          .eq('user_id', user.id)
-          .single();
-
-        if (stats) {
-          result.newLevel = stats.level;
-          result.leveledUp = true;
-        }
+        console.log(`[${requestId}] XP awarded: ${xpAmount}, New level: ${xpResult.newLevel}`);
       } catch (error) {
         console.error(`[${requestId}] Error awarding XP:`, error);
         throw error;
@@ -239,13 +247,13 @@ Deno.serve(async (req) => {
         const bonusAmount = 50;
 
         try {
-          await supabaseAdmin.rpc('award_xp', {
-            _user_id: user.id,
-            _amount: bonusAmount,
-            _reason: 'day_complete_bonus',
-            _metadata: { challenge_id, date, total_items: totalItems },
-            _caller_function: 'award-challenge-xp'
-          });
+          await awardXP(
+            supabaseAdmin,
+            user.id,
+            bonusAmount,
+            'day_complete_bonus',
+            { challenge_id, date, total_items: totalItems }
+          );
 
           result.dayComplete = true;
           result.xpAwarded += bonusAmount;
@@ -286,13 +294,13 @@ Deno.serve(async (req) => {
             const challengeBonus = 200;
 
             try {
-              await supabaseAdmin.rpc('award_xp', {
-                _user_id: user.id,
-                _amount: challengeBonus,
-                _reason: 'challenge_completed',
-                _metadata: { challenge_id, completed_days: newCompletedDays },
-                _caller_function: 'award-challenge-xp'
-              });
+              await awardXP(
+                supabaseAdmin,
+                user.id,
+                challengeBonus,
+                'challenge_completed',
+                { challenge_id, completed_days: newCompletedDays }
+              );
 
               result.xpAwarded += challengeBonus;
             } catch (error) {
@@ -316,7 +324,7 @@ Deno.serve(async (req) => {
     }
 
     // Update streak for any item completion (not just day complete)
-    if (completed && (!existing || !existing.completed)) {
+    if (completed && !wasAlreadyCompleted) {
       try {
         await supabaseAdmin.functions.invoke('update-user-streak', {
           body: { date },
