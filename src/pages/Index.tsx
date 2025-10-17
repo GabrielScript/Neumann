@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Target, Trophy, Medal, TrendingUp, Users } from 'lucide-react';
 import logo from '@/assets/logo.png';
+import logoWebp from '@/assets/logo-optimized.webp';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOnboarding } from '@/hooks/useOnboarding';
 
@@ -42,7 +43,10 @@ const Index = () => {
         <div className="flex flex-col items-center text-center max-w-4xl mx-auto space-y-8">
           {/* Logo */}
           <div className="p-6 bg-primary/10 rounded-3xl shadow-glow animate-scale-in">
-            <img src={logo} alt="Neumann Logo" className="w-20 h-20" />
+            <picture>
+              <source srcSet={logoWebp} type="image/webp" />
+              <img src={logo} alt="Neumann Logo" className="w-20 h-20" loading="eager" />
+            </picture>
           </div>
 
           {/* Title & Description */}
