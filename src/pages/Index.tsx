@@ -130,7 +130,7 @@ const Index = () => {
               <p>Transforme objetivos em realizações. Cada meta concluída é um troféu permanente.</p>
             </div>
             <div>
-              <h4 className="font-semibold text-foreground mb-2">🎯 Missão</h4>
+              <h4 className="font-semibold text-foreground mb-2">🚀 Missão</h4>
               <p>Acreditamos que, por meio do comprometimento e da consistência na superação de desafios, no alcance de objetivos e na formação de bons hábitos, o usuário possa desbloquear todo o seu potencial e atingir alta performance em suas capacidades e habilidades.</p>
             </div>
           </div>
