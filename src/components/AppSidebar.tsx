@@ -18,7 +18,7 @@ import logo from '@/assets/logo.png';
 const navItems = [
   { title: 'Dashboard', url: '/dashboard', icon: Award },
   { title: 'Desafios', url: '/challenges', icon: Target },
-  { title: 'Objetivos de Vida', url: '/goals', icon: Sparkles },
+  { title: 'Objetivos', url: '/goals', icon: Sparkles },
   { title: 'Meus Troféus', url: '/trophy', icon: Trophy },
   { title: 'Comunidades (Beta)', url: '/community', icon: Users },
   { title: 'Rankings', url: '/rankings', icon: Medal },
