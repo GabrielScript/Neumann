@@ -131,7 +131,7 @@ const Index = () => {
             </div>
             <div>
               <h4 className="font-semibold text-foreground mb-2">🎯 Missão</h4>
-              <p>Acreditamos que atráves do comprometimento e consistência na conquista dos desafios, objetivos e hábitos, o usuário possa desbloquear seu máximo potencial, alta-performance e de suas capacidades.</p>
+              <p>Acreditamos que, por meio do comprometimento e da consistência na superação de desafios, no alcance de objetivos e na formação de bons hábitos, o usuário possa desbloquear todo o seu potencial e atingir alta performance em suas capacidades e habilidades.</p>
             </div>
           </div>
         </div>
