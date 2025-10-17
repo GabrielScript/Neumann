@@ -18,9 +18,10 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Pencil, Save, X, Globe } from "lucide-react";
+import { Pencil, Save, X, Globe, BookOpen, History, Star, Lightbulb } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
+import { getChallengeAbout } from "@/lib/challengeAbout";
 
 interface ChallengeLibraryTabProps {
   onChallengeStarted: () => void;
@@ -39,6 +40,7 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
   const [editedItems, setEditedItems] = useState<any[]>([]);
   const [editedDays, setEditedDays] = useState<number>(0);
   const [activeTab, setActiveTab] = useState("padrao");
+  const [detailsTab, setDetailsTab] = useState("habitos");
   
   const isPlusUser = subscription?.tier === 'plus_monthly' || subscription?.tier === 'plus_annual';
 
@@ -227,6 +229,7 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
     setSelectedTemplate(template);
     setDetailsOpen(true);
     setIsEditing(false);
+    setDetailsTab("habitos");
   };
   
   const handleStartEdit = () => {
@@ -420,125 +423,202 @@ export function ChallengeLibraryTab({ onChallengeStarted }: ChallengeLibraryTabP
             <DialogDescription>{selectedTemplate?.description}</DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
-            <div className="flex gap-2 items-center">
-              {isEditing ? (
-                <div className="flex items-center gap-2">
-                  <label className="text-sm font-medium">Duração:</label>
-                  <Input
-                    type="number"
-                    value={editedDays}
-                    onChange={(e) => setEditedDays(parseInt(e.target.value) || 0)}
-                    min={selectedTemplate?.duration_days}
-                    className="w-24"
-                  />
-                  <span className="text-sm text-muted-foreground">dias (mínimo: {selectedTemplate?.duration_days})</span>
-                </div>
-              ) : (
-                <Badge>{selectedTemplate?.duration_days} dias</Badge>
-              )}
-              <Badge variant={selectedTemplate?.is_default ? "default" : "secondary"}>
-                {selectedTemplate?.is_default ? "Padrão" : "Comunidade"}
-              </Badge>
-            </div>
+          <Tabs value={detailsTab} onValueChange={setDetailsTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="habitos">Hábitos</TabsTrigger>
+              <TabsTrigger value="sobre">Sobre</TabsTrigger>
+            </TabsList>
 
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-semibold">Hábitos do Desafio:</h3>
-                {isPlusUser && !isEditing && (
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={handleStartEdit}
-                    className="gap-2"
-                  >
-                    <Pencil className="w-4 h-4" />
-                    Editar
-                  </Button>
+            <TabsContent value="habitos" className="space-y-4">
+              <div className="flex gap-2 items-center">
+                {isEditing ? (
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm font-medium">Duração:</label>
+                    <Input
+                      type="number"
+                      value={editedDays}
+                      onChange={(e) => setEditedDays(parseInt(e.target.value) || 0)}
+                      min={selectedTemplate?.duration_days}
+                      className="w-24"
+                    />
+                    <span className="text-sm text-muted-foreground">dias (mínimo: {selectedTemplate?.duration_days})</span>
+                  </div>
+                ) : (
+                  <Badge>{selectedTemplate?.duration_days} dias</Badge>
                 )}
-                {isEditing && (
-                  <div className="flex gap-2">
+                <Badge variant={selectedTemplate?.is_default ? "default" : "secondary"}>
+                  {selectedTemplate?.is_default ? "Padrão" : "Comunidade"}
+                </Badge>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold">Hábitos do Desafio:</h3>
+                  {isPlusUser && !isEditing && (
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={handleCancelEdit}
+                      onClick={handleStartEdit}
                       className="gap-2"
                     >
-                      <X className="w-4 h-4" />
-                      Cancelar
+                      <Pencil className="w-4 h-4" />
+                      Editar
                     </Button>
-                    <Button 
-                      size="sm"
-                      onClick={handleSaveEdit}
-                      disabled={saveItemsMutation.isPending}
-                      className="gap-2"
-                    >
-                      <Save className="w-4 h-4" />
-                      Salvar
-                    </Button>
+                  )}
+                  {isEditing && (
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleCancelEdit}
+                        className="gap-2"
+                      >
+                        <X className="w-4 h-4" />
+                        Cancelar
+                      </Button>
+                      <Button 
+                        size="sm"
+                        onClick={handleSaveEdit}
+                        disabled={saveItemsMutation.isPending}
+                        className="gap-2"
+                      >
+                        <Save className="w-4 h-4" />
+                        Salvar
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                {itemsLoading ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-16" />
+                    <Skeleton className="h-16" />
+                    <Skeleton className="h-16" />
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {(isEditing ? editedItems : templateItems)?.map((item, index) => (
+                      <div key={item.id} className="p-3 border rounded-lg">
+                        {isEditing ? (
+                          <div className="space-y-2">
+                            <div>
+                              <label className="text-sm font-medium">Título:</label>
+                              <Input
+                                value={item.title}
+                                onChange={(e) => handleItemChange(index, 'title', e.target.value)}
+                                className="mt-1"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium">Descrição:</label>
+                              <Textarea
+                                value={item.description || ''}
+                                onChange={(e) => handleItemChange(index, 'description', e.target.value)}
+                                className="mt-1"
+                                rows={2}
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <p className="font-medium">
+                                {index + 1}. {item.title}
+                              </p>
+                              {item.description && (
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  {item.description}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
-              {itemsLoading ? (
-                <div className="space-y-2">
-                  <Skeleton className="h-16" />
-                  <Skeleton className="h-16" />
-                  <Skeleton className="h-16" />
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {(isEditing ? editedItems : templateItems)?.map((item, index) => (
-                    <div key={item.id} className="p-3 border rounded-lg">
-                      {isEditing ? (
-                        <div className="space-y-2">
-                          <div>
-                            <label className="text-sm font-medium">Título:</label>
-                            <Input
-                              value={item.title}
-                              onChange={(e) => handleItemChange(index, 'title', e.target.value)}
-                              className="mt-1"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-sm font-medium">Descrição:</label>
-                            <Textarea
-                              value={item.description || ''}
-                              onChange={(e) => handleItemChange(index, 'description', e.target.value)}
-                              className="mt-1"
-                              rows={2}
-                            />
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <p className="font-medium">
-                              {index + 1}. {item.title}
-                            </p>
-                            {item.description && (
-                              <p className="text-sm text-muted-foreground mt-1">
-                                {item.description}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
 
-            {!isEditing && (
-              <Button
-                onClick={() => handleStartChallenge(selectedTemplate, selectedTemplate?.isCommunity)}
-                className="w-full"
-                size="lg"
-              >
-                Iniciar Desafio
-              </Button>
-            )}
-          </div>
+              {!isEditing && (
+                <Button
+                  onClick={() => handleStartChallenge(selectedTemplate, selectedTemplate?.isCommunity)}
+                  className="w-full"
+                  size="lg"
+                >
+                  Iniciar Desafio
+                </Button>
+              )}
+            </TabsContent>
+
+            <TabsContent value="sobre" className="space-y-6">
+              {(() => {
+                const aboutContent = getChallengeAbout(selectedTemplate?.name || "");
+                
+                if (!aboutContent) {
+                  return (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground">
+                        Informações sobre este desafio serão adicionadas em breve.
+                      </p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <BookOpen className="w-5 h-5 text-primary" />
+                        <h3 className="font-semibold text-lg">O que é</h3>
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                        {aboutContent.concept}
+                      </p>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <History className="w-5 h-5 text-primary" />
+                        <h3 className="font-semibold text-lg">História e Origem</h3>
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                        {aboutContent.history}
+                      </p>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Star className="w-5 h-5 text-primary" />
+                        <h3 className="font-semibold text-lg">Importância</h3>
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                        {aboutContent.importance}
+                      </p>
+                    </div>
+
+                    {aboutContent.tips && (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Lightbulb className="w-5 h-5 text-primary" />
+                          <h3 className="font-semibold text-lg">Como tirar o máximo proveito</h3>
+                        </div>
+                        <p className="text-muted-foreground leading-relaxed whitespace-pre-line">
+                          {aboutContent.tips}
+                        </p>
+                      </div>
+                    )}
+
+                    <Button
+                      onClick={() => handleStartChallenge(selectedTemplate, selectedTemplate?.isCommunity)}
+                      className="w-full"
+                      size="lg"
+                    >
+                      Iniciar Desafio
+                    </Button>
+                  </>
+                );
+              })()}
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
     </>
