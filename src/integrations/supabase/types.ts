@@ -30,6 +30,7 @@ export type Database = {
           date: string
           day_number: number
           forgiveness_completed: boolean | null
+          forgiveness_name: string | null
           gratitude_1: string | null
           gratitude_2: string | null
           gratitude_3: string | null
@@ -55,6 +56,7 @@ export type Database = {
           date?: string
           day_number: number
           forgiveness_completed?: boolean | null
+          forgiveness_name?: string | null
           gratitude_1?: string | null
           gratitude_2?: string | null
           gratitude_3?: string | null
@@ -80,6 +82,7 @@ export type Database = {
           date?: string
           day_number?: number
           forgiveness_completed?: boolean | null
+          forgiveness_name?: string | null
           gratitude_1?: string | null
           gratitude_2?: string | null
           gratitude_3?: string | null

@@ -35,6 +35,7 @@ export function DiaryEntryForm({ challengeId, challengeStartDate }: DiaryEntryFo
   const [beliefArguments, setBeliefArguments] = useState("");
   const [gratitudes, setGratitudes] = useState(["", "", ""]);
   const [forgivenessCompleted, setForgivenessCompleted] = useState(false);
+  const [forgivenessName, setForgivenessName] = useState("");
   const [learnings, setLearnings] = useState("");
 
   // Collapsible sections state
@@ -68,6 +69,7 @@ export function DiaryEntryForm({ challengeId, challengeStartDate }: DiaryEntryFo
         todayEntry.gratitude_3 || "",
       ]);
       setForgivenessCompleted(todayEntry.forgiveness_completed);
+      setForgivenessName(todayEntry.forgiveness_name || "");
       setLearnings(todayEntry.learnings || "");
     }
   }, [todayEntry]);
@@ -114,6 +116,7 @@ export function DiaryEntryForm({ challengeId, challengeStartDate }: DiaryEntryFo
       gratitude_2: gratitudes[1],
       gratitude_3: gratitudes[2],
       forgiveness_completed: forgivenessCompleted,
+      forgiveness_name: forgivenessName,
       learnings: learnings,
     });
   };
@@ -274,23 +277,31 @@ export function DiaryEntryForm({ challengeId, challengeStartDate }: DiaryEntryFo
               {openSections.section4 ? <ChevronUp /> : <ChevronDown />}
             </CollapsibleTrigger>
             <CollapsibleContent className="mt-4 space-y-4">
+              <div className="space-y-2">
+                <Label>Seu nome completo:</Label>
+                <Input
+                  value={forgivenessName}
+                  onChange={(e) => setForgivenessName(e.target.value)}
+                  placeholder="Digite seu nome completo..."
+                />
+              </div>
               <div className="p-4 bg-muted/50 rounded-lg space-y-4 text-sm">
                 <p>
                   <strong>1.</strong> Por todas as coisas que eu mesmo me feri, me magoei, me prejudiquei,
                   consciente ou inconscientemente, sabendo o que estava fazendo, ou sem saber, eu me perdoo e
-                  me liberto. Eu me aceito do jeito que eu sou. Eu sou [seu nome completo]
+                  me liberto. Eu me aceito do jeito que eu sou. Eu sou <strong>{forgivenessName || "[seu nome completo]"}</strong>
                 </p>
                 <p>
                   <strong>2.</strong> Por todas as pessoas que nesse mundo me magoaram, me ofenderam, me
                   prejudicaram de forma consciente ou inconsciente, direta ou indiretamente, eu perdoo cada uma
                   dessas pessoas. Eu me desconecto delas neste momento. Eu me perdoo. Eu me liberto. Eu me
-                  aceito do jeito que sou. Eu sou [seu nome]
+                  aceito do jeito que sou. Eu sou <strong>{forgivenessName || "[seu nome]"}</strong>
                 </p>
                 <p>
                   <strong>3.</strong> Por todas as pessoas nesse mundo que eu prejudiquei, magoei, ofendi, por
                   pensamentos ou palavras, gestos ou emoções, consciente ou inconscientemente, eu peço perdão ao
                   Universo. Eu peço perdão a cada uma dessas pessoas. Eu me desconecto delas. Eu me aceito do
-                  jeito que eu sou. Eu sou [seu nome]
+                  jeito que eu sou. Eu sou <strong>{forgivenessName || "[seu nome]"}</strong>
                 </p>
               </div>
               <div className="flex items-center space-x-2">

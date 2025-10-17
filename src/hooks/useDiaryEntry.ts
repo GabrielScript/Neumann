@@ -25,6 +25,7 @@ export interface DiaryEntry {
   gratitude_2?: string;
   gratitude_3?: string;
   forgiveness_completed: boolean;
+  forgiveness_name?: string;
   learnings?: string;
   created_at?: string;
   updated_at?: string;
