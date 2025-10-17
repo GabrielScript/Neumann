@@ -14,6 +14,92 @@ export type Database = {
   }
   public: {
     Tables: {
+      challenge_diary_entries: {
+        Row: {
+          action_1: string | null
+          action_2: string | null
+          action_3: string | null
+          action_4: string | null
+          action_5: string | null
+          action_6: string | null
+          actions_belief_arguments: string | null
+          actions_belief_score: number | null
+          challenge_id: string
+          change_past: string | null
+          created_at: string | null
+          date: string
+          day_number: number
+          forgiveness_completed: boolean | null
+          gratitude_1: string | null
+          gratitude_2: string | null
+          gratitude_3: string | null
+          id: string
+          learnings: string | null
+          reason_to_live: string | null
+          updated_at: string | null
+          user_id: string
+          world_contribution: string | null
+        }
+        Insert: {
+          action_1?: string | null
+          action_2?: string | null
+          action_3?: string | null
+          action_4?: string | null
+          action_5?: string | null
+          action_6?: string | null
+          actions_belief_arguments?: string | null
+          actions_belief_score?: number | null
+          challenge_id: string
+          change_past?: string | null
+          created_at?: string | null
+          date?: string
+          day_number: number
+          forgiveness_completed?: boolean | null
+          gratitude_1?: string | null
+          gratitude_2?: string | null
+          gratitude_3?: string | null
+          id?: string
+          learnings?: string | null
+          reason_to_live?: string | null
+          updated_at?: string | null
+          user_id: string
+          world_contribution?: string | null
+        }
+        Update: {
+          action_1?: string | null
+          action_2?: string | null
+          action_3?: string | null
+          action_4?: string | null
+          action_5?: string | null
+          action_6?: string | null
+          actions_belief_arguments?: string | null
+          actions_belief_score?: number | null
+          challenge_id?: string
+          change_past?: string | null
+          created_at?: string | null
+          date?: string
+          day_number?: number
+          forgiveness_completed?: boolean | null
+          gratitude_1?: string | null
+          gratitude_2?: string | null
+          gratitude_3?: string | null
+          id?: string
+          learnings?: string | null
+          reason_to_live?: string | null
+          updated_at?: string | null
+          user_id?: string
+          world_contribution?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "challenge_diary_entries_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       challenge_items: {
         Row: {
           alignment_score: number | null

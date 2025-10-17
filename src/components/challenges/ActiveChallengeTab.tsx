@@ -22,7 +22,8 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { EditActiveChallengeModal } from "./EditActiveChallengeModal"; // Importar o novo modal
+import { EditActiveChallengeModal } from "./EditActiveChallengeModal";
+import { DiaryEntryForm } from "./DiaryEntryForm";
 import {
   Dialog,
   DialogContent,
@@ -72,10 +73,13 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
   
   const [abandonDialogOpen, setAbandonDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [editModalOpen, setEditModalOpen] = useState(false); // Estado para o modal de edição
-  const [detailsModalOpen, setDetailsModalOpen] = useState(false); // Estado para o modal de detalhes
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [detailsModalOpen, setDetailsModalOpen] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  
+  // Detectar se é o desafio do diário de bordo
+  const isDiaryChallenge = challenge.name === "Desafio do Diário de Bordo";
 
   const isItemCompleted = (itemId: string) => {
     return progress?.some((p) => p.item_id === itemId && p.completed) || false;
@@ -273,55 +277,60 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>Checklist Diário</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {items && items.length > 0 ? (
-              items.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-start gap-3 p-4 border rounded-lg hover:bg-accent/50 transition-colors"
-                >
-                  <Checkbox
-                    checked={isItemCompleted(item.id)}
-                    onCheckedChange={(checked) =>
-                      toggleItem({ itemId: item.id, completed: !!checked })
-                    }
-                    className="mt-1"
-                  />
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-start justify-between gap-2">
-                      <h4 className="font-medium">{item.title}</h4>
-                      <Badge variant={priorityColors[item.priority as keyof typeof priorityColors]}>
-                        {priorityLabels[item.priority as keyof typeof priorityLabels]}
-                      </Badge>
+      {/* Renderizar Diário de Bordo ou Checklist Normal */}
+      {isDiaryChallenge ? (
+        <DiaryEntryForm challengeId={challenge.id} challengeStartDate={challenge.start_date} />
+      ) : (
+        <Card>
+          <CardHeader>
+            <div className="flex justify-between items-center">
+              <CardTitle>Checklist Diário</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {items && items.length > 0 ? (
+                items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-start gap-3 p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+                  >
+                    <Checkbox
+                      checked={isItemCompleted(item.id)}
+                      onCheckedChange={(checked) =>
+                        toggleItem({ itemId: item.id, completed: !!checked })
+                      }
+                      className="mt-1"
+                    />
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <h4 className="font-medium">{item.title}</h4>
+                        <Badge variant={priorityColors[item.priority as keyof typeof priorityColors]}>
+                          {priorityLabels[item.priority as keyof typeof priorityLabels]}
+                        </Badge>
+                      </div>
+                      {item.description && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {item.description}
+                        </p>
+                      )}
+                      {item.reminder_time && (
+                        <p className="text-xs text-muted-foreground">
+                          🕐 Lembrete: {item.reminder_time}
+                        </p>
+                      )}
                     </div>
-                    {item.description && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {item.description}
-                      </p>
-                    )}
-                    {item.reminder_time && (
-                      <p className="text-xs text-muted-foreground">
-                        🕐 Lembrete: {item.reminder_time}
-                      </p>
-                    )}
                   </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-center text-muted-foreground py-8">
-                Nenhum item no checklist ainda.
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+                ))
+              ) : (
+                <p className="text-center text-muted-foreground py-8">
+                  Nenhum item no checklist ainda.
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <AlertDialog open={abandonDialogOpen} onOpenChange={setAbandonDialogOpen}>
         <AlertDialogContent>
