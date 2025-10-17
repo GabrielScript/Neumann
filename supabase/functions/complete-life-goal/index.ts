@@ -147,8 +147,8 @@ Deno.serve(async (req) => {
 
     const oldLevel = statsBefore.level;
 
-    // 4. Award 500 XP directly
-    const xpAmount = 500;
+    // 4. Award 1000 XP directly
+    const xpAmount = 1000;
     console.log(`[${requestId}] Awarding ${xpAmount} XP for life goal completion`);
 
     const xpResult = await awardXP(
