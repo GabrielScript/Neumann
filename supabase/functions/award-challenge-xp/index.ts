@@ -290,8 +290,8 @@ Deno.serve(async (req) => {
               })
               .eq('id', challenge_id);
             
-            // Award challenge completion bonus - 200 XP
-            const challengeBonus = 200;
+            // Award challenge completion bonus - (duration_days * 100) / 2
+            const challengeBonus = Math.floor((challenge.duration_days * 100) / 2);
 
             try {
               await awardXP(
