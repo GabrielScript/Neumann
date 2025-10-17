@@ -9,7 +9,7 @@ import { Moon, Sun, LogOut } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
-import { TrophyBackgroundRemover } from '@/components/TrophyBackgroundRemover';
+
 
 export default function Settings() {
   const { user, signOut } = useAuth();
@@ -126,8 +126,6 @@ export default function Settings() {
             </Button>
           </CardContent>
         </Card>
-
-        <TrophyBackgroundRemover />
       </div>
       </div>
     </Layout>
