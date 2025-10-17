@@ -129,7 +129,7 @@ export default function Goals() {
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-4xl font-bold mb-2">Objetivos de Vida</h1>
+            <h1 className="text-4xl font-bold mb-2">Objetivos</h1>
             <p className="text-muted-foreground">
               Defina e acompanhe suas metas mais importantes
             </p>
@@ -151,7 +151,7 @@ export default function Goals() {
             {activeGoals.length === 0 && completedGoals.length === 0 ? (
               <div className="text-center py-16">
                 <p className="text-muted-foreground mb-4">
-                  Você ainda não tem objetivos de vida cadastrados.
+                  Você ainda não tem objetivos cadastrados.
                 </p>
                 <Button onClick={() => setFormOpen(true)}>
                   Criar Primeiro Objetivo
