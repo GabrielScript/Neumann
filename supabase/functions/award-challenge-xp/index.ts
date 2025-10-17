@@ -243,8 +243,8 @@ Deno.serve(async (req) => {
       if (totalItems > 0 && completedItems === totalItems) {
         console.log(`[${requestId}] Day complete! Awarding bonus...`);
         
-        // Day complete bonus - award 50 XP
-        const bonusAmount = 50;
+        // Day complete bonus - award 100 XP
+        const bonusAmount = 100;
 
         try {
           await awardXP(
