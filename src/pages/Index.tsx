@@ -89,15 +89,15 @@ const Index = () => {
             <Sparkles className="w-12 h-12 text-yellow-500 mb-4" />
             <h3 className="text-2xl font-bold mb-3">Objetivos de Vida</h3>
             <p className="text-muted-foreground">
-              Defina e conquiste suas metas mais importantes. Celebre cada objetivo alcançado com troféus especiais.
+              Defina e conquiste suas metas mais importantes. Celebre cada objetivo alcançado com trofeus especiais.
             </p>
           </div>
 
           <div className="bg-card p-8 rounded-2xl shadow-card hover:shadow-primary transition-all duration-300 animate-fade-in">
             <Trophy className="w-12 h-12 text-yellow-500 mb-4" />
-            <h3 className="text-2xl font-bold mb-3">Troféus de Conquista</h3>
+            <h3 className="text-2xl font-bold mb-3">Trofeus de Conquista</h3>
             <p className="text-muted-foreground">
-              Ganhe troféus permanentes ao completar seus objetivos de vida. Construa seu legado de conquistas.
+              Ganhe trofeus permanentes ao completar seus objetivos de vida. Construa seu legado de conquistas.
             </p>
           </div>
 
