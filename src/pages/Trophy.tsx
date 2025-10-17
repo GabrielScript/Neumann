@@ -189,15 +189,15 @@ const TrophyPage = () => {
           </CardContent>
         </Card>
 
-        {/* Troféus de Objetivos de Vida */}
+        {/* Objetivos Especiais */}
         <Card className="border-2 border-primary/30 bg-gradient-card shadow-card animate-fade-in max-w-2xl mx-auto">
             <CardHeader>
               <CardTitle className="text-xl text-primary flex items-center gap-2 font-display">
                 <Award className="w-5 h-5" />
-                Troféus Especiais
+                Objetivos Especiais
               </CardTitle>
               <CardDescription className="font-body">
-                Conquistas por completar objetivos de vida
+                Objetivos de vida conquistados
               </CardDescription>
             </CardHeader>
             <CardContent>
