@@ -210,14 +210,6 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => setEditModalOpen(true)} // Botão para abrir o modal de edição
-              >
-                <Pencil className="w-4 h-4 mr-2" />
-                Editar
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
                 onClick={handleSaveAsTemplate}
                 disabled={isSaving}
               >
