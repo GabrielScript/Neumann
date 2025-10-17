@@ -79,6 +79,15 @@ Deno.serve(async (req) => {
     }
 
     const newBestStreak = Math.max(bestStreak, newStreak);
+    const streakIncreased = newStreak > currentStreak;
+
+    // Calculate progressive XP bonus for streak
+    let streakXP = 0;
+    if (streakIncreased && newStreak > 1) {
+      // Progressive XP: 10 base + (streak * 5)
+      // Day 1: 15 XP, Day 2: 20 XP, Day 3: 25 XP, Day 7: 45 XP, Day 30: 160 XP
+      streakXP = 10 + (newStreak * 5);
+    }
 
     // Update user_stats with new streak
     const { error: updateError } = await supabaseAdmin
@@ -91,6 +100,41 @@ Deno.serve(async (req) => {
       .eq('user_id', user.id);
 
     if (updateError) throw updateError;
+
+    // Award XP for maintaining streak (if streak increased)
+    if (streakXP > 0) {
+      const { data: currentStats } = await supabaseAdmin
+        .from('user_stats')
+        .select('xp')
+        .eq('user_id', user.id)
+        .single();
+
+      const newXP = (currentStats?.xp || 0) + streakXP;
+      const newLevel = Math.max(1, Math.floor(Math.sqrt(newXP / 100.0)) + 1);
+
+      await supabaseAdmin
+        .from('user_stats')
+        .update({
+          xp: newXP,
+          level: newLevel,
+        })
+        .eq('user_id', user.id);
+
+      // Log XP award
+      await supabaseAdmin
+        .from('xp_audit_log')
+        .insert({
+          user_id: user.id,
+          amount: streakXP,
+          reason: `Sequência de ${newStreak} dias mantida`,
+          metadata: {
+            streak: newStreak,
+            caller_function: 'update-user-streak',
+          },
+        });
+
+      console.log(`[${requestId}] Streak XP awarded: ${streakXP} (Streak: ${newStreak})`);
+    }
     
     console.log(`[${requestId}] Streak updated - Current: ${newStreak}, Best: ${newBestStreak}`);
 
