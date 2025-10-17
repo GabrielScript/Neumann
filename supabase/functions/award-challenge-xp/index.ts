@@ -1,5 +1,4 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.75.0';
-import { getAllHeaders, checkRateLimit, logSecurityEvent, getIpAddress, isValidUUID } from '../_shared/security.ts';
 
 interface AwardXPRequest {
   challenge_id: string;
@@ -8,31 +7,31 @@ interface AwardXPRequest {
   completed: boolean;
 }
 
-// XP calculation logic (moved from client)
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Content-Type': 'application/json',
+};
+
+// XP calculation logic
 function calculateLevel(xp: number): number {
   return Math.floor(xp / 100) + 1;
 }
 
-function getTrophyStage(level: number): string {
-  if (level <= 10) return 'municipal';
-  if (level <= 25) return 'estadual';
-  if (level <= 45) return 'regional';
-  if (level <= 70) return 'nacional';
-  return 'internacional';
+function isValidUUID(uuid: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
 }
 
 Deno.serve(async (req) => {
-  const origin = req.headers.get('origin');
-  const headers = getAllHeaders(origin);
-  
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers });
+    return new Response(null, { headers: corsHeaders });
   }
 
   const requestId = crypto.randomUUID();
-  const ipAddress = getIpAddress(req);
-  const userAgent = req.headers.get('user-agent');
+  console.log(`[${requestId}] Request started`);
 
   try {
     // Admin client for secure database operations
@@ -44,34 +43,35 @@ Deno.serve(async (req) => {
     // Get user from auth header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      await logSecurityEvent(supabaseAdmin, null, 'award_xp_attempt', 'challenge', null, ipAddress, userAgent, 'blocked', { reason: 'missing_auth' });
-      throw new Error('Missing authorization header');
+      console.error(`[${requestId}] Missing authorization header`);
+      return new Response(
+        JSON.stringify({ error: 'Missing authorization header' }),
+        { headers: corsHeaders, status: 401 }
+      );
     }
 
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
 
     if (authError || !user) {
-      await logSecurityEvent(supabaseAdmin, null, 'award_xp_attempt', 'challenge', null, ipAddress, userAgent, 'blocked', { reason: 'invalid_auth' });
-      throw new Error('Unauthorized');
-    }
-
-    // Rate limiting: 100 requests per minute
-    const rateLimitCheck = await checkRateLimit(supabaseAdmin, user.id, ipAddress, 'award-challenge-xp', 100, 1);
-    if (!rateLimitCheck.allowed) {
-      await logSecurityEvent(supabaseAdmin, user.id, 'rate_limit_exceeded', 'challenge', null, ipAddress, userAgent, 'blocked');
+      console.error(`[${requestId}] Auth error:`, authError);
       return new Response(
-        JSON.stringify({ error: rateLimitCheck.error }),
-        { headers, status: 429 }
+        JSON.stringify({ error: 'Unauthorized' }),
+        { headers: corsHeaders, status: 401 }
       );
     }
+
+    console.log(`[${requestId}] User authenticated: ${user.id}`);
 
     const { challenge_id, item_id, date, completed }: AwardXPRequest = await req.json();
 
     // Validate UUIDs
     if (!isValidUUID(challenge_id) || !isValidUUID(item_id)) {
-      await logSecurityEvent(supabaseAdmin, user.id, 'invalid_input', 'challenge', challenge_id, ipAddress, userAgent, 'blocked', { reason: 'invalid_uuid' });
-      throw new Error('Invalid challenge or item ID');
+      console.error(`[${requestId}] Invalid UUIDs`);
+      return new Response(
+        JSON.stringify({ error: 'Invalid challenge or item ID' }),
+        { headers: corsHeaders, status: 400 }
+      );
     }
 
     console.log(`[${requestId}] Processing - Challenge: ${challenge_id}, Item: ${item_id}, Completed: ${completed}`);
@@ -85,7 +85,11 @@ Deno.serve(async (req) => {
       .single();
 
     if (challengeError || !challenge) {
-      throw new Error('Challenge not found or unauthorized');
+      console.error(`[${requestId}] Challenge not found:`, challengeError);
+      return new Response(
+        JSON.stringify({ error: 'Challenge not found or unauthorized' }),
+        { headers: corsHeaders, status: 404 }
+      );
     }
 
     // 2. Verify item belongs to challenge
@@ -97,7 +101,11 @@ Deno.serve(async (req) => {
       .single();
 
     if (itemError || !item) {
-      throw new Error('Challenge item not found');
+      console.error(`[${requestId}] Item not found:`, itemError);
+      return new Response(
+        JSON.stringify({ error: 'Challenge item not found' }),
+        { headers: corsHeaders, status: 404 }
+      );
     }
 
     // 3. Check if progress already exists
@@ -109,7 +117,13 @@ Deno.serve(async (req) => {
       .eq('date', date)
       .maybeSingle();
 
-    if (fetchError) throw fetchError;
+    if (fetchError) {
+      console.error(`[${requestId}] Fetch error:`, fetchError);
+      return new Response(
+        JSON.stringify({ error: 'Error fetching progress' }),
+        { headers: corsHeaders, status: 500 }
+      );
+    }
 
     // 4. Update or insert progress
     if (existing) {
@@ -118,7 +132,13 @@ Deno.serve(async (req) => {
         .update({ completed })
         .eq('id', existing.id);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error(`[${requestId}] Update error:`, updateError);
+        return new Response(
+          JSON.stringify({ error: 'Error updating progress' }),
+          { headers: corsHeaders, status: 500 }
+        );
+      }
     } else {
       const { error: insertError } = await supabaseAdmin
         .from('challenge_progress')
@@ -129,7 +149,13 @@ Deno.serve(async (req) => {
           completed,
         });
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error(`[${requestId}] Insert error:`, insertError);
+        return new Response(
+          JSON.stringify({ error: 'Error inserting progress' }),
+          { headers: corsHeaders, status: 500 }
+        );
+      }
     }
 
     let result = {
@@ -157,6 +183,7 @@ Deno.serve(async (req) => {
         });
 
         if (awardError) {
+          console.error(`[${requestId}] Award XP error:`, awardError);
           // Check if it's a limit error
           if (awardError.message?.includes('limit')) {
             console.log(`[${requestId}] XP limit reached: ${awardError.message}`);
@@ -166,7 +193,7 @@ Deno.serve(async (req) => {
                 message: awardError.message,
                 xpAwarded: 0,
               }),
-              { headers, status: 200 }
+              { headers: corsHeaders, status: 200 }
             );
           }
           throw awardError;
@@ -304,26 +331,13 @@ Deno.serve(async (req) => {
 
     console.log(`[${requestId}] Success - Awarded ${result.xpAwarded} XP`);
 
-    // Log successful XP award
-    await logSecurityEvent(
-      supabaseAdmin, 
-      user.id, 
-      'award_xp_success', 
-      'challenge', 
-      challenge_id, 
-      ipAddress, 
-      userAgent, 
-      'success',
-      { xpAwarded: result.xpAwarded, levelUp: result.leveledUp }
-    );
-
-    return new Response(JSON.stringify(result), { headers, status: 200 });
+    return new Response(JSON.stringify(result), { headers: corsHeaders, status: 200 });
   } catch (error) {
     console.error(`[${requestId}] ERROR:`, error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
       JSON.stringify({ error: errorMessage }),
-      { headers, status: 400 }
+      { headers: corsHeaders, status: 400 }
     );
   }
 });
