@@ -52,7 +52,7 @@ export function getAllHeaders(origin?: string | null): Record<string, string> {
  * Check rate limit for a user/endpoint
  */
 export async function checkRateLimit(
-  supabaseAdmin: ReturnType<typeof createClient>,
+  supabaseAdmin: any,
   userId: string | null,
   ipAddress: string | null,
   endpoint: string,
@@ -66,7 +66,7 @@ export async function checkRateLimit(
       _endpoint: endpoint,
       _max_requests: maxRequests,
       _window_minutes: windowMinutes,
-    });
+    } as any);
 
     if (error) {
       console.error('[RATE_LIMIT] Error checking rate limit:', error);
@@ -91,7 +91,7 @@ export async function checkRateLimit(
  * Log security event for audit trail
  */
 export async function logSecurityEvent(
-  supabaseAdmin: ReturnType<typeof createClient>,
+  supabaseAdmin: any,
   userId: string | null,
   action: string,
   resourceType: string | null,
@@ -111,7 +111,7 @@ export async function logSecurityEvent(
       _user_agent: userAgent,
       _status: status,
       _metadata: metadata ? JSON.stringify(metadata) : null,
-    });
+    } as any);
   } catch (error) {
     console.error('[SECURITY_AUDIT] Failed to log event:', error);
   }

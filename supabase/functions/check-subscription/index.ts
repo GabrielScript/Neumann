@@ -43,8 +43,8 @@ serve(async (req) => {
       await logSecurityEvent(supabaseClient, null, 'check_subscription_failed', 'subscription', null, ipAddress, userAgent, 'blocked', { reason: 'invalid_auth' });
       throw new Error(`Authentication error: ${userError.message}`);
     }
-    if (!user?.email) throw new Error("User not authenticated or email not available");
     const user = userData.user;
+    if (!user?.email) throw new Error("User not authenticated or email not available");
     // Log without exposing PII
     logStep("User authenticated");
 
@@ -168,16 +168,10 @@ serve(async (req) => {
       tier,
       product_id: productId,
       subscription_end: subscriptionEnd
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
+    }), { headers, status: 200 });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
     logStep("ERROR in check-subscription", { message: errorMessage });
-    return new Response(JSON.stringify({ error: errorMessage }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
-    });
+    return new Response(JSON.stringify({ error: errorMessage }), { headers, status: 500 });
   }
 });

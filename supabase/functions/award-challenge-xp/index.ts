@@ -166,7 +166,7 @@ Deno.serve(async (req) => {
                 message: awardError.message,
                 xpAwarded: 0,
               }),
-              { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+              { headers, status: 200 }
             );
           }
           throw awardError;
@@ -304,19 +304,26 @@ Deno.serve(async (req) => {
 
     console.log(`[${requestId}] Success - Awarded ${result.xpAwarded} XP`);
 
-    return new Response(JSON.stringify(result), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 200,
-    });
+    // Log successful XP award
+    await logSecurityEvent(
+      supabaseAdmin, 
+      user.id, 
+      'award_xp_success', 
+      'challenge', 
+      challenge_id, 
+      ipAddress, 
+      userAgent, 
+      'success',
+      { xpAwarded: result.xpAwarded, levelUp: result.leveledUp }
+    );
+
+    return new Response(JSON.stringify(result), { headers, status: 200 });
   } catch (error) {
     console.error(`[${requestId}] ERROR:`, error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
       JSON.stringify({ error: errorMessage }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
-      }
+      { headers, status: 400 }
     );
   }
 });
