@@ -26,6 +26,8 @@ export interface DiaryEntry {
   gratitude_3?: string;
   forgiveness_completed: boolean;
   learnings?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export function useDiaryEntry(challengeId: string, challengeStartDate: string) {

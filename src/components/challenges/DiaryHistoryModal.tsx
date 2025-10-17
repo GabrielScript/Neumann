@@ -126,7 +126,7 @@ export function DiaryHistoryModal({ open, onOpenChange, challengeId }: DiaryHist
 
                   <Separator />
                   <p className="text-xs text-muted-foreground">
-                    Registrado em {format(new Date(entry.date), "dd/MM/yyyy")}
+                    Registrado em {format(new Date(entry.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                   </p>
                 </CardContent>
               </Card>
