@@ -24,7 +24,7 @@ const navItems = [
   { title: 'Rankings', url: '/rankings', icon: Medal },
   { title: 'Assinaturas', url: '/subscriptions', icon: CreditCard },
   { title: 'Configurações', url: '/settings', icon: Settings },
-  { title: 'Feedbacks', url: '/feedback', icon: MessageSquare },
+  { title: 'Feedback', url: '/feedback', icon: MessageSquare },
 ];
 
 export const AppSidebar = () => {
