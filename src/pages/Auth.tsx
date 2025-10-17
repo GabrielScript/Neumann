@@ -258,6 +258,14 @@ const Auth = () => {
                     minLength={6}
                     maxLength={72}
                   />
+                  <div className="text-xs text-muted-foreground space-y-1 mt-2">
+                    <p className="font-medium">Requisitos de senha forte:</p>
+                    <ul className="list-disc list-inside space-y-0.5 pl-2">
+                      <li>Mínimo de 6 caracteres</li>
+                      <li>Recomendado: letras maiúsculas e minúsculas</li>
+                      <li>Recomendado: números e caracteres especiais</li>
+                    </ul>
+                  </div>
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? 'Criando conta...' : 'Criar Conta'}
