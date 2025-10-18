@@ -15,16 +15,22 @@ export const OptimizedImage = ({
   height,
   priority = false 
 }: OptimizedImageProps) => {
+  // Generate WebP source from original image path
+  const webpSrc = typeof src === 'string' ? src.replace(/\.(png|jpg|jpeg)$/i, '.webp') : src;
+  
   return (
-    <img
-      src={src}
-      alt={alt}
-      className={className}
-      loading={priority ? "eager" : "lazy"}
-      decoding="async"
-      width={width}
-      height={height}
-      fetchPriority={priority ? "high" : "auto"}
-    />
+    <picture>
+      <source srcSet={webpSrc} type="image/webp" />
+      <img
+        src={src}
+        alt={alt}
+        className={className}
+        loading={priority ? "eager" : "lazy"}
+        decoding="async"
+        width={width}
+        height={height}
+        fetchPriority={priority ? "high" : "auto"}
+      />
+    </picture>
   );
 };
