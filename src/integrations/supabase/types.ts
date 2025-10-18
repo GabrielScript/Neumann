@@ -1047,6 +1047,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      reset_to_free_tier: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "community_admin" | "community_moderator" | "community_member"
