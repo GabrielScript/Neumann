@@ -22,12 +22,17 @@
     <meta name="description" content="Neumann - Transforme desafios em conquistas,mude sua vida e alcance seus sonhos!">
     <meta name="author" content="Neumann" />
     
-    <!-- Preload Fontes Críticas -->
-    <link 
-      rel="preload" 
-      as="style"
-      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap"
-    >
+    <!-- Critical CSS inline para First Paint -->
+    <style>
+      /* Critical styles only */
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { 
+        font-family: system-ui, -apple-system, sans-serif;
+        background: hsl(0 0% 92%);
+        color: hsl(0 0% 10%);
+      }
+      #root { min-height: 100vh; }
+    </style>
     
     <!-- Carregamento Assíncrono de Fontes -->
     <link 
@@ -44,6 +49,11 @@
         href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap"
       >
     </noscript>
+    
+    <!-- Script para garantir carregamento assíncrono -->
+    <script>
+      !function(e){"use strict";var t=function(t,n,r){var o,i=e.document,s=i.createElement("link");if(n)o=n;else{var a=(i.body||i.getElementsByTagName("head")[0]).childNodes;o=a[a.length-1]}var l=i.styleSheets;if(r)for(var d in r)r.hasOwnProperty(d)&&s.setAttribute(d,r[d]);s.rel="stylesheet",s.href=t,s.media="only x",function e(t){if(i.body)return t();setTimeout(function(){e(t)})}(function(){o.parentNode.insertBefore(s,n?o:o.nextSibling)});var f=function(e){for(var t=s.href,n=l.length;n--;)if(l[n].href===t)return e();setTimeout(function(){f(e)})};return s.addEventListener&&s.addEventListener("load",function(){this.media=r&&r.media||"all"}),s.onloadcssdefined=f,f(function(){s.media!==r&&r.media||"all"||(s.media=r&&r.media||"all")}),s};"undefined"!=typeof exports?exports.loadCSS=t:e.loadCSS=t}("undefined"!=typeof global?global:this);
+    </script>
 
     
     
