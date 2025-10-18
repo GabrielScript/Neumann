@@ -16,7 +16,6 @@ const feedbackSchema = z.object({
     .trim()
     .min(10, "A mensagem deve ter pelo menos 10 caracteres")
     .max(2000, "A mensagem não pode exceder 2000 caracteres"),
-  phone: z.string().optional().nullable(),
 });
 
 // HTML sanitization - escape HTML entities
@@ -111,12 +110,11 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    const { type, message, phone } = validation.data;
+    const { type, message } = validation.data;
 
     // Sanitize inputs
     const sanitizedMessage = sanitizeString(escapeHtml(type === 'bug' ? `${message} [BUG REPORT]` : message), 5000);
     const sanitizedEmail = escapeHtml(user.email || 'unknown');
-    const sanitizedPhone = phone ? escapeHtml(phone) : null;
 
     logStep(`[${requestId}] Input sanitized successfully`);
 
@@ -127,7 +125,6 @@ const handler = async (req: Request): Promise<Response> => {
         user_id: user.id,
         type,
         message: sanitizedMessage,
-        phone: sanitizedPhone,
       });
 
     if (dbError) {
@@ -147,7 +144,6 @@ const handler = async (req: Request): Promise<Response> => {
           <h2>Novo Feedback Recebido</h2>
           <p><strong>Tipo:</strong> ${type}</p>
           <p><strong>Usuário:</strong> ${sanitizedEmail}</p>
-          ${sanitizedPhone ? `<p><strong>Telefone:</strong> ${sanitizedPhone}</p>` : ''}
           <p><strong>Mensagem:</strong></p>
           <p>${sanitizedMessage}</p>
           <p><em>Enviado em: ${new Date().toLocaleString('pt-BR')}</em></p>

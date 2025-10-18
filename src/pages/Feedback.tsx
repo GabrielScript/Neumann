@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -16,7 +15,6 @@ export default function Feedback() {
   const { toast } = useToast();
   const [type, setType] = useState<string>('');
   const [message, setMessage] = useState('');
-  const [phone, setPhone] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,7 +37,6 @@ export default function Feedback() {
           email: user?.email,
           type,
           message,
-          phone: phone || null,
         },
       });
 
@@ -52,7 +49,6 @@ export default function Feedback() {
 
       setType('');
       setMessage('');
-      setPhone('');
     } catch (error) {
       console.error('Error sending feedback:', error);
       toast({
@@ -92,17 +88,6 @@ export default function Feedback() {
                     <SelectItem value="other">💬 Outro</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="phone">Telefone (opcional)</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  placeholder="8888-8888"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                />
               </div>
 
               <div className="space-y-2">
