@@ -20,7 +20,7 @@ const navItems = [
   { title: 'Desafios', url: '/challenges', icon: Target },
   { title: 'Objetivos', url: '/goals', icon: Sparkles },
   { title: 'Meus Troféus', url: '/trophy', icon: Trophy },
-  { title: 'Comunidades (Beta)', url: '/community', icon: Users },
+  { title: 'Comunidades', subtitle: 'Beta', url: '/community', icon: Users },
   { title: 'Rankings', url: '/rankings', icon: Medal },
   { title: 'Assinaturas', url: '/subscriptions', icon: CreditCard },
   { title: 'Configurações', url: '/settings', icon: Settings },
@@ -92,9 +92,16 @@ export const AppSidebar = () => {
                             >
                               <item.icon className="h-7 w-7" />
                               {!isCollapsed && (
-                                <span className="text-lg font-medium font-body">
-                                  {item.title}
-                                </span>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-lg font-medium font-body">
+                                    {item.title}
+                                  </span>
+                                  {'subtitle' in item && (
+                                    <span className="text-xs px-2 py-0.5 bg-primary/20 text-primary rounded-full font-semibold">
+                                      {item.subtitle}
+                                    </span>
+                                  )}
+                                </div>
                               )}
                             </NavLink>
                           </SidebarMenuButton>
