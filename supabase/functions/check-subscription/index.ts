@@ -128,9 +128,9 @@ serve(async (req) => {
       logStep("Subscription details retrieved");
 
       // Map product to tier based on price ID
-      if (priceId === 'price_1QkxdMAi9dCfWAipC3MaIc6a' || priceId === 'price_1SIBXMPzwST7RaKh5ePjbrBw') {
+      if (priceId === 'price_1SIBXMPzwST7RaKh5ePjbrBw') {
         tier = 'plus_monthly';
-      } else if (priceId === 'price_1QkxdpAi9dCfWAipYWnNHGhf') {
+      } else if (priceId === 'price_1SIBZVPzwST7RaKhOOEadBxR') {
         tier = 'plus_annual';
       }
       
