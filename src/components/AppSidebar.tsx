@@ -79,7 +79,7 @@ export const AppSidebar = () => {
                         <TooltipTrigger asChild>
                           <SidebarMenuButton 
                             asChild
-                            className={`h-auto ${isCollapsed ? 'py-3 px-0' : 'py-3 px-4'} rounded-xl`}
+                            className={`h-auto ${isCollapsed ? 'py-3 px-3' : 'py-3 px-4'} rounded-xl`}
                           >
                             <NavLink
                               to={item.url}
