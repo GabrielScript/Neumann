@@ -171,7 +171,14 @@ serve(async (req) => {
     }), { headers, status: 200 });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logStep("ERROR in check-subscription", { message: errorMessage });
-    return new Response(JSON.stringify({ error: errorMessage }), { headers, status: 500 });
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    logStep("ERROR in check-subscription", { message: errorMessage, stack: errorStack });
+    
+    // Return a valid response even on error to prevent blocking the UI
+    return new Response(JSON.stringify({ 
+      error: errorMessage,
+      subscribed: false,
+      tier: 'free'
+    }), { headers, status: 200 });
   }
 });

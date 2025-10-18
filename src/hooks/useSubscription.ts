@@ -98,14 +98,18 @@ export const useSubscription = () => {
   };
 
   const refreshSubscription = async () => {
-    // Call Stripe edge function to check and update subscription
     try {
-      await supabase.functions.invoke('check-subscription');
+      const { error } = await supabase.functions.invoke('check-subscription');
+      if (error) {
+        console.error('Error checking subscription:', error);
+        // Don't throw - just log and continue
+      }
     } catch (error) {
       console.error('Error checking subscription:', error);
+      // Don't throw - just log and continue
     }
     
-    // Invalidate and refetch local data
+    // Always invalidate and refetch local data
     await queryClient.invalidateQueries({ queryKey: ['subscription', user?.id] });
   };
 
