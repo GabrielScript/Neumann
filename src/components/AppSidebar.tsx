@@ -51,7 +51,7 @@ export const AppSidebar = () => {
   return (
     <Sidebar 
       className={`
-        ${isCollapsed ? 'w-16' : 'w-56 lg:w-60'}
+        ${isCollapsed ? 'w-16' : 'w-64 lg:w-72'}
         transition-all duration-300 
         border-r-2 border-primary/20
       `}
