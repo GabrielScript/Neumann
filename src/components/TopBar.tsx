@@ -69,7 +69,7 @@ export const TopBar = () => {
       <div className="flex items-center gap-3">
         {stats && (
           <>
-            <div className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-4 py-2 rounded-lg shadow-glow">
+            <div className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-5 py-2 rounded-lg shadow-glow">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-primary" />
                 <div>
@@ -79,7 +79,7 @@ export const TopBar = () => {
               </div>
             </div>
 
-            <div className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-4 py-2 rounded-lg shadow-glow">
+            <div className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-5 py-2 rounded-lg shadow-glow">
               <div className="flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-primary" />
                 <div>
@@ -90,7 +90,7 @@ export const TopBar = () => {
             </div>
 
             <div 
-              className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-4 py-2 rounded-lg shadow-glow cursor-pointer hover:bg-background/90 transition-colors"
+              className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-5 py-2 rounded-lg shadow-glow cursor-pointer hover:bg-background/90 transition-colors"
               onClick={() => navigate('/subscriptions')}
               title="Ver planos"
             >
