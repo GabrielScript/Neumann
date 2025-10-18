@@ -71,13 +71,13 @@ export const TopBar = () => {
         border-b-2 border-primary/20 
         bg-card/50 backdrop-blur-sm 
         flex items-center justify-between 
-        px-3 sm:px-4 lg:px-6
+        pl-0 pr-3 sm:pr-4 lg:pr-6
         sticky top-0 z-40
         w-full
       "
       role="banner"
     >
-      <div className="flex items-center">
+      <div className="flex items-center pl-3 sm:pl-4 lg:pl-6">
         <SidebarTrigger 
           aria-label="Alternar menu lateral"
           className="touch-target"
