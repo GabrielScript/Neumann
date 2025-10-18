@@ -53,6 +53,7 @@ const Index = () => {
               width={80}
               height={80}
               priority={true}
+              fetchPriority="high"
             />
           </div>
 

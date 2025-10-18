@@ -5,6 +5,7 @@ interface OptimizedImageProps {
   width?: number;
   height?: number;
   priority?: boolean;
+  fetchPriority?: "high" | "low" | "auto";
 }
 
 export const OptimizedImage = ({ 
@@ -13,7 +14,8 @@ export const OptimizedImage = ({
   className, 
   width, 
   height,
-  priority = false 
+  priority = false,
+  fetchPriority = "auto"
 }: OptimizedImageProps) => {
   // Generate WebP source from original image path
   const webpSrc = typeof src === 'string' ? src.replace(/\.(png|jpg|jpeg)$/i, '.webp') : src;
@@ -29,7 +31,7 @@ export const OptimizedImage = ({
         decoding="async"
         width={width}
         height={height}
-        fetchPriority={priority ? "high" : "auto"}
+        fetchPriority={fetchPriority}
       />
     </picture>
   );
