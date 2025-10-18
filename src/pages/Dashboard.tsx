@@ -139,7 +139,15 @@ const Dashboard = () => {
 
   return (
     <Layout>
+      <a 
+        href="#main-content" 
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:rounded-md focus-ring"
+      >
+        Pular para conteúdo principal
+      </a>
+      
       <div 
+        id="main-content"
         className="space-y-6 lg:space-y-8 max-w-7xl mx-auto"
         aria-live="polite"
         aria-atomic="false"
@@ -202,7 +210,7 @@ const Dashboard = () => {
                   </Badge>
                 )}
               </div>
-              <CardDescription className="text-base text-accent/80 font-body">
+              <CardDescription className="text-base text-text-medium-contrast font-body">
                 {activeChallenges.length > 0
                   ? 'Continue seus desafios em andamento'
                   : 'Desbloqueie seu potencial máximo'}
@@ -272,7 +280,7 @@ const Dashboard = () => {
                 <Sparkles className="w-8 h-8 text-yellow-400 group-hover:scale-110 transition-transform" />
                 <CardTitle className="text-2xl font-bold text-primary font-display">Objetivos de Vida</CardTitle>
               </div>
-              <CardDescription className="text-base text-accent/80 font-body">
+              <CardDescription className="text-base text-text-medium-contrast font-body">
                 {goals.length > 0
                   ? 'Seus sonhos em andamento'
                   : 'Defina e acompanhe seus sonhos'}
@@ -330,23 +338,27 @@ const Dashboard = () => {
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               {/* Posição no Ranking */}
-              <div className="
-                relative
-                p-6 rounded-xl
-                border-2 border-yellow-500/30
-                bg-gradient-to-br from-yellow-500/10 to-orange-500/10
-                backdrop-blur-sm
-                hover:border-yellow-500/50
-                hover:shadow-glow
-                transition-all duration-300
-                group
-              ">
+              <div 
+                className="
+                  relative
+                  p-6 rounded-xl
+                  border-2 border-yellow-500/30
+                  bg-gradient-to-br from-yellow-500/10 to-orange-500/10
+                  backdrop-blur-sm
+                  hover:border-yellow-500/50
+                  hover:shadow-glow
+                  transition-all duration-300
+                  group
+                "
+                role="region"
+                aria-label={`Estatística: ${rankingPosition ? `Posição ${rankingPosition} no ranking global` : 'Carregando ranking'}`}
+              >
                 <div className="absolute top-2 right-2 opacity-10 group-hover:opacity-20 transition-opacity">
                   <Award className="w-16 h-16 text-yellow-500" />
                 </div>
                 
                 <div className="relative z-10">
-                  <p className="text-4xl font-black text-yellow-600 dark:text-yellow-400 mb-2 font-display">
+                  <p className="text-4xl font-black text-yellow-600 dark:text-yellow-400 mb-2 font-display" aria-live="polite">
                     #{rankingPosition || '...'}
                   </p>
                   <p className="text-sm text-accent/80 uppercase tracking-wider font-body font-bold">

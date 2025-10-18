@@ -119,7 +119,7 @@ export const TopBar = () => {
                   <div className="flex items-center gap-2">
                     <TrendingUp className="w-5 h-5 text-primary" aria-hidden="true" />
                     <div>
-                      <p className="text-xs text-success/70 font-body">Nível</p>
+                      <p className="text-xs text-muted-foreground font-body">Nível</p>
                       <p 
                         className="font-bold text-lg text-primary font-display"
                         aria-label={`Nível ${stats.level}`}

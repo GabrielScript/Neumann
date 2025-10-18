@@ -118,6 +118,13 @@ export const AppSidebar = () => {
                               onClick={() => handleNavClick(item.url)}
                               aria-current={isActive ? 'page' : undefined}
                               aria-label={item.title}
+                              tabIndex={0}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  handleNavClick(item.url);
+                                }
+                              }}
                               className={`
                                 flex items-center w-full
                                 ${isCollapsed ? 'justify-center' : 'gap-2.5 lg:gap-3'} 

@@ -26,7 +26,7 @@ All colors MUST be HSL.
     --secondary-foreground: 0 0% 10%;
 
     --muted: 0 0% 88%;
-    --muted-foreground: 0 0% 35%;
+    --muted-foreground: 0 0% 30%;
 
     /* Verde como acento */
     --accent: 142 71% 40%;
@@ -101,8 +101,8 @@ All colors MUST be HSL.
     --secondary: 0 0% 20%;
     --secondary-foreground: 0 0% 95%;
 
-    --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 65%;
+  --muted: 0 0% 20%;
+  --muted-foreground: 0 0% 70%;
 
     --accent: 142 71% 45%;
     --accent-foreground: 0 0% 100%;
@@ -200,5 +200,30 @@ All colors MUST be HSL.
       linear-gradient(-45deg, transparent 75%, hsl(var(--muted)) 75%);
     background-size: 20px 20px;
     background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  }
+
+  /* ✅ NOVO: Classe de texto com contraste médio acessível */
+  .text-text-medium-contrast {
+    color: hsl(var(--muted-foreground));
+  }
+
+  /* ✅ NOVO: Otimizar animações com will-change */
+  .animate-scale-in {
+    will-change: transform, opacity;
+  }
+
+  .animate-fade-in {
+    will-change: opacity;
+  }
+
+  /* ✅ NOVO: Reduzir motion para usuários com preferência */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-scale-in,
+    .animate-fade-in,
+    .animate-slide-up,
+    .animate-slide-in-bottom,
+    .animate-wave {
+      animation: none !important;
+    }
   }
 }
