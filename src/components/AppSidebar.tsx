@@ -44,7 +44,7 @@ export const AppSidebar = () => {
 
   return (
     <Sidebar 
-      className={`${isCollapsed ? 'w-16' : 'w-72'} transition-all duration-300 border-r-2 border-primary/20`} 
+      className={`${isCollapsed ? 'w-20' : 'w-72'} transition-all duration-300 border-r-2 border-primary/20`} 
       collapsible="icon"
     >
       <SidebarContent className="p-4">
