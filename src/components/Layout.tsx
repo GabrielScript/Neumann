@@ -10,9 +10,9 @@ interface LayoutProps {
 export const Layout = ({ children }: LayoutProps) => {
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex flex-col lg:flex-row w-full bg-gradient-hero">
+      <div className="min-h-screen flex w-full bg-gradient-hero">
         <AppSidebar />
-        <div className="flex-1 flex flex-col w-full lg:ml-0">
+        <div className="flex-1 flex flex-col w-full min-w-0">
           <TopBar />
           <main 
             className="flex-1 container-responsive py-4 md:py-6 lg:py-8"
