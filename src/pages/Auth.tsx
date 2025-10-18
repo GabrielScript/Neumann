@@ -182,11 +182,9 @@ const Auth = () => {
             </TabsList>
 
             <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4" noValidate>
+              <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email-signin" className="text-sm font-medium">
-                    Email
-                  </Label>
+                  <Label htmlFor="email-signin">Email</Label>
                   <Input
                     id="email-signin"
                     type="email"
@@ -195,14 +193,10 @@ const Auth = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     maxLength={255}
                     required
-                    aria-required="true"
-                    className="focus-ring"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password-signin" className="text-sm font-medium">
-                    Senha
-                  </Label>
+                  <Label htmlFor="password-signin">Senha</Label>
                   <Input
                     id="password-signin"
                     type="password"
@@ -211,42 +205,25 @@ const Auth = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     maxLength={72}
                     required
-                    aria-required="true"
-                    className="focus-ring"
                   />
                   <button
                     type="button"
                     onClick={() => setShowForgotPassword(true)}
-                    className="text-sm text-primary hover:underline transition-all focus-ring"
-                    aria-label="Recuperar senha esquecida"
+                    className="text-sm text-primary hover:underline transition-all"
                   >
                     Esqueceu a senha?
                   </button>
                 </div>
-                <Button 
-                  type="submit" 
-                  className="w-full touch-target" 
-                  disabled={loading}
-                  aria-busy={loading}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-                      <span>Entrando...</span>
-                    </>
-                  ) : (
-                    'Entrar'
-                  )}
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? 'Entrando...' : 'Entrar'}
                 </Button>
               </form>
             </TabsContent>
 
             <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4" noValidate>
+              <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="fullname" className="text-sm font-medium">
-                    Nome Completo
-                  </Label>
+                  <Label htmlFor="fullname">Nome Completo</Label>
                   <Input
                     id="fullname"
                     type="text"
@@ -255,14 +232,10 @@ const Auth = () => {
                     onChange={(e) => setFullName(e.target.value)}
                     maxLength={100}
                     required
-                    aria-required="true"
-                    className="focus-ring"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email-signup" className="text-sm font-medium">
-                    Email
-                  </Label>
+                  <Label htmlFor="email-signup">Email</Label>
                   <Input
                     id="email-signup"
                     type="email"
@@ -271,14 +244,10 @@ const Auth = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     maxLength={255}
                     required
-                    aria-required="true"
-                    className="focus-ring"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password-signup" className="text-sm font-medium">
-                    Senha
-                  </Label>
+                  <Label htmlFor="password-signup">Senha</Label>
                   <Input
                     id="password-signup"
                     type="password"
@@ -288,10 +257,8 @@ const Auth = () => {
                     required
                     minLength={9}
                     maxLength={72}
-                    aria-required="true"
-                    className="focus-ring"
                   />
-                  <div className="text-xs text-muted-foreground space-y-1 mt-2" role="note">
+                  <div className="text-xs text-muted-foreground space-y-1 mt-2">
                     <p className="font-medium">Requisitos de senha forte:</p>
                     <ul className="list-disc list-inside space-y-0.5 pl-2">
                       <li>Mínimo de 9 caracteres</li>
@@ -300,20 +267,8 @@ const Auth = () => {
                     </ul>
                   </div>
                 </div>
-                <Button 
-                  type="submit" 
-                  className="w-full touch-target" 
-                  disabled={loading}
-                  aria-busy={loading}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-                      <span>Criando conta...</span>
-                    </>
-                  ) : (
-                    'Criar Conta'
-                  )}
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? 'Criando conta...' : 'Criar Conta'}
                 </Button>
               </form>
             </TabsContent>
@@ -330,12 +285,11 @@ const Auth = () => {
 
           <Button
             variant="outline"
-            className="w-full touch-target"
+            className="w-full"
             onClick={handleGoogleSignIn}
             disabled={loading}
-            aria-label="Continuar com conta do Google"
           >
-            <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" aria-hidden="true">
+            <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
 ...
             </svg>
             Continuar com Google
@@ -356,11 +310,9 @@ const Auth = () => {
               Digite seu email para receber um link de recuperação de senha.
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleForgotPassword} className="space-y-4" noValidate>
+          <form onSubmit={handleForgotPassword} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="reset-email" className="text-sm font-medium">
-                Email
-              </Label>
+              <Label htmlFor="reset-email">Email</Label>
               <Input
                 id="reset-email"
                 type="email"
@@ -369,20 +321,13 @@ const Auth = () => {
                 onChange={(e) => setResetEmail(e.target.value)}
                 maxLength={255}
                 required
-                aria-required="true"
-                className="focus-ring"
               />
             </div>
-            <Button 
-              type="submit" 
-              className="w-full touch-target" 
-              disabled={resetLoading}
-              aria-busy={resetLoading}
-            >
+            <Button type="submit" className="w-full" disabled={resetLoading}>
               {resetLoading ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-                  <span>Enviando...</span>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Enviando...
                 </>
               ) : (
                 'Enviar Link de Recuperação'

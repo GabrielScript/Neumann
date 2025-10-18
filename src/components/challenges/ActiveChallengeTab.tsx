@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -22,6 +22,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { EditActiveChallengeModal } from "./EditActiveChallengeModal";
 import { DiaryEntryForm } from "./DiaryEntryForm";
 import { GratitudeDiaryForm } from "./GratitudeDiaryForm";
 import {
@@ -31,9 +32,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-
-// Lazy load do modal pesado
-const EditActiveChallengeModal = lazy(() => import("./EditActiveChallengeModal").then(m => ({ default: m.EditActiveChallengeModal })));
 
 interface ActiveChallengeTabProps {
   challenge: {
@@ -364,13 +362,11 @@ export function ActiveChallengeTab({ challenge }: ActiveChallengeTabProps) {
       </AlertDialog>
 
       {/* Modal de Edição do Desafio Ativo */}
-      <Suspense fallback={<div className="animate-pulse p-4">Carregando...</div>}>
-        <EditActiveChallengeModal
-          open={editModalOpen}
-          onOpenChange={setEditModalOpen}
-          challengeId={challenge.id}
-        />
-      </Suspense>
+      <EditActiveChallengeModal
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        challengeId={challenge.id}
+      />
 
       {/* Modal de Detalhes do Desafio */}
       <Dialog open={detailsModalOpen} onOpenChange={setDetailsModalOpen}>

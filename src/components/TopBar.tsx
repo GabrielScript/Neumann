@@ -18,7 +18,7 @@ export const TopBar = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState<UserStats | null>(null);
-  const { subscription } = useSubscription();
+  const { subscription, getFeatures, getTierBadgeColor } = useSubscription();
 
   useEffect(() => {
     if (user) {
@@ -63,45 +63,42 @@ export const TopBar = () => {
   };
 
   return (
-    <header className="h-14 border-b-2 border-primary/20 bg-card/50 backdrop-blur-sm flex items-center justify-between px-4 sticky top-0 z-40">
+    <header className="h-16 border-b-2 border-primary/20 bg-card/50 backdrop-blur-sm flex items-center justify-between px-6">
       <SidebarTrigger />
       
       <div className="flex items-center gap-3">
         {stats && (
           <>
-            <div className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-4 py-2 rounded-lg">
+            <div className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-4 py-2 rounded-lg shadow-glow">
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-primary" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Nível</p>
-                  <p className="font-bold text-lg text-primary">{stats.level}</p>
+                  <p className="text-xs text-success/70 font-body">Nível</p>
+                  <p className="font-bold text-lg text-primary font-display">{stats.level}</p>
                 </div>
               </div>
             </div>
 
-            <div className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-4 py-2 rounded-lg">
+            <div className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-4 py-2 rounded-lg shadow-glow">
               <div className="flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-primary" />
                 <div>
-                  <p className="text-xs text-success/70">Troféu</p>
-                  <p className="font-bold text-sm text-primary">
-                    {getTrophyStageName(stats.level)}
-                  </p>
+                  <p className="text-xs text-success/70 font-body">Troféu</p>
+                  <p className="font-bold text-sm text-primary font-body">{getTrophyStageName(stats.level)}</p>
                 </div>
               </div>
             </div>
 
             <div 
-              className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-4 py-2 rounded-lg cursor-pointer hover:bg-background/90 transition-colors"
+              className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-4 py-2 rounded-lg shadow-glow cursor-pointer hover:bg-background/90 transition-colors"
               onClick={() => navigate('/subscriptions')}
+              title="Ver planos"
             >
               <div className="flex items-center gap-2">
                 <CreditCard className="w-5 h-5 text-primary" />
                 <div>
-                  <p className="text-xs text-success/70">Plano</p>
-                  <p className="font-bold text-sm text-primary">
-                    {getPlanDisplayName()}
-                  </p>
+                  <p className="text-xs text-success/70 font-body">Plano</p>
+                  <p className="font-bold text-sm text-primary font-body">{getPlanDisplayName()}</p>
                 </div>
               </div>
             </div>

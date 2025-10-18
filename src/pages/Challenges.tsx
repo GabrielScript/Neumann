@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Layout } from "@/components/Layout";
@@ -6,13 +6,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useActiveChallenge } from "@/hooks/useActiveChallenge";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradePrompt } from "@/components/UpgradePrompt";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ActiveChallengeTab } from "@/components/challenges/ActiveChallengeTab";
+import { ChallengeLibraryTab } from "@/components/challenges/ChallengeLibraryTab";
+import { CreateChallengeTab } from "@/components/challenges/CreateChallengeTab";
 import { toast } from "@/hooks/use-toast";
-
-// Lazy load dos componentes pesados
-const ActiveChallengeTab = lazy(() => import("@/components/challenges/ActiveChallengeTab").then(m => ({ default: m.ActiveChallengeTab })));
-const ChallengeLibraryTab = lazy(() => import("@/components/challenges/ChallengeLibraryTab").then(m => ({ default: m.ChallengeLibraryTab })));
-const CreateChallengeTab = lazy(() => import("@/components/challenges/CreateChallengeTab").then(m => ({ default: m.CreateChallengeTab })));
 
 export default function Challenges() {
   const { user, loading: authLoading } = useAuth();
@@ -50,13 +47,13 @@ export default function Challenges() {
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto">
-        <header className="mb-6 lg:mb-8">
-          <h1 className="text-responsive-2xl font-bold mb-2 font-display">Desafios</h1>
-          <p className="text-responsive-base text-muted-foreground font-body">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2">Desafios</h1>
+          <p className="text-muted-foreground">
             Transforme sua vida com desafios estruturados
           </p>
-        </header>
+        </div>
 
         <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsList className="grid w-full grid-cols-3">
@@ -68,33 +65,27 @@ export default function Challenges() {
           </TabsList>
 
           <TabsContent value="active" className="mt-6">
-            <Suspense fallback={<Skeleton className="h-96 w-full" />}>
-              {challenges && challenges.length > 0 ? (
-                <div className="space-y-6">
-                  {challenges.map((challenge) => (
-                    <ActiveChallengeTab key={challenge.id} challenge={challenge} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-16">
-                  <p className="text-muted-foreground">
-                    Você não tem desafios ativos no momento.
-                  </p>
-                </div>
-              )}
-            </Suspense>
+            {challenges && challenges.length > 0 ? (
+              <div className="space-y-6">
+                {challenges.map((challenge) => (
+                  <ActiveChallengeTab key={challenge.id} challenge={challenge} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <p className="text-muted-foreground">
+                  Você não tem desafios ativos no momento.
+                </p>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="library" className="mt-6">
-            <Suspense fallback={<Skeleton className="h-96 w-full" />}>
-              <ChallengeLibraryTab onChallengeStarted={() => setActiveTab("active")} />
-            </Suspense>
+            <ChallengeLibraryTab onChallengeStarted={() => setActiveTab("active")} />
           </TabsContent>
 
           <TabsContent value="create" className="mt-6">
-            <Suspense fallback={<Skeleton className="h-96 w-full" />}>
-              <CreateChallengeTab onChallengeCreated={() => setActiveTab("active")} />
-            </Suspense>
+            <CreateChallengeTab onChallengeCreated={() => setActiveTab("active")} />
           </TabsContent>
         </Tabs>
 

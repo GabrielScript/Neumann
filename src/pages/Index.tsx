@@ -3,7 +3,6 @@ import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Sparkles, Target, Trophy, Medal, TrendingUp, Users } from 'lucide-react';
 import logo from '@/assets/logo.png';
-import { OptimizedImage } from '@/components/OptimizedImage';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOnboarding } from '@/hooks/useOnboarding';
 
@@ -24,44 +23,33 @@ const Index = () => {
   }, [user, authLoading, onboardingStatus, isLoadingOnboarding, navigate]);
 
   return (
-    <main className="min-h-screen bg-gradient-hero" role="main">
+    <div className="min-h-screen bg-gradient-hero">
       {/* Developer Credit */}
-      <aside 
-        className="absolute top-4 right-4 text-right text-sm text-muted-foreground" 
-        aria-label="Créditos do desenvolvedor"
-      >
+      <div className="absolute top-4 right-4 text-right text-sm text-muted-foreground">
         <p className="font-medium">Developed by Gabriel Estrela Lopes</p>
         <a 
           href="https://www.linkedin.com/in/gabrielestrela8/" 
           target="_blank" 
           rel="noopener noreferrer"
-          className="text-primary hover:underline focus-ring"
+          className="text-primary hover:underline"
         >
           Contact
         </a>
-      </aside>
+      </div>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-16" aria-labelledby="hero-title">
+      <div className="container mx-auto px-4 py-16">
         <div className="flex flex-col items-center text-center max-w-4xl mx-auto space-y-8">
           {/* Logo */}
           <div className="p-6 bg-primary/10 rounded-3xl shadow-glow animate-scale-in">
-            <OptimizedImage 
-              src={logo} 
-              alt="Neumann Logo" 
-              className="w-20 h-20"
-              width={80}
-              height={80}
-              priority={true}
-              fetchPriority="high"
-            />
+            <img src={logo} alt="Neumann Logo" className="w-20 h-20" />
           </div>
 
           {/* Title & Description */}
           <div className="space-y-4 animate-fade-in">
-          <h1 id="hero-title" className="text-5xl md:text-6xl font-bold font-display text-foreground">
-            Neumann
-          </h1>
+            <h1 className="text-5xl md:text-6xl font-bold font-display text-foreground">
+              Neumann
+            </h1>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl">
               Transforme sua vida através de desafios estruturados, objetivos claros e crescimento consistente.
             </p>
@@ -88,44 +76,39 @@ const Index = () => {
         </div>
 
         {/* Features Grid */}
-        <section 
-          className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mt-20 max-w-7xl mx-auto" 
-          aria-labelledby="features-title"
-        >
-          <h2 id="features-title" className="sr-only">Funcionalidades principais</h2>
-          
-          <article className="bg-card p-8 rounded-2xl shadow-card hover:shadow-primary transition-all duration-300 animate-fade-in">
-            <Target className="w-12 h-12 text-primary mb-4" aria-hidden="true" />
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mt-20 max-w-7xl mx-auto">
+          <div className="bg-card p-8 rounded-2xl shadow-card hover:shadow-primary transition-all duration-300 animate-fade-in">
+            <Target className="w-12 h-12 text-primary mb-4" />
             <h3 className="text-2xl font-bold mb-3">Desafios Estruturados</h3>
             <p className="text-muted-foreground">
               Complete desafios diários construindo hábitos poderosos. Um desafio ativo por vez para manter o foco.
             </p>
-          </article>
+          </div>
 
-          <article className="bg-card p-8 rounded-2xl shadow-card hover:shadow-primary transition-all duration-300 animate-fade-in">
-            <Sparkles className="w-12 h-12 text-yellow-500 mb-4" aria-hidden="true" />
+          <div className="bg-card p-8 rounded-2xl shadow-card hover:shadow-primary transition-all duration-300 animate-fade-in">
+            <Sparkles className="w-12 h-12 text-yellow-500 mb-4" />
             <h3 className="text-2xl font-bold mb-3">Objetivos de Vida</h3>
             <p className="text-muted-foreground">
               Defina e conquiste suas metas mais importantes. Celebre cada objetivo alcançado com troféus especiais.
             </p>
-          </article>
+          </div>
 
-          <article className="bg-card p-8 rounded-2xl shadow-card hover:shadow-primary transition-all duration-300 animate-fade-in">
-            <Trophy className="w-12 h-12 text-yellow-500 mb-4" aria-hidden="true" />
+          <div className="bg-card p-8 rounded-2xl shadow-card hover:shadow-primary transition-all duration-300 animate-fade-in">
+            <Trophy className="w-12 h-12 text-yellow-500 mb-4" />
             <h3 className="text-2xl font-bold mb-3">Troféus de Conquista</h3>
             <p className="text-muted-foreground">
               Ganhe troféus permanentes ao completar seus objetivos de vida. Construa seu legado de conquistas.
             </p>
-          </article>
+          </div>
 
-          <article className="bg-card p-8 rounded-2xl shadow-card hover:shadow-primary transition-all duration-300 animate-fade-in">
-            <Users className="w-12 h-12 text-primary mb-4" aria-hidden="true" />
+          <div className="bg-card p-8 rounded-2xl shadow-card hover:shadow-primary transition-all duration-300 animate-fade-in">
+            <Users className="w-12 h-12 text-primary mb-4" />
             <h3 className="text-2xl font-bold mb-3">Comunidades e Rankings</h3>
             <p className="text-muted-foreground">
               Participe de comunidades, compartilhe desafios e evolua junto com outras pessoas. Acompanhe seu progresso no ranking global baseado em nível, XP e conquistas.
             </p>
-          </article>
-        </section>
+          </div>
+        </div>
 
         {/* Philosophy Section */}
         <div className="mt-20 max-w-4xl mx-auto bg-card/50 backdrop-blur-sm p-10 rounded-3xl shadow-card animate-fade-in">
@@ -152,8 +135,8 @@ const Index = () => {
             </div>
           </div>
         </div>
-      </section>
-    </main>
+      </div>
+    </div>
   );
 };
 

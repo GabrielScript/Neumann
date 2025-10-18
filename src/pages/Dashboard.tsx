@@ -139,70 +139,43 @@ const Dashboard = () => {
 
   return (
     <Layout>
-      <a 
-        href="#main-content" 
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:rounded-md focus-ring"
-      >
-        Pular para conteúdo principal
-      </a>
-      
-      <div 
-        id="main-content"
-        className="space-y-6 lg:space-y-8 max-w-7xl mx-auto"
-        aria-live="polite"
-        aria-atomic="false"
-      >
+      <div className="space-y-8 max-w-7xl mx-auto px-6 py-8">
         {/* Saudação Personalizada */}
-        <header className="flex items-center gap-3 animate-slide-in-bottom">
-          <span 
-            className="text-4xl lg:text-5xl animate-wave" 
-            role="img" 
-            aria-label="Mão acenando"
-          >
-            👋
-          </span>
+        <div className="flex items-center gap-3 animate-slide-in-bottom">
+          <span className="text-5xl animate-wave">👋</span>
           <div>
-            <h1 className="text-responsive-2xl font-black text-primary font-display">
+            <h1 className="text-4xl font-black text-primary font-display">
               Olá, {userName}!
             </h1>
-            <p className="text-responsive-base text-foreground mt-1 font-body">
+            <p className="text-accent mt-1 font-body text-lg">
               Pronto para conquistar seus desafios hoje?
             </p>
           </div>
-        </header>
+        </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 lg:gap-6">
-          {/* Card de Desafios Ativos */}
-          <Card 
-            className="
-              relative overflow-hidden
-              border-2 border-primary/30
-              bg-gradient-card
-              shadow-card hover:shadow-primary
-              transition-all duration-500
-              group
-              animate-slide-in-bottom
-              h-full
-            "
-            role="article"
-            aria-labelledby="active-challenges-title"
-          >
-            <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity duration-500" aria-hidden="true" />
+        {/* Main Content Grid - FOCO EM DESAFIOS E OBJETIVOS */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Active Challenges Card - REDESENHADO */}
+          <Card className="
+            relative overflow-hidden
+            border-2 border-primary/30
+            bg-gradient-card
+            shadow-card hover:shadow-primary
+            transition-all duration-500
+            before:absolute before:inset-0 
+            before:border before:border-accent/20
+            before:rounded-lg before:pointer-events-none
+            group
+            animate-slide-in-bottom
+            h-full
+          ">
+            <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity duration-500" />
             
-            <CardHeader className="relative z-10 pb-3 lg:pb-4">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <div className="flex items-center gap-2.5 lg:gap-3">
-                  <Target 
-                    className="w-7 h-7 lg:w-8 lg:h-8 text-primary group-hover:scale-110 transition-transform" 
-                    aria-hidden="true"
-                  />
-                  <h2 
-                    id="active-challenges-title"
-                    className="text-responsive-xl font-bold text-primary font-display"
-                  >
-                    Desafios Ativos
-                  </h2>
+            <CardHeader className="relative z-10 pb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Target className="w-8 h-8 text-primary group-hover:scale-110 transition-transform" />
+                  <CardTitle className="text-2xl font-bold text-primary font-display">Desafios Ativos</CardTitle>
                 </div>
                 {activeChallenges.length > 0 && (
                   <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30 font-body">
@@ -210,7 +183,7 @@ const Dashboard = () => {
                   </Badge>
                 )}
               </div>
-              <CardDescription className="text-base text-text-medium-contrast font-body">
+              <CardDescription className="text-base text-accent/80 font-body">
                 {activeChallenges.length > 0
                   ? 'Continue seus desafios em andamento'
                   : 'Desbloqueie seu potencial máximo'}
@@ -280,7 +253,7 @@ const Dashboard = () => {
                 <Sparkles className="w-8 h-8 text-yellow-400 group-hover:scale-110 transition-transform" />
                 <CardTitle className="text-2xl font-bold text-primary font-display">Objetivos de Vida</CardTitle>
               </div>
-              <CardDescription className="text-base text-text-medium-contrast font-body">
+              <CardDescription className="text-base text-accent/80 font-body">
                 {goals.length > 0
                   ? 'Seus sonhos em andamento'
                   : 'Defina e acompanhe seus sonhos'}
@@ -338,27 +311,23 @@ const Dashboard = () => {
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
               {/* Posição no Ranking */}
-              <div 
-                className="
-                  relative
-                  p-6 rounded-xl
-                  border-2 border-yellow-500/30
-                  bg-gradient-to-br from-yellow-500/10 to-orange-500/10
-                  backdrop-blur-sm
-                  hover:border-yellow-500/50
-                  hover:shadow-glow
-                  transition-all duration-300
-                  group
-                "
-                role="region"
-                aria-label={`Estatística: ${rankingPosition ? `Posição ${rankingPosition} no ranking global` : 'Carregando ranking'}`}
-              >
+              <div className="
+                relative
+                p-6 rounded-xl
+                border-2 border-yellow-500/30
+                bg-gradient-to-br from-yellow-500/10 to-orange-500/10
+                backdrop-blur-sm
+                hover:border-yellow-500/50
+                hover:shadow-glow
+                transition-all duration-300
+                group
+              ">
                 <div className="absolute top-2 right-2 opacity-10 group-hover:opacity-20 transition-opacity">
                   <Award className="w-16 h-16 text-yellow-500" />
                 </div>
                 
                 <div className="relative z-10">
-                  <p className="text-4xl font-black text-yellow-600 dark:text-yellow-400 mb-2 font-display" aria-live="polite">
+                  <p className="text-4xl font-black text-yellow-600 dark:text-yellow-400 mb-2 font-display">
                     #{rankingPosition || '...'}
                   </p>
                   <p className="text-sm text-accent/80 uppercase tracking-wider font-body font-bold">

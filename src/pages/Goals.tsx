@@ -126,27 +126,22 @@ export default function Goals() {
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto">
-        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 lg:mb-8">
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-responsive-2xl font-bold font-display mb-2">Objetivos</h1>
-            <p className="text-responsive-base text-muted-foreground font-body">
+            <h1 className="text-4xl font-bold mb-2">Objetivos</h1>
+            <p className="text-muted-foreground">
               Defina e acompanhe suas metas mais importantes
             </p>
           </div>
-          <Button 
-            onClick={handleNewGoal} 
-            size="lg" 
-            className="touch-target w-full sm:w-auto"
-            aria-label="Criar novo objetivo"
-          >
-            <Plus className="mr-2 h-5 w-5" aria-hidden="true" />
+          <Button onClick={handleNewGoal} size="lg">
+            <Plus className="mr-2 h-5 w-5" />
             Novo Objetivo
           </Button>
-        </header>
+        </div>
 
         {isLoading ? (
-          <div className="grid gap-4 sm:gap-5 lg:gap-6 grid-cols-1 lg:grid-cols-2">
+          <div className="grid gap-6 md:grid-cols-2">
             {[1, 2, 3, 4].map((i) => (
               <Skeleton key={i} className="h-48" />
             ))}
@@ -154,29 +149,20 @@ export default function Goals() {
         ) : (
           <>
             {activeGoals.length === 0 && completedGoals.length === 0 ? (
-              <div className="text-center py-12 lg:py-16" role="status">
-                <p className="text-responsive-base text-muted-foreground mb-4 font-body">
+              <div className="text-center py-16">
+                <p className="text-muted-foreground mb-4">
                   Você ainda não tem objetivos cadastrados.
                 </p>
-                <Button 
-                  onClick={() => setFormOpen(true)}
-                  className="touch-target"
-                  aria-label="Criar seu primeiro objetivo"
-                >
+                <Button onClick={() => setFormOpen(true)}>
                   Criar Primeiro Objetivo
                 </Button>
               </div>
             ) : (
               <>
                 {activeGoals.length > 0 && (
-                  <section className="mb-6 lg:mb-8" aria-labelledby="active-goals-heading">
-                    <h2 
-                      id="active-goals-heading" 
-                      className="text-responsive-xl font-semibold mb-4 font-display"
-                    >
-                      Objetivos Ativos
-                    </h2>
-                    <div className="grid gap-4 sm:gap-5 lg:gap-6 grid-cols-1 lg:grid-cols-2">
+                  <div className="mb-8">
+                    <h2 className="text-2xl font-semibold mb-4">Objetivos Ativos</h2>
+                    <div className="grid gap-6 md:grid-cols-2">
                       {activeGoals.map((goal) => (
                         <GoalCard
                           key={goal.id}
@@ -187,20 +173,17 @@ export default function Goals() {
                         />
                       ))}
                     </div>
-                  </section>
+                  </div>
                 )}
 
                 {completedGoals.length > 0 && (
                   <Collapsible>
-                    <CollapsibleTrigger 
-                      className="flex items-center gap-2 text-responsive-lg font-semibold mb-4 hover:text-primary transition-colors focus-ring font-display"
-                      aria-label={`Mostrar ${completedGoals.length} objetivos concluídos`}
-                    >
+                    <CollapsibleTrigger className="flex items-center gap-2 text-xl font-semibold mb-4 hover:text-primary transition-colors">
                       Objetivos Concluídos ({completedGoals.length})
-                      <ChevronDown className="h-5 w-5" aria-hidden="true" />
+                      <ChevronDown className="h-5 w-5" />
                     </CollapsibleTrigger>
                     <CollapsibleContent>
-                      <div className="grid gap-4 sm:gap-5 lg:gap-6 grid-cols-1 lg:grid-cols-2">
+                      <div className="grid gap-6 md:grid-cols-2">
                         {completedGoals.map((goal) => (
                           <GoalCard
                             key={goal.id}
