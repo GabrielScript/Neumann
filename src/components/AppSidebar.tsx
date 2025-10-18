@@ -34,12 +34,19 @@ export const AppSidebar = () => {
   const isCollapsed = state === 'collapsed';
   const navigate = useNavigate();
 
-  const handleNavClick = () => {
+  const handleNavClick = (e: React.MouseEvent, url: string) => {
+    e.preventDefault(); // Impede navegação automática do NavLink
+    
     if (isMobile) {
       setOpenMobile(false);
     } else if (!isCollapsed) {
       toggleSidebar();
     }
+    
+    // Navega programaticamente após colapsar
+    setTimeout(() => {
+      navigate(url);
+    }, 0);
   };
 
   return (
@@ -110,7 +117,7 @@ export const AppSidebar = () => {
                           >
                             <NavLink
                               to={item.url}
-                              onClick={handleNavClick}
+                              onClick={(e) => handleNavClick(e, item.url)}
                               aria-current={isActive ? 'page' : undefined}
                               aria-label={item.title}
                               className={`
