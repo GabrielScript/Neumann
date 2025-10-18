@@ -34,19 +34,18 @@ export const AppSidebar = () => {
   const isCollapsed = state === 'collapsed';
   const navigate = useNavigate();
 
-  const handleNavClick = (e: React.MouseEvent, url: string) => {
-    e.preventDefault(); // Impede navegação automática do NavLink
-    
+  const handleNavClick = (url: string) => {
     if (isMobile) {
       setOpenMobile(false);
-    } else if (!isCollapsed) {
-      toggleSidebar();
+      setTimeout(() => navigate(url), 150);
+    } else {
+      // Desktop: primeiro colapsa, depois navega
+      if (!isCollapsed) {
+        toggleSidebar();
+      }
+      // Delay para permitir animação do colapso (300ms da transição CSS)
+      setTimeout(() => navigate(url), isCollapsed ? 0 : 150);
     }
-    
-    // Navega programaticamente após colapsar
-    setTimeout(() => {
-      navigate(url);
-    }, 0);
   };
 
   return (
@@ -115,13 +114,12 @@ export const AppSidebar = () => {
                               transition-all duration-200
                             `}
                           >
-                            <NavLink
-                              to={item.url}
-                              onClick={(e) => handleNavClick(e, item.url)}
+                            <button
+                              onClick={() => handleNavClick(item.url)}
                               aria-current={isActive ? 'page' : undefined}
                               aria-label={item.title}
                               className={`
-                                flex items-center 
+                                flex items-center w-full
                                 ${isCollapsed ? 'justify-center' : 'gap-2.5 lg:gap-3'} 
                                 ${isActive 
                                   ? 'bg-primary/20 text-primary font-bold border-l-4 border-primary' 
@@ -145,7 +143,7 @@ export const AppSidebar = () => {
                                   )}
                                 </div>
                               )}
-                            </NavLink>
+                            </button>
                           </SidebarMenuButton>
                         </TooltipTrigger>
                         {isCollapsed && (
