@@ -28,7 +28,7 @@ const navItems = [
 ];
 
 export const AppSidebar = () => {
-  const { state, setOpenMobile, toggleSidebar } = useSidebar();
+  const { state, setOpenMobile, setOpen } = useSidebar();
   const location = useLocation();
   const isMobile = useIsMobile();
   const isCollapsed = state === 'collapsed';
@@ -39,12 +39,12 @@ export const AppSidebar = () => {
       setOpenMobile(false);
       setTimeout(() => navigate(url), 150);
     } else {
-      // Desktop: primeiro colapsa, depois navega
+      // Desktop: força collapsed e persiste no cookie
       if (!isCollapsed) {
-        toggleSidebar();
+        setOpen(false);
       }
-      // Delay para permitir animação do colapso (300ms da transição CSS)
-      setTimeout(() => navigate(url), isCollapsed ? 0 : 150);
+      // Navega imediatamente
+      navigate(url);
     }
   };
 
