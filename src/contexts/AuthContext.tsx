@@ -61,16 +61,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }, 0);
         }
         
-        // Check subscription status with Stripe (async, don't block)
+        // Check subscription status with Stripe (disabled temporarily to prevent errors)
+        // Users can manually refresh on the subscriptions page
+        /* 
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          // Don't await this - let it run in background
           supabase.functions.invoke('check-subscription')
             .then(() => console.log('Subscription status checked'))
             .catch(error => {
               console.error('Error checking subscription (non-blocking):', error);
-              // This is OK - user can still use the app
             });
         }
+        */
       }
     );
 
