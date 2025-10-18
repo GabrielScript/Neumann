@@ -7,7 +7,6 @@ import { getTrophyStage } from '@/lib/xp';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useNavigate } from 'react-router-dom';
 import { UserProfileDropdown } from '@/components/UserProfileDropdown';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface UserStats {
   level: number;
@@ -20,7 +19,6 @@ export const TopBar = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState<UserStats | null>(null);
   const { subscription } = useSubscription();
-  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (user) {
@@ -65,106 +63,48 @@ export const TopBar = () => {
   };
 
   return (
-    <header 
-      className="
-        h-14 lg:h-16 
-        border-b-2 border-primary/20 
-        bg-card/50 backdrop-blur-sm 
-        flex items-center justify-between 
-        px-3 sm:px-4 lg:px-6
-        sticky top-0 z-40
-        w-full
-      "
-      role="banner"
-    >
-      <div className="flex items-center">
-        <SidebarTrigger 
-          aria-label="Alternar menu lateral"
-          className="touch-target"
-        />
-      </div>
+    <header className="h-14 border-b-2 border-primary/20 bg-card/50 backdrop-blur-sm flex items-center justify-between px-4 sticky top-0 z-40">
+      <SidebarTrigger />
       
-      <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto">
+      <div className="flex items-center gap-3">
         {stats && (
           <>
-            {isMobile ? (
-              <>
-                {/* Versão Mobile Compacta */}
-                <div className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-sm">
-                  <div className="flex items-center gap-1.5">
-                    <TrendingUp className="w-4 h-4 text-primary" aria-hidden="true" />
-                    <span className="font-bold text-base text-primary font-display">
-                      Nv. {stats.level}
-                    </span>
-                  </div>
+            <div className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-4 py-2 rounded-lg">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-primary" />
+                <div>
+                  <p className="text-xs text-muted-foreground">Nível</p>
+                  <p className="font-bold text-lg text-primary">{stats.level}</p>
                 </div>
+              </div>
+            </div>
 
-                <div 
-                  className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-sm cursor-pointer hover:bg-background/90 transition-colors touch-target"
-                  onClick={() => navigate('/subscriptions')}
-                  role="button"
-                  aria-label={`Plano atual: ${getPlanDisplayName()}. Clique para ver outros planos`}
-                  tabIndex={0}
-                  onKeyDown={(e) => e.key === 'Enter' && navigate('/subscriptions')}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <CreditCard className="w-4 h-4 text-primary" aria-hidden="true" />
-                    <span className="font-bold text-xs text-primary font-body">
-                      {getPlanDisplayName()}
-                    </span>
-                  </div>
+            <div className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-4 py-2 rounded-lg">
+              <div className="flex items-center gap-2">
+                <Trophy className="w-5 h-5 text-primary" />
+                <div>
+                  <p className="text-xs text-success/70">Troféu</p>
+                  <p className="font-bold text-sm text-primary">
+                    {getTrophyStageName(stats.level)}
+                  </p>
                 </div>
-              </>
-            ) : (
-              <>
-                {/* Versão Desktop Completa */}
-                <div className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-4 py-2 rounded-lg shadow-glow">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-primary" aria-hidden="true" />
-                    <div>
-                      <p className="text-xs text-muted-foreground font-body">Nível</p>
-                      <p 
-                        className="font-bold text-lg text-primary font-display"
-                        aria-label={`Nível ${stats.level}`}
-                      >
-                        {stats.level}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+              </div>
+            </div>
 
-                <div className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-4 py-2 rounded-lg shadow-glow">
-                  <div className="flex items-center gap-2">
-                    <Trophy className="w-5 h-5 text-primary" aria-hidden="true" />
-                    <div>
-                      <p className="text-xs text-success/70 font-body">Troféu</p>
-                      <p className="font-bold text-sm text-primary font-body">
-                        {getTrophyStageName(stats.level)}
-                      </p>
-                    </div>
-                  </div>
+            <div 
+              className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-4 py-2 rounded-lg cursor-pointer hover:bg-background/90 transition-colors"
+              onClick={() => navigate('/subscriptions')}
+            >
+              <div className="flex items-center gap-2">
+                <CreditCard className="w-5 h-5 text-primary" />
+                <div>
+                  <p className="text-xs text-success/70">Plano</p>
+                  <p className="font-bold text-sm text-primary">
+                    {getPlanDisplayName()}
+                  </p>
                 </div>
-
-                <div 
-                  className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-4 py-2 rounded-lg shadow-glow cursor-pointer hover:bg-background/90 transition-colors touch-target"
-                  onClick={() => navigate('/subscriptions')}
-                  role="button"
-                  aria-label={`Plano atual: ${getPlanDisplayName()}. Clique para ver outros planos`}
-                  tabIndex={0}
-                  onKeyDown={(e) => e.key === 'Enter' && navigate('/subscriptions')}
-                >
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="w-5 h-5 text-primary" aria-hidden="true" />
-                    <div>
-                      <p className="text-xs text-success/70 font-body">Plano</p>
-                      <p className="font-bold text-sm text-primary font-body">
-                        {getPlanDisplayName()}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </>
-            )}
+              </div>
+            </div>
 
             <UserProfileDropdown />
           </>

@@ -14,11 +14,7 @@ export const Layout = ({ children }: LayoutProps) => {
         <AppSidebar />
         <div className="flex-1 flex flex-col w-full min-w-0">
           <TopBar />
-          <main 
-            className="flex-1 container-responsive py-4 md:py-6 lg:py-8"
-            role="main"
-            aria-label="Conteúdo principal"
-          >
+          <main className="flex-1 container px-4 py-6">
             {children}
           </main>
         </div>
