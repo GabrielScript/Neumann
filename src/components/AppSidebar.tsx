@@ -90,7 +90,7 @@ export const AppSidebar = () => {
                                   : 'hover:bg-accent/10 hover:text-accent'
                               }`}
                             >
-                              <item.icon className={`h-7 w-7 ${isCollapsed ? 'mr-8' : ''}`} />
+                              <item.icon className="h-7 w-7" />
                               {!isCollapsed && (
                                 <div className="flex items-center gap-2">
                                   <span className="text-lg font-medium font-body">
