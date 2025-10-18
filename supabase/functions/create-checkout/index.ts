@@ -4,12 +4,17 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.75.0";
 import { getAllHeaders, checkRateLimit, logSecurityEvent, getIpAddress } from '../_shared/security.ts';
 
 serve(async (req) => {
+  console.log('[CREATE-CHECKOUT] Request received at:', new Date().toISOString());
+  console.log('[CREATE-CHECKOUT] Request method:', req.method);
+  console.log('[CREATE-CHECKOUT] Origin:', req.headers.get('origin'));
+  
   const origin = req.headers.get('origin');
   const headers = getAllHeaders(origin);
   const ipAddress = getIpAddress(req);
   const userAgent = req.headers.get('user-agent');
   
   if (req.method === "OPTIONS") {
+    console.log('[CREATE-CHECKOUT] Handling OPTIONS preflight request');
     return new Response(null, { headers });
   }
 

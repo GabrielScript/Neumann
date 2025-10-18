@@ -26,14 +26,32 @@ export const StripeCheckout = ({ priceId, planName, onClose }: StripeCheckoutPro
 
       console.log('Session token available, calling create-checkout...');
       
-      const { data, error } = await supabase.functions.invoke('create-checkout', {
+      // Adicionar timeout de 30 segundos
+      const timeoutPromise = new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Timeout: A requisição demorou mais de 30 segundos')), 30000)
+      );
+
+      const invokePromise = supabase.functions.invoke('create-checkout', {
         body: { priceId },
       });
+
+      const result = await Promise.race([invokePromise, timeoutPromise]) as Awaited<typeof invokePromise>;
+      const { data, error } = result;
 
       console.log('Function response:', { data, error });
 
       if (error) {
         console.error('Function error:', error);
+        
+        // Tratamento de erro mais específico
+        if (error.message?.includes('fetch') || error.message?.includes('Failed to fetch')) {
+          throw new Error('Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.');
+        }
+        
+        if (error.message?.includes('Timeout')) {
+          throw new Error('A requisição demorou muito tempo. Tente novamente.');
+        }
+        
         throw new Error(error.message || 'Erro ao criar sessão de checkout');
       }
 
