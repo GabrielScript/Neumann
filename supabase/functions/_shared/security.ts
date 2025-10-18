@@ -44,6 +44,14 @@ export function getSecurityHeaders(): Record<string, string> {
  * Combine all response headers
  */
 export function getAllHeaders(origin?: string | null): Record<string, string> {
+  const allowedOrigin = origin && ALLOWED_ORIGINS.includes(origin) 
+    ? origin 
+    : ALLOWED_ORIGINS[0];
+  
+  console.log('[CORS] Origin recebida:', origin);
+  console.log('[CORS] Origin permitida:', allowedOrigin);
+  console.log('[CORS] ALLOWED_ORIGINS:', ALLOWED_ORIGINS);
+  
   return {
     ...getCorsHeaders(origin),
     ...getSecurityHeaders(),

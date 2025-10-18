@@ -16,15 +16,23 @@ export const StripeCheckout = ({ priceId, planName, onClose }: StripeCheckoutPro
   const handleCheckout = async () => {
     try {
       setIsLoading(true);
-      console.log(`Starting checkout for ${planName} with price ${priceId}`);
+      console.log('[CHECKOUT] ====== STARTING CHECKOUT ======');
+      console.log('[CHECKOUT] Current URL:', window.location.href);
+      console.log('[CHECKOUT] Plan:', planName);
+      console.log('[CHECKOUT] Price ID:', priceId);
+      console.log('[CHECKOUT] Timestamp:', new Date().toISOString());
 
       const { data: { session } } = await supabase.auth.getSession();
+      console.log('[CHECKOUT] Session exists:', !!session);
+      console.log('[CHECKOUT] Session user:', session?.user?.email);
       
       if (!session) {
         throw new Error('Você precisa estar logado para fazer uma assinatura');
       }
 
-      console.log('Session token available, calling create-checkout...');
+      console.log('[CHECKOUT] ✓ Session validated');
+      console.log('[CHECKOUT] Calling create-checkout edge function...');
+      console.log('[CHECKOUT] Supabase URL:', import.meta.env.VITE_SUPABASE_URL);
       
       // Adicionar timeout de 30 segundos
       const timeoutPromise = new Promise<never>((_, reject) => 
@@ -35,10 +43,15 @@ export const StripeCheckout = ({ priceId, planName, onClose }: StripeCheckoutPro
         body: { priceId },
       });
 
+      console.log('[CHECKOUT] Invoke function called, waiting for response...');
+      
       const result = await Promise.race([invokePromise, timeoutPromise]) as Awaited<typeof invokePromise>;
       const { data, error } = result;
 
-      console.log('Function response:', { data, error });
+      console.log('[CHECKOUT] ====== FUNCTION RESPONSE ======');
+      console.log('[CHECKOUT] Data:', data);
+      console.log('[CHECKOUT] Error:', error);
+      console.log('[CHECKOUT] Full result:', result);
 
       if (error) {
         console.error('Function error:', error);
