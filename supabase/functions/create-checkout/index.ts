@@ -13,7 +13,15 @@ serve(async (req) => {
     return new Response(null, { headers });
   }
 
-  const supabaseClient = createClient(
+  // Client for authentication with user token
+  const supabaseAuth = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+    { auth: { persistSession: false } }
+  );
+
+  // Admin client for security operations
+  const supabaseAdmin = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
   );
@@ -21,18 +29,18 @@ serve(async (req) => {
   try {
     const authHeader = req.headers.get("Authorization")!;
     const token = authHeader.replace("Bearer ", "");
-    const { data, error: userError } = await supabaseClient.auth.getUser(token);
+    const { data, error: userError } = await supabaseAuth.auth.getUser(token);
     if (userError) {
-      await logSecurityEvent(supabaseClient, null, 'checkout_attempt', 'subscription', null, ipAddress, userAgent, 'blocked', { reason: 'invalid_auth' });
+      await logSecurityEvent(supabaseAdmin, null, 'checkout_attempt', 'subscription', null, ipAddress, userAgent, 'blocked', { reason: 'invalid_auth' });
       throw new Error(`Authentication error: ${userError.message}`);
     }
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated or email not available");
 
     // Rate limiting: 5 checkout attempts per minute
-    const rateLimitCheck = await checkRateLimit(supabaseClient, user.id, ipAddress, 'create-checkout', 5, 1);
+    const rateLimitCheck = await checkRateLimit(supabaseAdmin, user.id, ipAddress, 'create-checkout', 5, 1);
     if (!rateLimitCheck.allowed) {
-      await logSecurityEvent(supabaseClient, user.id, 'rate_limit_exceeded', 'subscription', null, ipAddress, userAgent, 'blocked');
+      await logSecurityEvent(supabaseAdmin, user.id, 'rate_limit_exceeded', 'subscription', null, ipAddress, userAgent, 'blocked');
       return new Response(
         JSON.stringify({ error: rateLimitCheck.error }),
         { headers, status: 429 }
@@ -75,7 +83,7 @@ serve(async (req) => {
     console.log(`[CREATE-CHECKOUT] Session created successfully`);
 
     // Log successful checkout creation
-    await logSecurityEvent(supabaseClient, user.id, 'checkout_created', 'subscription', null, ipAddress, userAgent, 'success', { priceId });
+    await logSecurityEvent(supabaseAdmin, user.id, 'checkout_created', 'subscription', null, ipAddress, userAgent, 'success', { priceId });
 
     return new Response(JSON.stringify({ url: session.url }), { headers, status: 200 });
   } catch (error) {
