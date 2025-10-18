@@ -18,24 +18,39 @@ export const StripeCheckout = ({ priceId, planName, onClose }: StripeCheckoutPro
       setIsLoading(true);
       console.log(`Starting checkout for ${planName} with price ${priceId}`);
 
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('Você precisa estar logado para fazer uma assinatura');
+      }
+
+      console.log('Invoking create-checkout function...');
+      
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { priceId },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
       });
 
-      if (error) throw error;
+      console.log('Function response:', { data, error });
+
+      if (error) {
+        console.error('Function error:', error);
+        throw new Error(error.message || 'Erro ao criar sessão de checkout');
+      }
 
       if (data?.url) {
         console.log('Redirecting to Stripe checkout:', data.url);
-        window.open(data.url, '_blank');
-        onClose?.();
+        window.location.href = data.url;
       } else {
-        throw new Error('No checkout URL returned');
+        throw new Error('URL de checkout não foi retornada');
       }
     } catch (error) {
       console.error('Checkout error:', error);
       toast({
         title: 'Erro ao processar pagamento',
-        description: error instanceof Error ? error.message : 'Tente novamente mais tarde',
+        description: error instanceof Error ? error.message : 'Erro desconhecido. Tente novamente.',
         variant: 'destructive',
       });
     } finally {
