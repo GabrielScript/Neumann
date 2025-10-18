@@ -24,33 +24,18 @@ export const StripeCheckout = ({ priceId, planName, onClose }: StripeCheckoutPro
         throw new Error('Você precisa estar logado para fazer uma assinatura');
       }
 
-      // Obter URL do Supabase
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      console.log('Session token available, calling create-checkout...');
       
-      console.log('Making direct request to:', `${supabaseUrl}/functions/v1/create-checkout`);
-      
-      // Fazer chamada direta com fetch
-      const response = await fetch(`${supabaseUrl}/functions/v1/create-checkout`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-          'apikey': supabaseAnonKey,
-        },
-        body: JSON.stringify({ priceId }),
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: { priceId },
       });
 
-      console.log('Response status:', response.status);
+      console.log('Function response:', { data, error });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Response error:', errorText);
-        throw new Error(`Erro HTTP ${response.status}: ${errorText}`);
+      if (error) {
+        console.error('Function error:', error);
+        throw new Error(error.message || 'Erro ao criar sessão de checkout');
       }
-
-      const data = await response.json();
-      console.log('Function response data:', data);
 
       if (data?.url) {
         console.log('Redirecting to Stripe checkout:', data.url);
