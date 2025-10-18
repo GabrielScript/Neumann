@@ -3,6 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.75.0";
 // Allowed origins based on environment
 const ALLOWED_ORIGINS = [
   'https://jlqntjsxhyyquhfufihd.lovableproject.com',
+  'https://neumann.lovable.app',
   'http://localhost:5173',
   'http://localhost:3000',
 ];
