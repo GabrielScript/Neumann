@@ -73,13 +73,16 @@ export const TopBar = () => {
         flex items-center justify-between 
         px-3 sm:px-4 lg:px-6
         sticky top-0 z-40
+        w-full
       "
       role="banner"
     >
-      <SidebarTrigger 
-        aria-label="Alternar menu lateral"
-        className="touch-target"
-      />
+      <div className="flex items-center">
+        <SidebarTrigger 
+          aria-label="Alternar menu lateral"
+          className="touch-target"
+        />
+      </div>
       
       <div className="flex items-center gap-2 sm:gap-3 overflow-x-auto">
         {stats && (
