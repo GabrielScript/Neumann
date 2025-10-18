@@ -8,6 +8,7 @@ import { Trophy, Award, TrendingUp, Sparkles } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { getTrophyStage, getTrophyStageName, getXPForNextLevel } from '@/lib/xp';
 import { Skeleton } from '@/components/ui/skeleton';
+import { OptimizedImage } from '@/components/OptimizedImage';
 import trophyMunicipal from '@/assets/trophies/trophy-municipal.png';
 import trophyEstadual from '@/assets/trophies/trophy-estadual.png';
 import trophyRegional from '@/assets/trophies/trophy-regional.png';
@@ -102,10 +103,13 @@ const TrophyPage = () => {
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-8">
-              <img 
-                src={trophyHierarchy.find(t => t.stage === currentStage)?.image} 
+              <OptimizedImage 
+                src={trophyHierarchy.find(t => t.stage === currentStage)?.image || ''} 
                 alt={getTrophyStageName(currentStage)}
                 className="w-32 h-32 object-contain"
+                width={128}
+                height={128}
+                priority={true}
               />
               <div className="flex-1 space-y-4">
                 <div>
@@ -158,10 +162,12 @@ const TrophyPage = () => {
                     `}
                   >
                     <div className="flex items-center gap-4">
-                      <img 
+                      <OptimizedImage 
                         src={trophy.image} 
                         alt={trophy.name}
                         className="w-16 h-16 object-contain"
+                        width={64}
+                        height={64}
                       />
                       <div className="flex-1">
                         <h4 className="font-bold text-lg text-primary font-display">
@@ -202,10 +208,12 @@ const TrophyPage = () => {
             </CardHeader>
             <CardContent>
               <div className="text-center py-8">
-                <img 
+                <OptimizedImage 
                   src={trophyLifeGoal} 
                   alt="Troféu Especial"
                   className="w-24 h-24 object-contain mx-auto mb-4"
+                  width={96}
+                  height={96}
                 />
                 <p className="text-5xl font-black text-primary font-display mb-2">
                   {stats?.life_goal_trophies || 0}

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Layout } from "@/components/Layout";
@@ -6,10 +6,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useActiveChallenge } from "@/hooks/useActiveChallenge";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UpgradePrompt } from "@/components/UpgradePrompt";
-import { ActiveChallengeTab } from "@/components/challenges/ActiveChallengeTab";
-import { ChallengeLibraryTab } from "@/components/challenges/ChallengeLibraryTab";
-import { CreateChallengeTab } from "@/components/challenges/CreateChallengeTab";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/hooks/use-toast";
+
+// Lazy load dos componentes pesados
+const ActiveChallengeTab = lazy(() => import("@/components/challenges/ActiveChallengeTab").then(m => ({ default: m.ActiveChallengeTab })));
+const ChallengeLibraryTab = lazy(() => import("@/components/challenges/ChallengeLibraryTab").then(m => ({ default: m.ChallengeLibraryTab })));
+const CreateChallengeTab = lazy(() => import("@/components/challenges/CreateChallengeTab").then(m => ({ default: m.CreateChallengeTab })));
 
 export default function Challenges() {
   const { user, loading: authLoading } = useAuth();
@@ -65,27 +68,33 @@ export default function Challenges() {
           </TabsList>
 
           <TabsContent value="active" className="mt-6">
-            {challenges && challenges.length > 0 ? (
-              <div className="space-y-6">
-                {challenges.map((challenge) => (
-                  <ActiveChallengeTab key={challenge.id} challenge={challenge} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-16">
-                <p className="text-muted-foreground">
-                  Você não tem desafios ativos no momento.
-                </p>
-              </div>
-            )}
+            <Suspense fallback={<Skeleton className="h-96 w-full" />}>
+              {challenges && challenges.length > 0 ? (
+                <div className="space-y-6">
+                  {challenges.map((challenge) => (
+                    <ActiveChallengeTab key={challenge.id} challenge={challenge} />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-16">
+                  <p className="text-muted-foreground">
+                    Você não tem desafios ativos no momento.
+                  </p>
+                </div>
+              )}
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="library" className="mt-6">
-            <ChallengeLibraryTab onChallengeStarted={() => setActiveTab("active")} />
+            <Suspense fallback={<Skeleton className="h-96 w-full" />}>
+              <ChallengeLibraryTab onChallengeStarted={() => setActiveTab("active")} />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="create" className="mt-6">
-            <CreateChallengeTab onChallengeCreated={() => setActiveTab("active")} />
+            <Suspense fallback={<Skeleton className="h-96 w-full" />}>
+              <CreateChallengeTab onChallengeCreated={() => setActiveTab("active")} />
+            </Suspense>
           </TabsContent>
         </Tabs>
 
