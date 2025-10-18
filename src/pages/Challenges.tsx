@@ -47,13 +47,13 @@ export default function Challenges() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Desafios</h1>
-          <p className="text-muted-foreground">
+      <div className="max-w-6xl mx-auto">
+        <header className="mb-6 lg:mb-8">
+          <h1 className="text-responsive-2xl font-bold mb-2 font-display">Desafios</h1>
+          <p className="text-responsive-base text-muted-foreground font-body">
             Transforme sua vida com desafios estruturados
           </p>
-        </div>
+        </header>
 
         <Tabs value={activeTab} onValueChange={handleTabChange}>
           <TabsList className="grid w-full grid-cols-3">

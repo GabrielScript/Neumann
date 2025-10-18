@@ -139,43 +139,62 @@ const Dashboard = () => {
 
   return (
     <Layout>
-      <div className="space-y-8 max-w-7xl mx-auto px-6 py-8">
+      <div 
+        className="space-y-6 lg:space-y-8 max-w-7xl mx-auto"
+        aria-live="polite"
+        aria-atomic="false"
+      >
         {/* Saudação Personalizada */}
-        <div className="flex items-center gap-3 animate-slide-in-bottom">
-          <span className="text-5xl animate-wave">👋</span>
+        <header className="flex items-center gap-3 animate-slide-in-bottom">
+          <span 
+            className="text-4xl lg:text-5xl animate-wave" 
+            role="img" 
+            aria-label="Mão acenando"
+          >
+            👋
+          </span>
           <div>
-            <h1 className="text-4xl font-black text-primary font-display">
+            <h1 className="text-responsive-2xl font-black text-primary font-display">
               Olá, {userName}!
             </h1>
-            <p className="text-accent mt-1 font-body text-lg">
+            <p className="text-responsive-base text-foreground mt-1 font-body">
               Pronto para conquistar seus desafios hoje?
             </p>
           </div>
-        </div>
+        </header>
 
-        {/* Main Content Grid - FOCO EM DESAFIOS E OBJETIVOS */}
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Active Challenges Card - REDESENHADO */}
-          <Card className="
-            relative overflow-hidden
-            border-2 border-primary/30
-            bg-gradient-card
-            shadow-card hover:shadow-primary
-            transition-all duration-500
-            before:absolute before:inset-0 
-            before:border before:border-accent/20
-            before:rounded-lg before:pointer-events-none
-            group
-            animate-slide-in-bottom
-            h-full
-          ">
-            <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity duration-500" />
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 lg:gap-6">
+          {/* Card de Desafios Ativos */}
+          <Card 
+            className="
+              relative overflow-hidden
+              border-2 border-primary/30
+              bg-gradient-card
+              shadow-card hover:shadow-primary
+              transition-all duration-500
+              group
+              animate-slide-in-bottom
+              h-full
+            "
+            role="article"
+            aria-labelledby="active-challenges-title"
+          >
+            <div className="absolute inset-0 bg-gradient-primary opacity-0 group-hover:opacity-10 transition-opacity duration-500" aria-hidden="true" />
             
-            <CardHeader className="relative z-10 pb-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Target className="w-8 h-8 text-primary group-hover:scale-110 transition-transform" />
-                  <CardTitle className="text-2xl font-bold text-primary font-display">Desafios Ativos</CardTitle>
+            <CardHeader className="relative z-10 pb-3 lg:pb-4">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2.5 lg:gap-3">
+                  <Target 
+                    className="w-7 h-7 lg:w-8 lg:h-8 text-primary group-hover:scale-110 transition-transform" 
+                    aria-hidden="true"
+                  />
+                  <h2 
+                    id="active-challenges-title"
+                    className="text-responsive-xl font-bold text-primary font-display"
+                  >
+                    Desafios Ativos
+                  </h2>
                 </div>
                 {activeChallenges.length > 0 && (
                   <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30 font-body">

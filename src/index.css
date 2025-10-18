@@ -69,6 +69,19 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 0 0% 10%;
     --sidebar-border: 0 0% 85%;
     --sidebar-ring: 45 100% 45%;
+    
+    /* ✅ NOVO: Contraste Acessível WCAG AA */
+    --text-high-contrast: 0 0% 10%;
+    --text-medium-contrast: 0 0% 30%;
+    --text-low-contrast: 0 0% 50%;
+    
+    /* ✅ NOVO: Touch Targets */
+    --touch-target-min: 44px;
+    
+    /* ✅ NOVO: Espaçamentos Responsivos */
+    --spacing-page-mobile: 1rem;
+    --spacing-page-tablet: 1.5rem;
+    --spacing-page-desktop: 2rem;
   }
 
   .dark {
@@ -122,6 +135,11 @@ All colors MUST be HSL.
     --sidebar-accent-foreground: 0 0% 95%;
     --sidebar-border: 0 0% 25%;
     --sidebar-ring: 45 100% 50%;
+    
+    /* ✅ NOVO: Contraste Acessível WCAG AA (Dark Mode) */
+    --text-high-contrast: 0 0% 95%;
+    --text-medium-contrast: 0 0% 75%;
+    --text-low-contrast: 0 0% 60%;
   }
 }
 
@@ -136,6 +154,44 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
+  /* ✅ NOVO: Indicador de Foco Visível */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primary/50 focus-visible:ring-offset-2;
+  }
+  
+  /* ✅ NOVO: Touch Targets Seguros */
+  .touch-target {
+    min-width: var(--touch-target-min);
+    min-height: var(--touch-target-min);
+  }
+  
+  /* ✅ NOVO: Texto Responsivo com clamp */
+  .text-responsive-sm { font-size: clamp(0.875rem, 2vw, 1rem); }
+  .text-responsive-base { font-size: clamp(1rem, 2.5vw, 1.125rem); }
+  .text-responsive-lg { font-size: clamp(1.125rem, 3vw, 1.5rem); }
+  .text-responsive-xl { font-size: clamp(1.5rem, 4vw, 2rem); }
+  .text-responsive-2xl { font-size: clamp(2rem, 5vw, 2.5rem); }
+  
+  /* ✅ NOVO: Container Responsivo */
+  .container-responsive {
+    padding-left: var(--spacing-page-mobile);
+    padding-right: var(--spacing-page-mobile);
+  }
+  
+  @media (min-width: 768px) {
+    .container-responsive {
+      padding-left: var(--spacing-page-tablet);
+      padding-right: var(--spacing-page-tablet);
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .container-responsive {
+      padding-left: var(--spacing-page-desktop);
+      padding-right: var(--spacing-page-desktop);
+    }
+  }
+
   .bg-checkerboard {
     background-image: 
       linear-gradient(45deg, hsl(var(--muted)) 25%, transparent 25%),

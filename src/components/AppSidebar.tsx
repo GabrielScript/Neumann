@@ -44,32 +44,54 @@ export const AppSidebar = () => {
 
   return (
     <Sidebar 
-      className={`${isCollapsed ? 'w-16' : 'w-72'} transition-all duration-300 border-r-2 border-primary/20`} 
+      className={`
+        ${isCollapsed ? 'w-16' : 'w-64 lg:w-72'}
+        transition-all duration-300 
+        border-r-2 border-primary/20
+      `}
       collapsible="icon"
+      role="navigation"
+      aria-label="Menu de navegação principal"
     >
-      <SidebarContent className="p-4">
+      <SidebarContent className="p-3 lg:p-4">
         <div 
-          className="mb-8 px-2 cursor-pointer hover:opacity-80 transition-opacity"
+          className="mb-6 lg:mb-8 px-2 cursor-pointer hover:opacity-80 transition-opacity"
           onClick={() => navigate('/onboarding')}
-          title="Rever apresentação"
+          role="button"
+          aria-label="Rever apresentação do Neumann"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && navigate('/onboarding')}
         >
           <div className="flex items-center gap-3">
             {!isCollapsed && (
               <>
-                <img src={logo} alt="Neumann Logo" className="w-10 h-10" />
-                <span className="font-display font-black text-xl text-foreground">
+                <img 
+                  src={logo} 
+                  alt="Logo do Neumann - Aplicativo de desenvolvimento pessoal" 
+                  className="w-10 h-10"
+                  role="img"
+                />
+                <span className="font-display font-black text-lg lg:text-xl text-foreground">
                   Neumann
                 </span>
               </>
             )}
-            {isCollapsed && <img src={logo} alt="Neumann Logo" className="w-10 h-10" />}
+            {isCollapsed && (
+              <img 
+                src={logo} 
+                alt="Neumann"
+                className="w-10 h-10" 
+              />
+            )}
           </div>
         </div>
         
         <SidebarGroup>
-          <SidebarGroupLabel className={isCollapsed ? 'sr-only' : 'text-base'}>Menu</SidebarGroupLabel>
+          <SidebarGroupLabel className={isCollapsed ? 'sr-only' : 'text-sm lg:text-base'}>
+            Menu Principal
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className={`space-y-2 ${isCollapsed ? 'mx-0' : 'mx-2'}`}>
+            <SidebarMenu className={`space-y-1.5 lg:space-y-2 ${isCollapsed ? 'mx-0' : 'mx-2'}`}>
               <TooltipProvider>
                 {navItems.map((item) => {
                   const isActive = location.pathname === item.url;
@@ -79,21 +101,34 @@ export const AppSidebar = () => {
                         <TooltipTrigger asChild>
                           <SidebarMenuButton 
                             asChild
-                            className={`h-auto ${isCollapsed ? 'py-3 px-0' : 'py-3 px-4'} rounded-xl`}
+                            className={`
+                              h-auto touch-target
+                              ${isCollapsed ? 'py-2.5 px-0' : 'py-2.5 lg:py-3 px-3 lg:px-4'} 
+                              rounded-xl
+                              transition-all duration-200
+                            `}
                           >
                             <NavLink
                               to={item.url}
                               onClick={handleNavClick}
-                              className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} ${
-                                isActive 
+                              aria-current={isActive ? 'page' : undefined}
+                              aria-label={item.title}
+                              className={`
+                                flex items-center 
+                                ${isCollapsed ? 'justify-center' : 'gap-2.5 lg:gap-3'} 
+                                ${isActive 
                                   ? 'bg-primary/20 text-primary font-bold border-l-4 border-primary' 
-                                  : 'hover:bg-accent/10 hover:text-accent'
-                              }`}
+                                  : 'hover:bg-accent/10 hover:text-accent focus-ring'
+                                }
+                              `}
                             >
-                              <item.icon className="h-7 w-7" />
+                              <item.icon 
+                                className="h-6 w-6 lg:h-7 lg:w-7" 
+                                aria-hidden="true" 
+                              />
                               {!isCollapsed && (
                                 <div className="flex items-center gap-2">
-                                  <span className="text-lg font-medium font-body">
+                                  <span className="text-base lg:text-lg font-medium font-body">
                                     {item.title}
                                   </span>
                                   {'subtitle' in item && (
