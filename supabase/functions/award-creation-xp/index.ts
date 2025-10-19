@@ -114,6 +114,31 @@ Deno.serve(async (req) => {
 
     console.log(`[${requestId}] Processing ${type} creation XP - User: ${user.id}`);
 
+    // SECURITY: Verify ownership before awarding XP
+    if (type === 'challenge') {
+      const { data: challenge, error: challengeError } = await supabaseAdmin
+        .from('challenges')
+        .select('user_id')
+        .eq('id', item_id)
+        .single();
+
+      if (challengeError || !challenge || challenge.user_id !== user.id) {
+        await logSecurityEvent(supabaseAdmin, user.id, 'ownership_violation', type, item_id, ipAddress, userAgent, 'blocked', { reason: 'not_owner' });
+        throw new Error('Unauthorized: Challenge not found or access denied');
+      }
+    } else if (type === 'goal') {
+      const { data: goal, error: goalError } = await supabaseAdmin
+        .from('life_goals')
+        .select('user_id')
+        .eq('id', item_id)
+        .single();
+
+      if (goalError || !goal || goal.user_id !== user.id) {
+        await logSecurityEvent(supabaseAdmin, user.id, 'ownership_violation', type, item_id, ipAddress, userAgent, 'blocked', { reason: 'not_owner' });
+        throw new Error('Unauthorized: Goal not found or access denied');
+      }
+    }
+
     // Define XP amounts
     let xpAmount = 0;
     let reason = '';
