@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from 'next-themes';
 import { useAvatar } from '@/hooks/useAvatar';
+import { useLanguage } from '@/hooks/useLanguage';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -32,12 +33,14 @@ import {
   User,
   UserCircle,
   UserCog,
+  Languages,
 } from 'lucide-react';
 
 export function UserProfileDropdown() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
+  const { language, toggleLanguage, getLanguageName } = useLanguage();
   const { uploadAvatar, removeAvatar, getDefaultAvatar, isUploading } = useAvatar();
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -142,6 +145,29 @@ export function UserProfileDropdown() {
             Ver Objetivos de Vida
           </DropdownMenuItem>
           
+          <DropdownMenuSeparator />
+          
+          <DropdownMenuItem onClick={() => navigate('/feedback')}>
+            <MessageSquare className="mr-2 h-4 w-4" />
+            Feedback
+          </DropdownMenuItem>
+          
+          <DropdownMenuItem onClick={toggleLanguage}>
+            <Languages className="mr-2 h-4 w-4" />
+            Idioma: {getLanguageName()}
+          </DropdownMenuItem>
+          
+          <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+            {theme === 'dark' ? (
+              <Sun className="mr-2 h-4 w-4" />
+            ) : (
+              <Moon className="mr-2 h-4 w-4" />
+            )}
+            Tema: {theme === 'dark' ? 'Claro' : 'Escuro'}
+          </DropdownMenuItem>
+          
+          <DropdownMenuSeparator />
+          
           <DropdownMenuItem onClick={() => navigate('/community')}>
             <Users className="mr-2 h-4 w-4" />
             Ver Suas Comunidades
@@ -152,20 +178,6 @@ export function UserProfileDropdown() {
           <DropdownMenuItem onClick={() => navigate('/settings')}>
             <Settings className="mr-2 h-4 w-4" />
             Configurações
-          </DropdownMenuItem>
-          
-          <DropdownMenuItem onClick={() => navigate('/feedback')}>
-            <MessageSquare className="mr-2 h-4 w-4" />
-            Feedback
-          </DropdownMenuItem>
-          
-          <DropdownMenuItem onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-            {theme === 'dark' ? (
-              <Sun className="mr-2 h-4 w-4" />
-            ) : (
-              <Moon className="mr-2 h-4 w-4" />
-            )}
-            Tema: {theme === 'dark' ? 'Claro' : 'Escuro'}
           </DropdownMenuItem>
           
           <DropdownMenuSeparator />
