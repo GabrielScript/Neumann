@@ -528,6 +528,27 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_quotes: {
+        Row: {
+          category: string
+          created_at: string | null
+          id: string
+          quote: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          id?: string
+          quote: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          id?: string
+          quote?: string
+        }
+        Relationships: []
+      }
       direct_messages: {
         Row: {
           community_id: string | null
@@ -765,6 +786,38 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      user_daily_quotes: {
+        Row: {
+          created_at: string | null
+          id: string
+          quote_id: string
+          shown_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          quote_id: string
+          shown_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          quote_id?: string
+          shown_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_daily_quotes_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "daily_quotes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_onboarding: {
         Row: {
