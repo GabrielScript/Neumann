@@ -1,15 +1,19 @@
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Sparkles, Target, Trophy, Medal, TrendingUp, Users } from 'lucide-react';
+import { Sparkles, Target, Trophy, Medal, TrendingUp, Users, Languages } from 'lucide-react';
 import logo from '@/assets/logo.png';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOnboarding } from '@/hooks/useOnboarding';
+import { useTranslation } from '@/translations';
+import { useLanguage } from '@/hooks/useLanguage';
 
 const Index = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { onboardingStatus, isLoading: isLoadingOnboarding } = useOnboarding();
+  const { t } = useTranslation();
+  const { toggleLanguage, language } = useLanguage();
 
   useEffect(() => {
     // Se o usuário está autenticado, verificar o status do onboarding
@@ -24,16 +28,29 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-hero">
+      {/* Language Selector */}
+      <div className="absolute top-4 left-4 z-50">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={toggleLanguage}
+          className="gap-2"
+        >
+          <Languages className="w-4 h-4" />
+          {language === 'pt' ? 'EN' : 'PT'}
+        </Button>
+      </div>
+
       {/* Developer Credit */}
       <div className="absolute top-4 right-4 text-right text-sm text-muted-foreground">
-        <p className="font-medium">Developed by Gabriel Estrela Lopes</p>
+        <p className="font-medium">{t('landing.developedBy')}</p>
         <a 
           href="https://www.linkedin.com/in/gabrielestrela8/" 
           target="_blank" 
           rel="noopener noreferrer"
           className="text-primary hover:underline"
         >
-          Contact
+          {t('landing.contact')}
         </a>
       </div>
 
@@ -48,10 +65,10 @@ const Index = () => {
           {/* Title & Description */}
           <div className="space-y-4 animate-fade-in">
             <h1 className="text-5xl md:text-6xl font-bold font-display text-foreground">
-              Neumann
+              {t('landing.title')}
             </h1>
             <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl">
-              Transforme sua vida através de desafios estruturados, objetivos claros e crescimento consistente.
+              {t('landing.subtitle')}
             </p>
           </div>
 
@@ -62,7 +79,7 @@ const Index = () => {
               className="text-lg px-8 shadow-primary"
               onClick={() => navigate('/auth')}
             >
-              Começar Agora
+              {t('landing.cta')}
             </Button>
             <Button
               variant="outline"
@@ -70,7 +87,7 @@ const Index = () => {
               className="text-lg px-8"
               onClick={() => navigate('/auth')}
             >
-              Fazer Login
+              {t('landing.login')}
             </Button>
           </div>
         </div>
@@ -79,33 +96,33 @@ const Index = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mt-20 max-w-7xl mx-auto">
           <div className="bg-card p-8 rounded-2xl shadow-card hover:shadow-primary transition-all duration-300 animate-fade-in">
             <Target className="w-12 h-12 text-primary mb-4" />
-            <h3 className="text-2xl font-bold mb-3">Desafios Estruturados</h3>
+            <h3 className="text-2xl font-bold mb-3">{t('landing.features.challenges.title')}</h3>
             <p className="text-muted-foreground">
-              Complete desafios diários construindo hábitos poderosos. Um desafio ativo por vez para manter o foco.
+              {t('landing.features.challenges.description')}
             </p>
           </div>
 
           <div className="bg-card p-8 rounded-2xl shadow-card hover:shadow-primary transition-all duration-300 animate-fade-in">
             <Sparkles className="w-12 h-12 text-yellow-500 mb-4" />
-            <h3 className="text-2xl font-bold mb-3">Objetivos de Vida</h3>
+            <h3 className="text-2xl font-bold mb-3">{t('landing.features.goals.title')}</h3>
             <p className="text-muted-foreground">
-              Defina e conquiste suas metas mais importantes. Celebre cada objetivo alcançado com troféus especiais.
+              {t('landing.features.goals.description')}
             </p>
           </div>
 
           <div className="bg-card p-8 rounded-2xl shadow-card hover:shadow-primary transition-all duration-300 animate-fade-in">
             <Trophy className="w-12 h-12 text-yellow-500 mb-4" />
-            <h3 className="text-2xl font-bold mb-3">Troféus de Conquista</h3>
+            <h3 className="text-2xl font-bold mb-3">{t('landing.features.trophies.title')}</h3>
             <p className="text-muted-foreground">
-              Ganhe troféus permanentes ao completar seus objetivos de vida. Construa seu legado de conquistas.
+              {t('landing.features.trophies.description')}
             </p>
           </div>
 
           <div className="bg-card p-8 rounded-2xl shadow-card hover:shadow-primary transition-all duration-300 animate-fade-in">
             <Users className="w-12 h-12 text-primary mb-4" />
-            <h3 className="text-2xl font-bold mb-3">Comunidades e Rankings</h3>
+            <h3 className="text-2xl font-bold mb-3">{t('landing.features.community.title')}</h3>
             <p className="text-muted-foreground">
-              Participe de comunidades, compartilhe desafios e evolua junto com outras pessoas. Acompanhe seu progresso no ranking global baseado em nível, XP e conquistas.
+              {t('landing.features.community.description')}
             </p>
           </div>
         </div>
@@ -114,24 +131,24 @@ const Index = () => {
         <div className="mt-20 max-w-4xl mx-auto bg-card/50 backdrop-blur-sm p-10 rounded-3xl shadow-card animate-fade-in">
           <div className="flex items-center gap-3 mb-6">
             <TrendingUp className="w-8 h-8 text-primary" />
-            <h2 className="text-3xl font-bold">Nossa Filosofia</h2>
+            <h2 className="text-3xl font-bold">{t('landing.philosophy.title')}</h2>
           </div>
           <div className="grid md:grid-cols-2 gap-6 text-muted-foreground">
             <div>
-              <h4 className="font-semibold text-foreground mb-2">🎯 Foco e Disciplina</h4>
-              <p>Um desafio por vez. Concentre sua energia no que realmente importa.</p>
+              <h4 className="font-semibold text-foreground mb-2">{t('landing.philosophy.focus.title')}</h4>
+              <p>{t('landing.philosophy.focus.description')}</p>
             </div>
             <div>
-              <h4 className="font-semibold text-foreground mb-2">📈 Progresso Visível e Gamificada</h4>
-              <p>Acompanhe cada vitória. Conquista de troféus e níveis que mostram sua evolução.</p>
+              <h4 className="font-semibold text-foreground mb-2">{t('landing.philosophy.progress.title')}</h4>
+              <p>{t('landing.philosophy.progress.description')}</p>
             </div>
             <div>
-              <h4 className="font-semibold text-foreground mb-2">🏆 Conquistas Reais</h4>
-              <p>Transforme objetivos em realizações. Cada meta concluída é um troféu permanente.</p>
+              <h4 className="font-semibold text-foreground mb-2">{t('landing.philosophy.achievements.title')}</h4>
+              <p>{t('landing.philosophy.achievements.description')}</p>
             </div>
             <div>
-              <h4 className="font-semibold text-foreground mb-2">🚀 Missão</h4>
-              <p>Acreditamos que, por meio do comprometimento e da consistência na superação de desafios, no alcance de objetivos e na formação de bons hábitos, o usuário possa desbloquear todo o seu potencial e atingir alta performance em suas capacidades e habilidades.</p>
+              <h4 className="font-semibold text-foreground mb-2">{t('landing.philosophy.mission.title')}</h4>
+              <p>{t('landing.philosophy.mission.description')}</p>
             </div>
           </div>
         </div>

@@ -11,3 +11,7 @@ verify_jwt = true
 
 [functions.check-subscription]
 verify_jwt = true
+
+[functions.translate-dynamic-content]
+verify_jwt = true
+

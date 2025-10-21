@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { StripeCheckout } from '@/components/payment/StripeCheckout';
 import { supabase } from '@/integrations/supabase/client';
+import { useTranslation } from '@/translations';
 import {
   Dialog,
   DialogContent,
@@ -21,6 +22,7 @@ export default function Subscriptions() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { subscription, isLoading, getFeatures, refreshSubscription } = useSubscription();
+  const { t, language } = useTranslation();
   
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<{
@@ -83,52 +85,29 @@ export default function Subscriptions() {
   const plans = [
     {
       tier: 'free',
-      name: 'Neumann Free',
-      price: 'Grátis',
+      name: t('subscriptions.free.name'),
+      price: t('subscriptions.free.price'),
       priceId: '',
-      features: [
-        'Apenas 1 desafio ativo por dia',
-        '1 objetivo por mês',
-        'Limite de nível 50',
-        'Acesso à comunidade no nível 25',
-        'Limite de 1 comunidade',
-      ],
+      features: t('subscriptions.free.features') as string[],
     },
     {
       tier: 'plus_monthly',
-      name: 'Neumann Plus Mensal',
-      price: 'R$ 14,90',
+      name: t('subscriptions.plusMonthly.name'),
+      price: language === 'en' ? '$3' : 'R$ 14,90',
       priceId: 'price_1SIBXMPzwST7RaKh5ePjbrBw',
-      period: '/mês',
-      features: [
-        '5 desafios por dia',
-        '5 objetivos por mês',
-        'Nível XP ilimitado',
-        'Turbo XP de 1,5%',
-        'Acesso à comunidade',
-        'Criação de comunidades no nivel 25',
-        'Limite de 5 comunidades',
-        'Ajuste dos desafios padrão',
-      ],
+      period: t('subscriptions.plusMonthly.period'),
+      features: t('subscriptions.plusMonthly.features') as string[],
       popular: true,
     },
     {
       tier: 'plus_annual',
-      name: 'Neumann Plus Anual',
-      price: 'R$ 129,90',
+      name: t('subscriptions.plusAnnual.name'),
+      price: language === 'en' ? '$27' : 'R$ 129,90',
       priceId: 'price_1SIBZVPzwST7RaKhOOEadBxR',
-      period: '/ano',
-      discount: '30% de desconto',
-      features: [
-        'Desafios ativos simultâneos ilimitados',
-        'Objetivos de vida ilimitados',
-        'Turbo XP de 2,5%',
-        'Limite de 10 comunidades',
-        'Liderar até 5 comunidades',
-        'Criação de comunidades e de novos desafios globais',
-        'Todos os benefícios do Plus Mensal',
-      ],
-      badge: 'Melhor Valor',
+      period: t('subscriptions.plusAnnual.period'),
+      discount: t('subscriptions.plusAnnual.discount'),
+      features: t('subscriptions.plusAnnual.features') as string[],
+      badge: t('subscriptions.plusAnnual.badge'),
     },
   ];
 
@@ -150,13 +129,13 @@ export default function Subscriptions() {
     <Layout>
       <div className="container mx-auto p-6 max-w-7xl">
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold mb-2 font-display text-primary">Assinaturas</h1>
-          <p className="text-muted-foreground font-body">Escolha o plano ideal para você</p>
+          <h1 className="text-4xl font-bold mb-2 font-display text-primary">{t('subscriptions.title')}</h1>
+          <p className="text-muted-foreground font-body">{t('subscriptions.subtitle')}</p>
           
           {currentFeatures && (
             <div className="mt-4 flex items-center justify-center gap-2 flex-wrap">
               <Badge className="text-sm py-1 px-3">
-                Plano Atual: {currentFeatures.name}
+                {t('subscriptions.currentPlan')} {currentFeatures.name}
               </Badge>
               <Button 
                 variant="outline" 
@@ -165,7 +144,7 @@ export default function Subscriptions() {
                 className="gap-2"
               >
                 <RefreshCw className="w-4 h-4" />
-                Atualizar Perfil
+                {t('subscriptions.refreshProfile')}
               </Button>
               {subscription?.tier !== 'free' && (
                 <Button 
@@ -175,7 +154,7 @@ export default function Subscriptions() {
                   className="gap-2"
                 >
                   <Settings className="w-4 h-4" />
-                  Gerenciar Assinatura
+                  {t('subscriptions.manageSubscription')}
                 </Button>
               )}
             </div>

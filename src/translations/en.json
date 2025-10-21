@@ -1,0 +1,178 @@
+{
+  "landing": {
+    "title": "Neumann",
+    "subtitle": "Transform your life through structured challenges, clear goals, and consistent growth.",
+    "cta": "Get Started",
+    "login": "Login",
+    "developedBy": "Developed by Gabriel Estrela Lopes",
+    "contact": "Contact",
+    "features": {
+      "challenges": {
+        "title": "Structured Challenges",
+        "description": "Complete daily challenges building powerful habits. One active challenge at a time to maintain focus."
+      },
+      "goals": {
+        "title": "Life Goals",
+        "description": "Define and achieve your most important goals. Celebrate each achievement with special trophies."
+      },
+      "trophies": {
+        "title": "Achievement Trophies",
+        "description": "Earn permanent trophies by completing your life goals. Build your legacy of achievements."
+      },
+      "community": {
+        "title": "Communities and Rankings",
+        "description": "Join communities, share challenges, and evolve alongside others. Track your progress in the global ranking based on level, XP, and achievements."
+      }
+    },
+    "philosophy": {
+      "title": "Our Philosophy",
+      "focus": {
+        "title": "🎯 Focus and Discipline",
+        "description": "One challenge at a time. Focus your energy on what really matters."
+      },
+      "progress": {
+        "title": "📈 Visible and Gamified Progress",
+        "description": "Track every victory. Trophy and level achievements that show your evolution."
+      },
+      "achievements": {
+        "title": "🏆 Real Achievements",
+        "description": "Transform goals into accomplishments. Every completed goal is a permanent trophy."
+      },
+      "mission": {
+        "title": "🚀 Mission",
+        "description": "We believe that through commitment and consistency in overcoming challenges, achieving goals, and forming good habits, users can unlock their full potential and achieve high performance in their capabilities and skills."
+      }
+    }
+  },
+  "dashboard": {
+    "greeting": "Hello, {name}!",
+    "ready": "Ready to conquer your challenges today?",
+    "loading": "Loading...",
+    "activeChallenges": "Active Challenges",
+    "lifeGoals": "Life Goals",
+    "challengesDescription": "Continue your ongoing challenges",
+    "goalsDescription": "Your dreams in progress",
+    "noChallenges": "You don't have any active challenges at the moment. Choose a challenge from the library or create a custom one.",
+    "noGoals": "Define meaningful and transformative life goals.",
+    "startChallenge": "Start Challenge",
+    "viewProgress": "View Progress",
+    "viewAll": "View All",
+    "createGoal": "Create Goal",
+    "stats": {
+      "title": "Your Achievement Arsenal",
+      "rankingGlobal": "Global Ranking",
+      "level": "Current Level",
+      "streak": "Day Streak",
+      "bestStreak": "Best Streak",
+      "goalsCompleted": "Goals Completed",
+      "challengesCompleted": "Challenges Completed"
+    }
+  },
+  "subscriptions": {
+    "title": "Subscriptions",
+    "subtitle": "Choose the ideal plan for you",
+    "currentPlan": "Current Plan:",
+    "refreshProfile": "Refresh Profile",
+    "manageSubscription": "Manage Subscription",
+    "subscribe": "Subscribe",
+    "currentPlanButton": "Current Plan",
+    "myCurrentPlan": "My current plan",
+    "cancelAnytime": "All plans can be canceled at any time.",
+    "free": {
+      "name": "Neumann Free",
+      "price": "Free",
+      "features": [
+        "Only 1 active challenge per day",
+        "1 goal per month",
+        "Level 50 limit",
+        "Community access at level 25",
+        "1 community limit"
+      ]
+    },
+    "plusMonthly": {
+      "name": "Neumann Plus Monthly",
+      "price": "$3",
+      "period": "/month",
+      "features": [
+        "5 challenges per day",
+        "5 goals per month",
+        "Unlimited XP level",
+        "1.5% XP boost",
+        "Community access",
+        "Community creation at level 25",
+        "5 communities limit",
+        "Adjust default challenges"
+      ]
+    },
+    "plusAnnual": {
+      "name": "Neumann Plus Annual",
+      "price": "$27",
+      "period": "/year",
+      "discount": "30% discount",
+      "badge": "Best Value",
+      "features": [
+        "Unlimited simultaneous active challenges",
+        "Unlimited life goals",
+        "2.5% XP boost",
+        "10 communities limit",
+        "Lead up to 5 communities",
+        "Create communities and new global challenges",
+        "All Plus Monthly benefits"
+      ]
+    },
+    "toast": {
+      "profileUpdated": "Profile updated",
+      "profileUpdatedDescription": "Your subscription status has been updated.",
+      "error": "Error",
+      "errorDescription": "Unable to update profile.",
+      "errorManagement": "Unable to open management portal."
+    }
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "challenges": "Challenges",
+    "goals": "Goals",
+    "trophies": "My Trophies",
+    "community": "Communities",
+    "rankings": "Rankings",
+    "subscriptions": "Subscriptions",
+    "settings": "Settings",
+    "feedback": "Feedback",
+    "beta": "Beta"
+  },
+  "topbar": {
+    "dailyQuote": "Daily Quote",
+    "level": "Level",
+    "trophy": "Trophy",
+    "plan": "Plan",
+    "viewPlans": "View plans",
+    "trophyStages": {
+      "municipal": "Municipal",
+      "estadual": "State",
+      "regional": "Regional",
+      "nacional": "National",
+      "internacional": "International"
+    },
+    "plans": {
+      "free": "Free",
+      "plusMonthly": "Plus Monthly",
+      "plusAnnual": "Plus Annual"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Finish",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "language": "Language"
+  }
+}

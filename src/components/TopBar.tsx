@@ -10,6 +10,7 @@ import { UserProfileDropdown } from '@/components/UserProfileDropdown';
 import { useDailyQuote } from '@/hooks/useDailyQuote';
 import { DailyQuoteModal } from '@/components/DailyQuoteModal';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from '@/translations';
 
 interface UserStats {
   level: number;
@@ -20,6 +21,7 @@ interface UserStats {
 export const TopBar = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [stats, setStats] = useState<UserStats | null>(null);
   const { subscription, getFeatures, getTierBadgeColor } = useSubscription();
   const [showQuoteModal, setShowQuoteModal] = useState(false);
@@ -43,27 +45,20 @@ export const TopBar = () => {
 
   const getTrophyStageName = (level: number) => {
     const stage = getTrophyStage(level);
-    const stageNames: { [key: string]: string } = {
-      municipal: 'Municipal',
-      estadual: 'Estadual',
-      regional: 'Regional',
-      nacional: 'Nacional',
-      internacional: 'Internacional',
-    };
-    return stageNames[stage] || stage;
+    return t(`topbar.trophyStages.${stage}`) || stage;
   };
 
   const getPlanDisplayName = () => {
-    if (!subscription?.tier) return 'Free';
+    if (!subscription?.tier) return t('topbar.plans.free');
     switch (subscription.tier) {
       case 'free':
-        return 'Free';
+        return t('topbar.plans.free');
       case 'plus_monthly':
-        return 'Plus Mensal';
+        return t('topbar.plans.plusMonthly');
       case 'plus_annual':
-        return 'Plus Anual';
+        return t('topbar.plans.plusAnnual');
       default:
-        return 'Free';
+        return t('topbar.plans.free');
     }
   };
 
@@ -79,7 +74,7 @@ export const TopBar = () => {
             variant="ghost"
           >
             <Sparkles className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
-            <span className="font-bold text-sm text-primary font-body hidden sm:inline">Frase do Dia</span>
+            <span className="font-bold text-sm text-primary font-body hidden sm:inline">{t('topbar.dailyQuote')}</span>
           </Button>
         </div>
         
@@ -90,7 +85,7 @@ export const TopBar = () => {
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-5 h-5 text-primary" />
                 <div>
-                  <p className="text-xs text-success/70 font-body">Nível</p>
+                  <p className="text-xs text-success/70 font-body">{t('topbar.level')}</p>
                   <p className="font-bold text-lg text-primary font-display">{stats.level}</p>
                 </div>
               </div>
@@ -100,7 +95,7 @@ export const TopBar = () => {
               <div className="flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-primary" />
                 <div>
-                  <p className="text-xs text-success/70 font-body">Troféu</p>
+                  <p className="text-xs text-success/70 font-body">{t('topbar.trophy')}</p>
                   <p className="font-bold text-sm text-primary font-body">{getTrophyStageName(stats.level)}</p>
                 </div>
               </div>
@@ -109,12 +104,12 @@ export const TopBar = () => {
             <div 
               className="border-2 border-primary/50 bg-background/80 backdrop-blur-md px-5 py-2 rounded-lg shadow-glow cursor-pointer hover:bg-background/90 transition-colors"
               onClick={() => navigate('/subscriptions')}
-              title="Ver planos"
+              title={t('topbar.viewPlans')}
             >
               <div className="flex items-center gap-2">
                 <CreditCard className="w-5 h-5 text-primary" />
                 <div>
-                  <p className="text-xs text-success/70 font-body">Plano</p>
+                  <p className="text-xs text-success/70 font-body">{t('topbar.plan')}</p>
                   <p className="font-bold text-sm text-primary font-body">{getPlanDisplayName()}</p>
                 </div>
               </div>

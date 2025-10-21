@@ -14,18 +14,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Target, Trophy, Award, Users, Settings, Sparkles, CreditCard, Medal, MessageSquare } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import logo from '@/assets/logo.png';
-
-const navItems = [
-  { title: 'Dashboard', url: '/dashboard', icon: Award },
-  { title: 'Desafios', url: '/challenges', icon: Target },
-  { title: 'Objetivos', url: '/goals', icon: Sparkles },
-  { title: 'Meus Troféus', url: '/trophy', icon: Trophy },
-  { title: 'Comunidades', subtitle: 'Beta', url: '/community', icon: Users },
-  { title: 'Rankings', url: '/rankings', icon: Medal },
-  { title: 'Assinaturas', url: '/subscriptions', icon: CreditCard },
-  { title: 'Configurações', url: '/settings', icon: Settings },
-  { title: 'Feedbacks', url: '/feedback', icon: MessageSquare },
-];
+import { useTranslation } from '@/translations';
 
 export const AppSidebar = () => {
   const { state, setOpenMobile, toggleSidebar } = useSidebar();
@@ -33,6 +22,19 @@ export const AppSidebar = () => {
   const isMobile = useIsMobile();
   const isCollapsed = state === 'collapsed';
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const navItems = [
+    { title: t('sidebar.dashboard'), url: '/dashboard', icon: Award },
+    { title: t('sidebar.challenges'), url: '/challenges', icon: Target },
+    { title: t('sidebar.goals'), url: '/goals', icon: Sparkles },
+    { title: t('sidebar.trophies'), url: '/trophy', icon: Trophy },
+    { title: t('sidebar.community'), subtitle: t('sidebar.beta'), url: '/community', icon: Users },
+    { title: t('sidebar.rankings'), url: '/rankings', icon: Medal },
+    { title: t('sidebar.subscriptions'), url: '/subscriptions', icon: CreditCard },
+    { title: t('sidebar.settings'), url: '/settings', icon: Settings },
+    { title: t('sidebar.feedback'), url: '/feedback', icon: MessageSquare },
+  ];
 
   const handleNavClick = () => {
     if (isMobile) {

@@ -9,6 +9,7 @@ import { Target, Trophy, TrendingUp, Flame, Sparkles, Zap, Award } from 'lucide-
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useOnboarding } from '@/hooks/useOnboarding';
+import { useTranslation } from '@/translations';
 
 interface UserStats {
   xp: number;
@@ -42,6 +43,7 @@ const Dashboard = () => {
   const { user, loading: authLoading } = useAuth();
   const { onboardingStatus, isLoading: isLoadingOnboarding } = useOnboarding();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [activeChallenges, setActiveChallenges] = useState<Challenge[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -131,7 +133,7 @@ const Dashboard = () => {
     return (
       <Layout>
         <div className="flex items-center justify-center h-full">
-          <div className="animate-pulse text-primary font-display text-xl">Carregando...</div>
+          <div className="animate-pulse text-primary font-display text-xl">{t('dashboard.loading')}</div>
         </div>
       </Layout>
     );
@@ -145,10 +147,10 @@ const Dashboard = () => {
           <span className="text-5xl animate-wave">👋</span>
           <div>
             <h1 className="text-4xl font-black text-primary font-display">
-              Olá, {userName}!
+              {t('dashboard.greeting', { name: userName })}
             </h1>
             <p className="text-accent mt-1 font-body text-lg">
-              Pronto para conquistar seus desafios hoje?
+              {t('dashboard.ready')}
             </p>
           </div>
         </div>
@@ -175,18 +177,18 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Target className="w-8 h-8 text-primary group-hover:scale-110 transition-transform" />
-                  <CardTitle className="text-2xl font-bold text-primary font-display">Desafios Ativos</CardTitle>
+                  <CardTitle className="text-2xl font-bold text-primary font-display">{t('dashboard.activeChallenges')}</CardTitle>
                 </div>
                 {activeChallenges.length > 0 && (
                   <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30 font-body">
-                    {activeChallenges.length} {activeChallenges.length === 1 ? 'desafio' : 'desafios'}
+                    {activeChallenges.length} {activeChallenges.length === 1 ? t('dashboard.activeChallenges').toLowerCase().slice(0, -1) : t('dashboard.activeChallenges').toLowerCase()}
                   </Badge>
                 )}
               </div>
               <CardDescription className="text-base text-accent/80 font-body">
                 {activeChallenges.length > 0
-                  ? 'Continue seus desafios em andamento'
-                  : 'Desbloqueie seu potencial máximo'}
+                  ? t('dashboard.challengesDescription')
+                  : t('dashboard.noChallenges')}
               </CardDescription>
             </CardHeader>
             <CardContent className="relative z-10 flex flex-col">

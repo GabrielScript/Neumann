@@ -1,0 +1,178 @@
+{
+  "landing": {
+    "title": "Neumann",
+    "subtitle": "Transforme sua vida através de desafios estruturados, objetivos claros e crescimento consistente.",
+    "cta": "Começar Agora",
+    "login": "Fazer Login",
+    "developedBy": "Desenvolvido por Gabriel Estrela Lopes",
+    "contact": "Contato",
+    "features": {
+      "challenges": {
+        "title": "Desafios Estruturados",
+        "description": "Complete desafios diários construindo hábitos poderosos. Um desafio ativo por vez para manter o foco."
+      },
+      "goals": {
+        "title": "Objetivos de Vida",
+        "description": "Defina e conquiste suas metas mais importantes. Celebre cada objetivo alcançado com troféus especiais."
+      },
+      "trophies": {
+        "title": "Troféus de Conquista",
+        "description": "Ganhe troféus permanentes ao completar seus objetivos de vida. Construa seu legado de conquistas."
+      },
+      "community": {
+        "title": "Comunidades e Rankings",
+        "description": "Participe de comunidades, compartilhe desafios e evolua junto com outras pessoas. Acompanhe seu progresso no ranking global baseado em nível, XP e conquistas."
+      }
+    },
+    "philosophy": {
+      "title": "Nossa Filosofia",
+      "focus": {
+        "title": "🎯 Foco e Disciplina",
+        "description": "Um desafio por vez. Concentre sua energia no que realmente importa."
+      },
+      "progress": {
+        "title": "📈 Progresso Visível e Gamificada",
+        "description": "Acompanhe cada vitória. Conquista de troféus e níveis que mostram sua evolução."
+      },
+      "achievements": {
+        "title": "🏆 Conquistas Reais",
+        "description": "Transforme objetivos em realizações. Cada meta concluída é um troféu permanente."
+      },
+      "mission": {
+        "title": "🚀 Missão",
+        "description": "Acreditamos que, por meio do comprometimento e da consistência na superação de desafios, no alcance de objetivos e na formação de bons hábitos, o usuário possa desbloquear todo o seu potencial e atingir alta performance em suas capacidades e habilidades."
+      }
+    }
+  },
+  "dashboard": {
+    "greeting": "Olá, {name}!",
+    "ready": "Pronto para conquistar seus desafios hoje?",
+    "loading": "Carregando...",
+    "activeChallenges": "Desafios Ativos",
+    "lifeGoals": "Objetivos de Vida",
+    "challengesDescription": "Continue seus desafios em andamento",
+    "goalsDescription": "Seus sonhos em andamento",
+    "noChallenges": "Você não tem nenhum desafio ativo no momento. Escolha um desafio da biblioteca ou crie um personalizado.",
+    "noGoals": "Defina objetivos significativos e transformadores para sua vida.",
+    "startChallenge": "Iniciar Desafio",
+    "viewProgress": "Ver Progresso",
+    "viewAll": "Ver Todos",
+    "createGoal": "Criar Objetivo",
+    "stats": {
+      "title": "Seu Arsenal de Conquistas",
+      "rankingGlobal": "Ranking Global",
+      "level": "Nível Atual",
+      "streak": "Dias Seguidos",
+      "bestStreak": "Melhor Sequência",
+      "goalsCompleted": "Objetivos Vencidos",
+      "challengesCompleted": "Desafios Conquistados"
+    }
+  },
+  "subscriptions": {
+    "title": "Assinaturas",
+    "subtitle": "Escolha o plano ideal para você",
+    "currentPlan": "Plano Atual:",
+    "refreshProfile": "Atualizar Perfil",
+    "manageSubscription": "Gerenciar Assinatura",
+    "subscribe": "Assinar",
+    "currentPlanButton": "Plano Atual",
+    "myCurrentPlan": "Meu plano atual",
+    "cancelAnytime": "Todos os planos podem ser cancelados a qualquer momento.",
+    "free": {
+      "name": "Neumann Free",
+      "price": "Grátis",
+      "features": [
+        "Apenas 1 desafio ativo por dia",
+        "1 objetivo por mês",
+        "Limite de nível 50",
+        "Acesso à comunidade no nível 25",
+        "Limite de 1 comunidade"
+      ]
+    },
+    "plusMonthly": {
+      "name": "Neumann Plus Mensal",
+      "price": "R$ 14,90",
+      "period": "/mês",
+      "features": [
+        "5 desafios por dia",
+        "5 objetivos por mês",
+        "Nível XP ilimitado",
+        "Turbo XP de 1,5%",
+        "Acesso à comunidade",
+        "Criação de comunidades no nivel 25",
+        "Limite de 5 comunidades",
+        "Ajuste dos desafios padrão"
+      ]
+    },
+    "plusAnnual": {
+      "name": "Neumann Plus Anual",
+      "price": "R$ 129,90",
+      "period": "/ano",
+      "discount": "30% de desconto",
+      "badge": "Melhor Valor",
+      "features": [
+        "Desafios ativos simultâneos ilimitados",
+        "Objetivos de vida ilimitados",
+        "Turbo XP de 2,5%",
+        "Limite de 10 comunidades",
+        "Liderar até 5 comunidades",
+        "Criação de comunidades e de novos desafios globais",
+        "Todos os benefícios do Plus Mensal"
+      ]
+    },
+    "toast": {
+      "profileUpdated": "Perfil atualizado",
+      "profileUpdatedDescription": "Seu status de assinatura foi atualizado.",
+      "error": "Erro",
+      "errorDescription": "Não foi possível atualizar o perfil.",
+      "errorManagement": "Não foi possível abrir o portal de gerenciamento."
+    }
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "challenges": "Desafios",
+    "goals": "Objetivos",
+    "trophies": "Meus Troféus",
+    "community": "Comunidades",
+    "rankings": "Rankings",
+    "subscriptions": "Assinaturas",
+    "settings": "Configurações",
+    "feedback": "Feedbacks",
+    "beta": "Beta"
+  },
+  "topbar": {
+    "dailyQuote": "Frase do Dia",
+    "level": "Nível",
+    "trophy": "Troféu",
+    "plan": "Plano",
+    "viewPlans": "Ver planos",
+    "trophyStages": {
+      "municipal": "Municipal",
+      "estadual": "Estadual",
+      "regional": "Regional",
+      "nacional": "Nacional",
+      "internacional": "Internacional"
+    },
+    "plans": {
+      "free": "Free",
+      "plusMonthly": "Plus Mensal",
+      "plusAnnual": "Plus Anual"
+    }
+  },
+  "common": {
+    "loading": "Carregando...",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "delete": "Excluir",
+    "edit": "Editar",
+    "close": "Fechar",
+    "confirm": "Confirmar",
+    "back": "Voltar",
+    "next": "Próximo",
+    "finish": "Finalizar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "sort": "Ordenar",
+    "language": "Idioma"
+  }
+}
